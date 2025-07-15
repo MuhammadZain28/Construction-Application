@@ -22,13 +22,15 @@ export class Material {
     no: Int32;
     price: Float;
     used: boolean;
-    constructor(house: House, product: string, no: Int32, price: Float, used = false)
+    date: string;
+    constructor(house: House, product: string, no: Int32, price: Float, date = "01-01-2025", used = false)
     {
         this.id = Material.counter++;
         this.house = house;
         this.product = product;
         this.no = no;
         this.price = price;
+        this.date = date;
         this.used = used
     }
 }

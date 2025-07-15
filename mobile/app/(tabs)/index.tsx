@@ -8,6 +8,7 @@ export default function HomeScreen() {
   const [mobile, setMobile] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [name, setName] = React.useState("");
+  const [ deleteVisible, setDelete] = React.useState(false);
   const [description, setDescription] = React.useState("");
   const editRef = useRef(null);
   const animation = useRef(new Animated.Value(0)).current;
@@ -68,84 +69,41 @@ export default function HomeScreen() {
               </View>
             </TouchableOpacity>
           </View>
-          { mobile ? 
+           
           <View>
-            <View style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1, borderTopRightRadius: 20, borderTopLeftRadius: 20}}>
-              <View style={{flexDirection: 'row', backgroundColor: 'rgb(214, 71, 243)', borderTopRightRadius: 19, borderTopLeftRadius: 19}}>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'15%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='qr-code' style={{fontSize: 32}}></MaterialIcons>  Code</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'25%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='location-city' style={{fontSize: 32}}></MaterialIcons> Name</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'30%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='done-all' style={{fontSize: 32}}></MaterialIcons> Completed</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'30%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)'}}>Action</Text>
-              </View>
-            </View>
-            {home.map((house, index) => (
-
-            <View key={index} style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1}}>
-              <View style={{flexDirection: 'row', backgroundColor: 'rgb(255, 255, 255)', borderRadius: 20}}>
-                <Text style={{width: '15%',padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, fontSize: 18, fontWeight: 'bold'}}> {house.code}</Text>
-                <Text style={{width: '25%',padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, fontSize: 18, fontWeight: 'bold'}}> {house.name}</Text>
-                {house.completed ?
-                  <TouchableOpacity style={{width: '30%', padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                  onPress={()=> handleClick(house.code, false)}>
-                    <View style={{backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                      <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
-                      <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Complete</Text>
-                    </View>
-                  </TouchableOpacity> 
-                  :      
-                  <TouchableOpacity style={{width: '30%', padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                  onPress={()=> handleClick(house.code, true)}>
-                    <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                      <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 5}}></MaterialIcons>
-                      <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Pending</Text>
-                    </View>
-                  </TouchableOpacity>}
-                <View style={{width: '30%',padding: 10, borderColor: 'rgb(214, 71, 243)', flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <TouchableOpacity onPress={() => remove(house.code)}>
-                    <MaterialIcons name='delete' style={{backgroundColor: 'rgb(255, 0, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <MaterialIcons name='remove-red-eye' style={{backgroundColor: 'rgb(0, 239, 44)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          ))}
-          </View>
-           : 
-          <View>
-            <View style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1, borderRadius: 20}}>
-              <View style={{flexDirection: 'row', backgroundColor: 'rgb(214, 71, 243)', borderRadius: 19}}>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'15%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='qr-code' style={{fontSize: 32}}></MaterialIcons>  Code</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'20%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='location-city' style={{fontSize: 32}}></MaterialIcons> Name</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'35%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='text-snippet' style={{fontSize: 32}}></MaterialIcons> Description</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'15%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)', borderRightWidth: 1}}><MaterialIcons name='done-all' style={{fontSize: 32}}></MaterialIcons> Completed</Text>
-                <Text style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width:'15%', fontWeight: '700', textAlign: 'center', fontSize: 18, color: '#ffffff', padding: 5, borderColor: 'rgb(255,255,255)'}}>Action</Text>
-              </View>
-            </View>
             {
             home.map((house, index) => (
-            <View key={index} style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1, borderRadius: 20}}>
-              <View style={{flexDirection: 'row', backgroundColor: 'rgb(255, 255, 255)', borderRadius: 20}}>
-                <Text style={{width: '15%',padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, fontSize: 18, fontWeight: 'bold'}}> {house.name}</Text>
-                <Text style={{width: '20%',padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, fontSize: 18, fontWeight: 'bold'}}> {house.code}</Text>
-                <Text style={{width: '35%',padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, fontSize: 18, fontWeight: 'bold'}}> {house.description}</Text>
-                {house.completed ?
-                  <TouchableOpacity style={{width: '15%', padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                  onPress={()=> handleClick(house.code, false)}>
-                    <View style={{backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                      <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
-                      <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Completed</Text>
-                    </View>
-                  </TouchableOpacity> 
-                  :      
-                  <TouchableOpacity style={{width: '15%', padding: 10, borderColor: 'rgb(214, 71, 243)', borderRightWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                  onPress={()=> handleClick(house.code, true)}>
-                    <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                      <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
-                      <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Pending</Text>
-                    </View>
-                  </TouchableOpacity>}
+            <TouchableOpacity key={index} style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1, borderRadius: 20}} onPress={() => {
+                    setName(house.name);
+                    setCode(house.code);
+                    setDescription(house.description);
+                    setVisible(true);
+                  } } onLongPress={() => {
+                    setDelete(true);
+                    setCode(house.code);
+                  }}>
+              <View style={{flexDirection: 'column', backgroundColor: 'rgb(255, 255, 255)', borderRadius: 20}}>
+                <Text style={{padding: 10, fontSize: 18, fontWeight: 'bold'}}> {house.code}</Text>
+                <View style={styles.titleContainer}>
+                  <Text style={{padding: 10, fontSize: 18, fontWeight: 'bold'}}> {house.name}</Text>
+                  { house.completed ?
+                    <TouchableOpacity style={{padding: 10,  display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                    onPress={()=> handleClick(house.code, false)}>
+                      <View style={{backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                        <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
+                        <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Completed</Text>
+                      </View>
+                    </TouchableOpacity> 
+                    :      
+                    <TouchableOpacity style={{padding: 10,  display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                    onPress={()=> handleClick(house.code, true)}>
+                      <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                        <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
+                        <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Pending</Text>
+                      </View>
+                    </TouchableOpacity>
+                  }
+                </View>
                 <View style={{width: '15%',padding: 10, borderColor: 'rgb(214, 71, 243)', flexDirection: 'row', justifyContent: 'space-between'}}>
                   <TouchableOpacity onPress={() => remove(house.code)}>
                     <MaterialIcons name='delete' style={{backgroundColor: 'rgb(255, 0, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
@@ -169,11 +127,12 @@ export default function HomeScreen() {
                     <MaterialIcons name='remove-red-eye' style={{backgroundColor: 'rgb(145, 255, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
                   </TouchableOpacity>
                 </View>
+                <Text style={{padding: 10, fontSize: 14,}}> {house.description}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
             ))}
           </View> 
-          }
+          
         </View>
         <Modal
           visible={visible}
@@ -253,6 +212,44 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+        <Modal
+              visible={deleteVisible}
+              transparent={true}
+              animationType="slide"
+              onRequestClose ={() => {
+                setDelete(false)
+              }}>
+              <View style={{ flex: 1, gap: 10, backgroundColor: 'rgba(97, 97, 97, 0.5)' }}>
+                <View style={{ width: '100%', backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, bottom: 0, gap: 20, position: "absolute",  justifyContent: "center", alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, paddingBottom: 10, flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: "bold"}}>Delete Items</Text>
+                  </View>
+                  <TouchableOpacity style={{position: "absolute", top: 5, right: 5}} onPress={() => setDelete(false)}>
+                    <MaterialIcons name='cancel' style={{ color: 'rgba(54, 57, 55, 1)', fontSize: 24 }} />
+                  </TouchableOpacity>
+                  <View style={{ width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
+                      <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
+                                        onPress={() => { setDelete(false)}}>
+                        <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
+                        <Text style={{color: 'white', fontWeight: "bold"}}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
+                      <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgb(255, 50, 10)"}}
+                        onPress={() => {
+                          remove(code);
+                          setDelete(false);
+                        }}>
+                        <MaterialIcons name='delete' style={{ color: 'white', fontSize: 24 }} />
+                        <Text style={{color: 'white', fontWeight: "bold"}}>Delete</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+          </Modal>
+          
       </View>
     </ScrollView>
   );
@@ -303,5 +300,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

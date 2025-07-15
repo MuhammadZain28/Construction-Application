@@ -1,4 +1,4 @@
-import { TextInput, Text, View, ScrollView, StyleSheet, TouchableOpacity, FlatList, Platform, Modal } from "react-native";
+import { TextInput, Text, View, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal } from "react-native";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Material, House } from "../Class/App";
 import React from "react";
@@ -11,13 +11,13 @@ const house =
   ];
 const Home: React.FC = () => {
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
-  const [mobile, setMobile] = React.useState(false);
+  const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
   const [deleteVisible, setDelete] = React.useState(false);
   const [productId, setProductId] = React.useState(-1);
   const [mDropDown, setMDropDown] = React.useState(false);
   const [id, setId] = React.useState(0);
-  const [product, setProduct] = React.useState("");
+  const [product, setProduct] = React.useState("Material");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
   const [home, setHome] = React.useState(0);
@@ -30,26 +30,18 @@ const Home: React.FC = () => {
     toggleDropdown();
   }
   const handleMaterialSelect = (id: number) => {
-    setProductId(material.findIndex(m => m.id === id));
-    setProduct(material.find(m => m.id === id)?.product || "");
+    setProduct(material.find(m => m.id === id)?.product || "Material");
     toggleMaterialDropdown()
   }
   const [material, setMaterial] = React.useState<Material[]>([
     new Material(house[0], "Abc", 10, 1000)
   ]);
 
-
-    React.useEffect(() => {
-      if (Platform.OS === 'android') {
-        setMobile(true);
-      }
-    }, []);
-
   const handleClick = (id: number, status: boolean) => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === id
-          ? new Material(m.house, m.product, m.no, m.price, status) // status = true
+          ? new Material(m.house, m.product, m.no, m.price, m.date, status) // status = true
           : m
         )
       );
@@ -62,18 +54,30 @@ const Home: React.FC = () => {
   const handleDelete = (id: number) => {
     setMaterial(prev => prev.filter(m => m.id !== id));
   };
+  const handleUpdate = () => {
+    setMaterial(prev =>
+      prev.map(m =>
+        m.id === productId
+          ? new Material(house[home], product, no, price, m.date, m.used) // status = true
+          : m
+      )
+    );
+    setUpdateVisible(false);
+    setVisible(false);
+    setProductId(-1);
+  };
   return (
     <ScrollView>
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgb(7, 180, 48)'}]}>
           <View>
             <TouchableOpacity onPress={() => toggleMaterialDropdown()} style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={styles.cardText}>{ productId === -1 ? "Material" : material[id].product }</Text>
+              <Text style={styles.cardText}>{ product }</Text>
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>    
             {mDropDown && (
               <View style={styles.dropDown}>
-              <TouchableOpacity onPress={() => handleMaterialSelect(productId)}>
+              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
                 <Text style={{ fontWeight: "bold"}}>Material</Text>
               </TouchableOpacity>
               <FlatList
@@ -87,7 +91,7 @@ const Home: React.FC = () => {
               />
               </View>
             )}        
-            <Text style={styles.cardText}>{ productId === -1 ? material.length : material.filter(m => m.product === product).length}</Text>
+            <Text style={styles.cardText}>{ product === "Material" ? material.length : material.filter(m => m.product === product).length}</Text>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -142,100 +146,50 @@ const Home: React.FC = () => {
                 <Text style={{color: '#fff', fontWeight: 'bold', paddingRight: 5}}>Enable Editing</Text>
               </TouchableOpacity>
         </View>
-        { mobile ? 
-        <View style={{gap: 5}}>
-          <View style={styles.headerRow}>
-            <Text style={[styles.heads, {width: '30%'}]}>Product</Text>
-            <Text style={[styles.heads, {width: '15%'}]} numberOfLines={1} ellipsizeMode="tail">No</Text>
-            <Text style={[styles.heads, {width: '15%'}]}>Price</Text>
-            <Text style={[styles.heads, {width: '30%', textAlign: "left"}]}>Action</Text>
-          </View>
-          {material.map((materials, index) => ( 
-
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}}>
-            <TextInput style={[styles.data, {width: '30%'}]} value={materials.product}/>
-            <TextInput style={[styles.data, {width: '20%'}]} value={"" + materials.no}/>
-            <TextInput style={[styles.data, {width: '25%'}]} value={"" + materials.price}/>
-            {materials.used ?
-              <TouchableOpacity style={{width: '20%', padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-              onPress={()=> handleClick(materials.id, false)}>
-                <View style={{backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                  <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
-                  <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
-                </View>
-              </TouchableOpacity> 
-              :      
-              <TouchableOpacity style={{width: '25%', padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-              onPress={()=> handleClick(materials.id, true)}>
-                <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                  <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
-                  <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
-                </View>
-              </TouchableOpacity>
-            }
-          </TouchableOpacity>
-          ))}
-        </View>
-
-          :
         
         <View style={{gap: 5}}>
-          <View style={styles.headerRow}>
-            <Text style={[styles.heads, {width: '30%'}]}>Product</Text>
-            <Text style={[styles.heads, {width: '10%'}]} numberOfLines={1} ellipsizeMode="tail">Items</Text>
-            <Text style={[styles.heads, {width: '20%'}]}>Total Price</Text>
-            <Text style={[styles.heads, {width: '10%'}]}>Price</Text>
-            <Text style={[styles.heads, {width: '30%', textAlign: "center"}]}>Action</Text>
-          </View>
           {material.map((materials, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}}>
-            <TextInput style={[styles.data, {width: '15%'}]} value={materials.product} 
-                onChangeText={(text) => {
-                const updated = [...material];
-                updated[index].product = text; // only updates product
-                setMaterial(updated);
-            }}/>
-            <TextInput style={[styles.data, {width: '15%'}]} value={materials.house.name} />
-            <TextInput style={[styles.data, {width: '10%'}]} value={"" + materials.no} keyboardType="numeric"
-                onChangeText={(text) => {
-                  const updated = [...material];
-                  updated[index].no = parseInt(text) || 0;
-                  setMaterial(updated);
-            }}/>
-            <TextInput style={[styles.data, {width: '20%'}]} value={"" + materials.price*materials.no}/>
-            <TextInput style={[styles.data, {width: '10%'}]} value={"" + materials.price}
-                onChangeText={(text) => {
-                  const updated = [...material];
-                  updated[index].price = parseInt(text) || 0;
-                  setMaterial(updated);
-            }}/>
-            {materials.used ?
-              <TouchableOpacity style={{width: '15%', padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-              onPress={()=> handleClick(materials.id, false)}>
-                <View style={{ width: '100%' , backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                  <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
-                  <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
-                </View>
-              </TouchableOpacity> 
-              :      
-              <TouchableOpacity style={{width: '15%', padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-              onPress={()=> handleClick(materials.id, true)}>
-                <View style={{ width: '100%' , backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
-                  <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
-                  <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
-                </View>
-              </TouchableOpacity>
-            }
-              <TouchableOpacity style={{width: '15%', backgroundColor: 'rgb(255, 0, 0)', flexDirection: "row", display: 'flex', justifyContent: 'center', alignItems: 'center',
-                borderRadius: 15, marginInline: 5, marginBlock: 5,}}  onPress={() => handleDelete(materials.id)}>
-                <MaterialIcons name='delete' style={{backgroundColor: 'rgb(255, 0, 0)', color: '#fff', fontSize: 20, padding: 5, borderRadius: 50}}></MaterialIcons>
-                <Text style={{color: '#fff', fontWeight: 'bold', paddingRight: 5}}>Delete</Text>
-              </TouchableOpacity>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true);}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+              <Text style={[styles.data, {fontSize: 22, width: '40%'}]}> {materials.house.name} </Text>
+              {materials.used ?
+                <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                onPress={()=> handleClick(materials.id, false)}>
+                  <View style={{ width: '100%' , backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                    <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
+                    <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
+                  </View>
+                </TouchableOpacity> 
+                :      
+                <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                onPress={()=> handleClick(materials.id, true)}>
+                  <View style={{ width: '100%' , backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                    <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
+                    <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
+                  </View>
+                </TouchableOpacity>
+              }
+            </View>
+              
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+              <Text style={[styles.data, {fontSize: 18}]}>{materials.product}</Text>
+              <Text style={[styles.data, {fontSize: 18}]}> {"Rs. " + materials.price*materials.no}</Text>
+            </View> 
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Items : </Text>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]} >{materials.no.toString()}</Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Date : </Text>
+                <Text style={[styles.data, , {fontWeight: 'normal', fontSize: 16}]}> {materials.date}</Text>
+              </View>
+            </View>
           </TouchableOpacity>
           ))}
         </View>
-      }
+  
       </View>
       <Modal
         visible={visible}
@@ -319,15 +273,24 @@ const Home: React.FC = () => {
               />
             )}
             </View>
+            { !updateVisible ? 
             <View>
               <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
               onPress={() => addData()}>
                 <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
               </TouchableOpacity>
             </View>
+            :
+            <View>
+              <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+              onPress={() => handleUpdate()}>
+                <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
+              </TouchableOpacity>
+            </View>
+            }
           </View>
           
-          <TouchableOpacity onPress={() =>{ setVisible(false);}} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
+          <TouchableOpacity onPress={() =>{ setVisible(false); setUpdateVisible(false);}} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
         </View>
@@ -350,17 +313,9 @@ const Home: React.FC = () => {
               <View style={{ width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
-                                    onPress={() => {
-                                      setDelete(false); 
-                                      setVisible(true);
-                                      setProduct(material.find(m => m.id === id)?.product || "");
-                                      setNo(material.find(m => m.id === id)?.no || 0);
-                                      setPrice(material.find(m => m.id === id)?.price || 0);
-                                      setHome(house.findIndex(h => h.code === material.find(m => m.id === id)?.house.code));
-                                    }
-                                  }>
-                    <MaterialIcons name='remove-red-eye' style={{ color: 'white', fontSize: 24 }} />
-                    <Text style={{color: 'white', fontWeight: "bold"}}>View</Text>
+                                    onPress={() => { setDelete(false)}}>
+                    <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
+                    <Text style={{color: 'white', fontWeight: "bold"}}>Cancel</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
@@ -441,9 +396,11 @@ const styles = StyleSheet.create({
     marginInline: 10
   }, 
   row: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     backgroundColor: 'rgb(229, 248, 212)',
     borderRadius: 10,
+    padding: 5,
+    gap: 5
   },
   data: {
     borderWidth: 0,
