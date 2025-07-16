@@ -43,7 +43,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     toggleDropdown();
   }
   const handleMaterialSelect = (id: number) => {
-    setProduct(material.find(m => m.id === id)?.product || "Material");
+    setProduct(material.find(m => m.id === id)?.product || "Paint");
     toggleMaterialDropdown()
   }
   const [material, setMaterial] = React.useState<Material[]>([
@@ -65,7 +65,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     setMaterial(prev => [ ...prev, data]);
     setPrice(0);
     setNo(0);
-    setProduct("Material");
+    setProduct("Paint");
     setProductId(-1);
     setHome(0);
   }
@@ -84,7 +84,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     setVisible(false);
     setPrice(0);
     setNo(0);
-    setProduct("Material");
+    setProduct("Paint");
     setProductId(-1);
     setHome(0);
   };
@@ -98,24 +98,8 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               <Text style={styles.cardText}>{ product }</Text>
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>    
-            {mDropDown && (
-              <View style={styles.dropDown}>
-              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
-                <Text style={{ fontWeight: "bold"}}>Material</Text>
-              </TouchableOpacity>
-
-              <FlatList
-                data={material}
-                keyExtractor={(item) => item.product}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleMaterialSelect(item.id)}>
-                    <Text>{item.product}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              </View>
-            )}        
-            <Text style={styles.cardText}>{ product === "Material" ? material.length : material.filter(m => m.product === product).length}</Text>
+            
+            <Text style={styles.cardText}>{ product === "Paint" ? material.length : material.filter(m => m.product === product).length}</Text>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -145,24 +129,12 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               </Text>
             </TouchableOpacity>
 
-            {isDropdownVisible && (
-              <FlatList
-                data={house}
-                keyExtractor={(item) => item.name}
-                style={styles.dropDown}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
-                    <Text>{item.name}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-            )}
           </View>
         </View>
       </View>
       <View style={styles.body}>
         <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
-          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Material Purchases</Text>
+          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Paints</Text>
         </View>
         
         <View style={{gap: 5}}>
@@ -174,7 +146,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               {materials.used ?
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, false)}>
-                  <View style={{ width: '100%' , backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                  <View style={{  backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
                   </View>
@@ -182,7 +154,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 :      
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, true)}>
-                  <View style={{ width: '100%' , backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                  <View style={{ backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
                   </View>
@@ -275,7 +247,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
                                   onPress={toggleDropdown}>
                   <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home !== -1 ? house[home].code : 'All Houses'}
+                    { home !== -1 ? house[home].name : 'All Houses'}
                   </Text>
                   <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
@@ -302,36 +274,29 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                     value={new Date()}
                     mode="date"
                     display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDate(false);
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                      }
+                    }}
                     />
                   )}
                 </View>
                 }
               </View>
             </View>
-
-            {isDropdownVisible && (
-              <FlatList
-                style={styles.HouseList}
-                data={house}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
-                    <Text>{item.code}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-            )}
             </View>
             { !updateVisible ? 
             <View>
-              <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+              <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
               onPress={() => addData()}>
                 <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
               </TouchableOpacity>
             </View>
             :
             <View>
-              <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+              <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
               onPress={() => handleUpdate()}>
                 <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
               </TouchableOpacity>
@@ -344,7 +309,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                           setUpdateVisible(false);      
                           setPrice(0);
                           setNo(0);
-                          setProduct("Material");
+                          setProduct("Paint");
                           setProductId(-1);
                           setHome(0);
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
@@ -373,7 +338,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                                     onPress={() => { setDelete(false);
                                                       setProductId(-1);
                                                       setHome(0);
-                                                      setProduct("Material");
+                                                      setProduct("Paint");
                                                       setNo(0);
                                                       setPrice(0);}}>
                     <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
@@ -394,6 +359,67 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
             </View>
           </View>
       </Modal>
+      <Modal
+        visible={isDropdownVisible}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() => 
+          setDropdownVisible(false)
+        }>
+          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            
+            <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleHouseSelect("All Houses")}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>All Houses</Text>
+              </TouchableOpacity>
+
+              <FlatList
+                    data={house}
+                    keyExtractor={(item) => item.name}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
+                        { item.code === house[home].code ?
+                        <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                        :
+                        <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                        }
+                        <Text style={{fontSize: 18}}>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+              </View>
+          </View>
+      </Modal>
+      <Modal
+        visible={mDropDown}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() => 
+          setDropdownVisible(false)
+        }>
+          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>Paint</Text>
+              </TouchableOpacity>
+
+              <FlatList
+                data={material}
+                keyExtractor={(item) => item.product}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
+                    { item.product === product ?
+                      <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                        :
+                      <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                    }
+                    <Text style={{fontSize: 18}}>{item.product}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              </View>
+          </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -407,7 +433,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     paddingBlock: 20,
-    paddingInline: 15,
   },
   card: {
     flex: 1,
@@ -432,23 +457,21 @@ const styles = StyleSheet.create({
   },
   dropDown: {
     padding: 10,
-    fontSize: 20, 
+    fontSize: 20,
+    width: '80%', 
+    height: '100%',
+    maxWidth: 400,
     backgroundColor: 'rgb(255, 255, 255)',
-    width: 120,
-    height: 180,
-    position: 'absolute',
-    top: -20,
     borderRadius: 10,
     zIndex: 100,
   },
   body: {
     backgroundColor: 'rgb(255, 255, 255)',
-    marginInline: 15,
     borderRadius: 15,
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: 'rgb(7, 180, 48)'
+    backgroundColor: 'rgba(5, 12, 121, 1)'
   }, 
   heads: {
     fontSize: 18,
@@ -458,7 +481,7 @@ const styles = StyleSheet.create({
   }, 
   row: {
     flexDirection: 'column',
-    backgroundColor: 'rgb(229, 248, 212)',
+    backgroundColor: 'rgba(212, 228, 248, 1)',
     borderRadius: 10,
     padding: 5,
     gap: 10,

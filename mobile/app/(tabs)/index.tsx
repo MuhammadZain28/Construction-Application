@@ -23,6 +23,15 @@ export default function HomeScreen() {
       setMobile(true);
     }
   }, []);
+  
+  const onChange = (event: any, date?: Date) => {
+    if (date) {
+      const strippedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      setDate(strippedDate);
+      setShowDate(false);
+    }
+  };
+
   const [home, setHome] = useState([
     new House("ABC", "01", "A Good House", false),
     new House("XYZ", "02", "A Good House", false)
@@ -33,14 +42,14 @@ export default function HomeScreen() {
   setHome(prev =>
     prev.map(h =>
       h.code === code
-        ? new House(h.name, h.code, h.description, status) // status = true
+        ? new House(h.name, h.code, h.description, status, h.date) // status = true
         : h
       )
     );
   };
 
   const addData = () => {
-    const house = new House(name, code, description, false, date.toLocaleDateString());
+    const house = new House(name, code, description, false, date.toISOString().substring(0, 10));
     setHome(prev =>[ ...prev, house]);
   }
   const remove = (code: string) => {
@@ -49,7 +58,7 @@ export default function HomeScreen() {
   const update = () => {
     setHome(prevHomes => prevHomes.map(h =>
       h.code === code
-        ? new House(name, code, description, h.completed) : h
+        ? new House(name, code, description, h.completed, date.toISOString().substring(0, 10)) : h
     ));
     setUpdateVisible(false);
     setVisible(false);
@@ -58,7 +67,7 @@ export default function HomeScreen() {
     <ScrollView>
       <View style={styles.main}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>House</Text>
+          <Text style={styles.headerText}><MaterialIcons name='home' size={26}/> House</Text>
         </View>
         <View style={styles.container}>
           <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',  padding: 20}}>
@@ -178,7 +187,7 @@ export default function HomeScreen() {
                   outline: 'none',
                 }}
               />
-                            <View>
+              <View>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?
@@ -197,9 +206,10 @@ export default function HomeScreen() {
                   {showDate && (
                     
                     <DateTimePicker
-                    value={new Date()}
+                    value={new Date(date)}
                     mode="date"
                     display="default"
+                    onChange={(event, selectedDate) => onChange(event, selectedDate)}
                     />
                   )}
                 </View>
@@ -283,6 +293,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerText: {
+    justifyContent: 'center',
+    alignItems: 'center',
     fontSize: 20,
     fontWeight: 'bold',
   },

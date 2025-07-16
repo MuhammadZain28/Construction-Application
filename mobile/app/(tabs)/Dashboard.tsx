@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
         </View>
         <View style={styles.top}>
           <View
-            style={[styles.container, {backgroundColor: 'rgba(245, 195, 58, 1)'}]}>
+            style={[styles.container, {backgroundColor: 'rgba(251, 192, 30, 1)'}]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
                   marginVertical: 5,
                   padding: 15,
                 }}>
-              <MaterialIcons name='pending-actions' style={{fontSize: 42, color: 'rgba(245, 195, 58, 1)'}}></MaterialIcons>
+              <MaterialIcons name='pending-actions' style={{fontSize: 42, color: 'rgba(250, 192, 30, 1)'}}></MaterialIcons>
               </View>
             </View>
             <Text style={styles.number}>0</Text>
@@ -102,16 +102,16 @@ const Dashboard: React.FC = () => {
         <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
           
           <View style={styles.table}>
-            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(180, 29, 250, 1)', borderTopRightRadius: 10, borderTopLeftRadius: 10, paddingHorizontal: 10, marginBottom: 5}}>
               <Text
-                style={styles.sectionText}
+                style={[styles.sectionText, {color: 'rgb(255, 255, 255)'}]}
                 numberOfLines={1}
                 ellipsizeMode="tail">
                 Recent Purchases
               </Text>
             </View>
-            <View style={{width: '100%', borderRadius: 10, borderWidth: 1, gap: 10, borderColor: 'rgb(255, 255, 255)', marginBottom: 10}}>
-              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgb(255, 235, 211)', borderRadius: 10,  gap: 0, paddingHorizontal: 0, width: '100%'}}>
+            <View style={{width: '100%', borderRadius: 5, borderWidth: 1, gap: 10, borderColor: 'rgb(255, 255, 255)', marginBottom: 10}}>
+              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgb(255, 235, 211)', borderRadius: 5,  gap: 0, paddingHorizontal: 10, width: '100%'}}>
                 <Text
                   style={{flex: 2, fontSize: 20, width: '50%', paddingInline: 5, fontWeight: 'bold'}}
                   numberOfLines={1}
@@ -129,14 +129,20 @@ const Dashboard: React.FC = () => {
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
             <View style={styles.sidebar}>
-              <Text style={styles.sectionText}>🏗️ &nbsp; Material</Text>
+              <View style={{flexDirection: 'row', borderTopRightRadius: 10, borderTopLeftRadius: 10, alignItems: 'center', justifyContent: 'flex-start', gap: 5, paddingHorizontal: 10, paddingVertical: 0, backgroundColor: 'rgba(30, 164, 10, 1)'}}>
+                <MaterialIcons name='construction' size={32} color={'rgb(255, 255, 255)'}/>
+                <Text style={[styles.sectionText, {color: 'rgb(255, 255, 255)'}]}>Material</Text>
+              </View>
               <Text style={styles.cardtext}>Remaining</Text>
               <Text style={styles.cardnumber}>0</Text>
               <Text style={styles.cardtext}>Used</Text>
               <Text style={styles.cardnumber}>0</Text>
             </View>
             <View style={styles.sidebar}>
-              <Text style={styles.sectionText}>🎨 &nbsp; Paints</Text>
+              <View style={{flexDirection: 'row', borderTopRightRadius: 10, borderTopLeftRadius: 10, alignItems: 'center', justifyContent: 'flex-start', gap: 5, paddingHorizontal: 10, paddingVertical: 0, backgroundColor: 'rgba(27, 0, 161, 1)'}}>
+                <MaterialCommunityIcons name='format-paint' size={32} color={'rgb(255, 255, 255)'}/>
+                <Text style={[styles.sectionText, {color: 'rgb(255, 255, 255)'}]}>Paints</Text>
+              </View>
               <Text style={styles.cardtext}>Remaining</Text>
               <Text style={styles.cardnumber}>0</Text>
               <Text style={styles.cardtext}>Used</Text>
