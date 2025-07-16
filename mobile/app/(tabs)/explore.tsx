@@ -1,110 +1,481 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, FlatList, Platform } from 'react-native';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Material, House } from '../Class/App'; // Adjust the import path as necessary
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
+const house = 
+  [ 
+    new House("All Houses", "All Houses", "", false),
+    new House("ABC", "01", "A Good House", false),
+    new House("XYZ", "02", "Great House", false),
+  ];
 export default function TabTwoScreen() {
+const [isDropdownVisible, setDropdownVisible] = React.useState(false);
+  const [updateVisible, setUpdateVisible] = React.useState(false); 
+  const [visible, setVisible] = React.useState(false);
+  const [deleteVisible, setDelete] = React.useState(false);
+  const [productId, setProductId] = React.useState(-1);
+  const [mDropDown, setMDropDown] = React.useState(false);
+  const [id, setId] = React.useState(0);
+  const [product, setProduct] = React.useState("Paint");
+  const [no, setNo] = React.useState(0);
+  const [price, setPrice] = React.useState(0.0);
+  const [home, setHome] = React.useState(0);
+  const [date, setDate] = React.useState(new Date());
+  const [showDate, setShowDate] = React.useState(false);
+  const [mobile, setMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    
+    if (Platform.OS === 'android') {
+      setMobile(true);
+    } 
+  }, []);
+
+  const toggleDropdown = () => setDropdownVisible(prev => !prev);
+  const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
+
+  const handleHouseSelect = (code: string) => {
+    let index = house.findIndex(h => h.code === code);
+    setHome(index);
+    toggleDropdown();
+  }
+  const handleMaterialSelect = (id: number) => {
+    setProduct(material.find(m => m.id === id)?.product || "Material");
+    toggleMaterialDropdown()
+  }
+  const [material, setMaterial] = React.useState<Material[]>([
+    new Material(house[0], "Abc", 10, 1000)
+  ]);
+
+  const handleClick = (id: number, status: boolean) => {
+    setMaterial(prev =>
+      prev.map(m =>
+        m.id === id
+          ? new Material(m.house, m.product, m.no, m.price, m.date, status) // status = true
+          : m
+        )
+      );
+    };
+  
+  const addData = () => {
+    const data = new Material(house[home], product, no, price, date.toLocaleDateString(), false);
+    setMaterial(prev => [ ...prev, data]);
+    setPrice(0);
+    setNo(0);
+    setProduct("Material");
+    setProductId(-1);
+    setHome(0);
+  }
+  const handleDelete = (id: number) => {
+    setMaterial(prev => prev.filter(m => m.id !== id));
+  };
+  const handleUpdate = () => {
+    setMaterial(prev =>
+      prev.map(m =>
+        m.id === productId
+          ? new Material(house[home], product, no, price, m.date, m.used) // status = true
+          : m
+      )
+    );
+    setUpdateVisible(false);
+    setVisible(false);
+    setPrice(0);
+    setNo(0);
+    setProduct("Material");
+    setProductId(-1);
+    setHome(0);
+  };
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+
+    <ScrollView>
+      <View style={styles.header}>
+        <View style={[styles.card, {backgroundColor: 'rgba(12, 41, 145, 1)'}]}>
+          <View>
+            <TouchableOpacity onPress={() => toggleMaterialDropdown()} style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={styles.cardText}>{ product }</Text>
+              <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
+            </TouchableOpacity>    
+            {mDropDown && (
+              <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
+                <Text style={{ fontWeight: "bold"}}>Material</Text>
+              </TouchableOpacity>
+
+              <FlatList
+                data={material}
+                keyExtractor={(item) => item.product}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleMaterialSelect(item.id)}>
+                    <Text>{item.product}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              </View>
+            )}        
+            <Text style={styles.cardText}>{ product === "Material" ? material.length : material.filter(m => m.product === product).length}</Text>
+          </View>
+          <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
+            <View style={styles.iconContainer}>
+              <MaterialIcons name='format-paint' style={[styles.icon, {color: 'rgba(12, 41, 145, 1)'}]}/>
+            </View>
+            <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', width: 170, borderRadius: 20, paddingInline: 15, paddingBlock: 5, alignItems: "center", justifyContent: "center", flexDirection: "row"}}
+            onPress={() => setVisible(true)}>
+              <MaterialCommunityIcons name="plus-circle" style={{color: 'rgb(12, 41, 145)', fontSize: 28}}/>
+              <Text style={{color: 'rgb(12, 41, 145)', fontSize: 18, fontWeight: "bold"}}> Paint</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
+          <View>
+            <Text style={styles.cardText}> Spend </Text>            
+            <Text style={styles.cardText}> {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+          </View>
+          <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgb(255, 183, 0)'}]}/>
+            </View>
+            <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', width: 170, borderRadius: 20, paddingInline: 15, paddingBlock: 5, alignItems: "center", justifyContent: "center", flexDirection: "row"}} 
+                              onPress={toggleDropdown}>
+              <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 183, 0)', fontSize: 28, paddingInline: 5,}}/>
+              <Text style={{color: 'rgb(255, 183, 0)', fontSize: 18, fontWeight: "bold"}}>
+                { house[home].name || 'All Houses'}
+              </Text>
+            </TouchableOpacity>
+
+            {isDropdownVisible && (
+              <FlatList
+                data={house}
+                keyExtractor={(item) => item.name}
+                style={styles.dropDown}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
+                    <Text>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+          </View>
+        </View>
+      </View>
+      <View style={styles.body}>
+        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
+          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Material Purchases</Text>
+        </View>
+        
+        <View style={{gap: 5}}>
+          {material.map((materials, index) => ( 
+
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true);}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
+              <Text style={[styles.data, {fontSize: 22}]}> {materials.house.name} </Text>
+              {materials.used ?
+                <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                onPress={()=> handleClick(materials.id, false)}>
+                  <View style={{ width: '100%' , backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                    <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
+                    <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
+                  </View>
+                </TouchableOpacity> 
+                :      
+                <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                onPress={()=> handleClick(materials.id, true)}>
+                  <View style={{ width: '100%' , backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                    <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
+                    <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
+                  </View>
+                </TouchableOpacity>
+              }
+            </View>
+              
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
+              <Text style={[styles.data, {fontSize: 18}]}>{materials.product}</Text>
+              <Text style={[styles.data, {fontSize: 18}]}> {"Rs. " + materials.price*materials.no}</Text>
+            </View> 
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Items : </Text>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]} >{materials.no.toString()}</Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Date : </Text>
+                <Text style={[styles.data, , {fontWeight: 'normal', fontSize: 16}]}> {materials.date}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+          ))}
+        </View>
+  
+      </View>
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          setVisible(false);
+        }}>
+        <View style={{ flex: 1, justifyContent: 'center', gap: 10, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <View style={{ width: '80%', maxWidth: 430, backgroundColor: '#fff', padding: 20, borderRadius: 20 }}>
+              <Text style={{display: 'flex', textAlign: 'center',justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: 24, marginBlockEnd: 15}}>
+                <MaterialIcons name='construction' style={{fontSize: 32}}/> Materials
+              </Text>
+            <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Product</Text>
+            <TextInput
+              placeholder="Type here..."
+            value={product}
+            onChangeText={setProduct}
+              style={{
+                height: 40,
+                borderColor: 'gray',
+                borderBottomWidth: 1,
+                marginBottom: 20,
+                paddingHorizontal: 10,
+                outline: 'none',
+              }}
+            />
+            <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+              <MaterialCommunityIcons name='counter' style={{fontSize: 32}}/>  No of Items</Text>
+            <TextInput
+              placeholder="Type here..."
+              value={no.toString()}
+              onChangeText={(text) => setNo(parseInt(text) || 0)}
+              keyboardType="numeric"
+              style={{
+                height: 40,
+                borderColor: 'gray',
+                borderBottomWidth: 1,
+                marginBottom: 20,
+                paddingHorizontal: 10,
+                outline: 'none',
+              }}
+            />
+            <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+              <MaterialIcons name='receipt' style={{fontSize: 32}}></MaterialIcons>  Price</Text>
+            <TextInput
+              placeholder="Type here..."
+              value={price.toString()}
+              onChangeText={(text) => setPrice(parseFloat(text) || 0)}
+              style={{
+                height: 40,
+                borderColor: 'gray',
+                borderBottomWidth: 1,
+                marginBottom: 20,
+                paddingHorizontal: 10,
+                outline: 'none',
+              }}
+            />
+            <View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                                  onPress={toggleDropdown}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    { home !== -1 ? house[home].code : 'All Houses'}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
+                  { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+                    
+                    <DateTimePicker
+                    value={new Date()}
+                    mode="date"
+                    display="default"
+                    />
+                  )}
+                </View>
+                }
+              </View>
+            </View>
+
+            {isDropdownVisible && (
+              <FlatList
+                style={styles.HouseList}
+                data={house}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
+                    <Text>{item.code}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+            </View>
+            { !updateVisible ? 
+            <View>
+              <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+              onPress={() => addData()}>
+                <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
+              </TouchableOpacity>
+            </View>
+            :
+            <View>
+              <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+              onPress={() => handleUpdate()}>
+                <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
+              </TouchableOpacity>
+            </View>
+            }
+          </View>
+          
+          <TouchableOpacity 
+          onPress={() =>{ setVisible(false); 
+                          setUpdateVisible(false);      
+                          setPrice(0);
+                          setNo(0);
+                          setProduct("Material");
+                          setProductId(-1);
+                          setHome(0);
+          }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
+            <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      <Modal
+        visible={deleteVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose ={() => {
+          setDelete(false)
+        }}>
+          <View style={{ flex: 1, gap: 10, backgroundColor: 'rgba(97, 97, 97, 0.5)' }}>
+            <View style={{ width: '100%', backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, bottom: 0, gap: 20, position: "absolute",  justifyContent: "center", alignItems: "center" }}>
+              <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, paddingBottom: 10, flex: 1 }}>
+                <Text style={{ fontSize: 18, fontWeight: "bold"}}>Delete Items</Text>
+              </View>
+              <TouchableOpacity style={{position: "absolute", top: 5, right: 5}} onPress={() => setDelete(false)}>
+                <MaterialIcons name='cancel' style={{ color: 'rgba(54, 57, 55, 1)', fontSize: 24 }} />
+              </TouchableOpacity>
+              <View style={{ width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
+                  <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
+                                    onPress={() => { setDelete(false);
+                                                      setProductId(-1);
+                                                      setHome(0);
+                                                      setProduct("Material");
+                                                      setNo(0);
+                                                      setPrice(0);}}>
+                    <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
+                    <Text style={{color: 'white', fontWeight: "bold"}}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
+                  <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgb(255, 50, 10)"}}
+                    onPress={() => {
+                      handleDelete(id);
+                      setDelete(false);
+                    }}>
+                    <MaterialIcons name='delete' style={{ color: 'white', fontSize: 24 }} />
+                    <Text style={{color: 'white', fontWeight: "bold"}}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+      </Modal>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
+  header: {
+    display: 'flex',
+    flexWrap: 'wrap',
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+    paddingBlock: 20,
+    paddingInline: 15,
   },
+  card: {
+    flex: 1,
+    minWidth: 300,
+    padding: 10,
+    borderRadius: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cardText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'rgb(255, 255, 255)',
+  },
+  iconContainer: {
+    backgroundColor: 'rgb(255, 255, 255)',
+    borderRadius: 50,
+    padding: 20,
+  },
+  icon: {
+    fontSize: 46
+  },
+  dropDown: {
+    padding: 10,
+    fontSize: 20, 
+    backgroundColor: 'rgb(255, 255, 255)',
+    width: 120,
+    height: 180,
+    position: 'absolute',
+    top: -20,
+    borderRadius: 10,
+    zIndex: 100,
+  },
+  body: {
+    backgroundColor: 'rgb(255, 255, 255)',
+    marginInline: 15,
+    borderRadius: 15,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgb(7, 180, 48)'
+  }, 
+  heads: {
+    fontSize: 18,
+    color: '#ffffff',
+    fontWeight: 800,
+    marginInline: 10
+  }, 
+  row: {
+    flexDirection: 'column',
+    backgroundColor: 'rgb(229, 248, 212)',
+    borderRadius: 10,
+    padding: 5,
+    gap: 10,
+  },
+  data: {
+    borderWidth: 0,
+    outline: 'none',
+    fontSize: 16,
+    fontWeight: 'bold'
+  }, 
+  HouseList: {
+    position: 'absolute',
+    backgroundColor: 'rgba(182, 255, 175, 1)',
+    padding: 10,
+    borderRadius: 10,
+    width: 150, 
+    top: -50,
+    height: 120,
+  }
 });

@@ -1,40 +1,33 @@
-import React, { useState, useRef } from 'react';
-import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform } from 'react-native';
 import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
 import { House } from '../Class/App'
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen() {
   const [visible, setVisible] = React.useState(false);
-  const [mobile, setMobile] = React.useState(false);
   const [code, setCode] = React.useState("");
+  const [updateVisible, setUpdateVisible] = React.useState(false);
   const [name, setName] = React.useState("");
   const [ deleteVisible, setDelete] = React.useState(false);
   const [description, setDescription] = React.useState("");
-  const editRef = useRef(null);
-  const animation = useRef(new Animated.Value(0)).current;
+  const [date, setDate] = React.useState(new Date());
+  const [showDate, setShowDate] = useState(false);
+  const [mobile, setMobile] = useState(false);
+
+  React.useEffect(() => {
+    if (Platform.OS === 'web') {
+      setMobile(false);
+    }
+    else {
+      setMobile(true);
+    }
+  }, []);
   const [home, setHome] = useState([
     new House("ABC", "01", "A Good House", false),
     new House("XYZ", "02", "A Good House", false)
   ]);
 
-  const handleFocus = () => {
-    Animated.spring(animation, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
-  const handleBlur = () => {
-    Animated.spring(animation, {
-      toValue: 0,
-      useNativeDriver: true,
-    }).start();
-  };
-  
-  React.useEffect(() => {
-    if (Platform.OS === 'android') {
-      setMobile(true);
-    }
-  }, []);
  
   const handleClick = (code: string, status: boolean) => {
   setHome(prev =>
@@ -47,11 +40,19 @@ export default function HomeScreen() {
   };
 
   const addData = () => {
-    const house = new House(name, code, description);
+    const house = new House(name, code, description, false, date.toLocaleDateString());
     setHome(prev =>[ ...prev, house]);
   }
   const remove = (code: string) => {
     setHome(prevHomes => prevHomes.filter(h => h.code !== code));
+  }
+  const update = () => {
+    setHome(prevHomes => prevHomes.map(h =>
+      h.code === code
+        ? new House(name, code, description, h.completed) : h
+    ));
+    setUpdateVisible(false);
+    setVisible(false);
   }
   return (
     <ScrollView>
@@ -60,7 +61,7 @@ export default function HomeScreen() {
           <Text style={styles.headerText}>House</Text>
         </View>
         <View style={styles.container}>
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBlockEnd: 20}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',  padding: 20}}>
             <Text style={{fontSize: 24, fontWeight: 'bold'}}>House</Text>
             <TouchableOpacity onPress={()=> setVisible(true)}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 8, backgroundColor: 'rgb(222, 69, 253)', borderRadius: 20}}>
@@ -73,21 +74,26 @@ export default function HomeScreen() {
           <View>
             {
             home.map((house, index) => (
-            <TouchableOpacity key={index} style={{borderColor: 'rgb(214, 71, 243)', borderWidth: 1, borderRadius: 20}} onPress={() => {
+            <TouchableOpacity key={index} onPress={() => {
                     setName(house.name);
                     setCode(house.code);
                     setDescription(house.description);
                     setVisible(true);
-                  } } onLongPress={() => {
+                    setUpdateVisible(true);
+                  } } 
+                  onLongPress={() => {
                     setDelete(true);
                     setCode(house.code);
                   }}>
-              <View style={{flexDirection: 'column', backgroundColor: 'rgb(255, 255, 255)', borderRadius: 20}}>
-                <Text style={{padding: 10, fontSize: 18, fontWeight: 'bold'}}> {house.code}</Text>
+              <View style={{flexDirection: 'column', borderRadius: 20, gap: 10, backgroundColor: 'rgba(245, 212, 252, 1)', padding: 10, marginBottom: 10}}>
                 <View style={styles.titleContainer}>
-                  <Text style={{padding: 10, fontSize: 18, fontWeight: 'bold'}}> {house.name}</Text>
+                  <Text style={{fontSize: 24, fontWeight: 'bold'}}> {house.code}</Text>
+                  <Text style={{fontSize: 14}}>Date: {house.date}</Text>
+                </View>
+                <View style={[styles.titleContainer, {paddingInline: 10}]}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold'}}> {house.name}</Text>
                   { house.completed ?
-                    <TouchableOpacity style={{padding: 10,  display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                    <TouchableOpacity style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                     onPress={()=> handleClick(house.code, false)}>
                       <View style={{backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                         <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
@@ -95,7 +101,7 @@ export default function HomeScreen() {
                       </View>
                     </TouchableOpacity> 
                     :      
-                    <TouchableOpacity style={{padding: 10,  display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                    <TouchableOpacity style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                     onPress={()=> handleClick(house.code, true)}>
                       <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                         <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
@@ -104,30 +110,7 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                   }
                 </View>
-                <View style={{width: '15%',padding: 10, borderColor: 'rgb(214, 71, 243)', flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <TouchableOpacity onPress={() => remove(house.code)}>
-                    <MaterialIcons name='delete' style={{backgroundColor: 'rgb(255, 0, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                  onPress={() => {
-                    setName(house.name);
-                    setCode(house.code);
-                    setDescription(house.description);
-                    setVisible(true);
-                  } }>
-                    <MaterialIcons name='edit' style={{backgroundColor: 'rgb(255, 217, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                  onPress={() => {
-                    setName(house.name);
-                    setCode(house.code);
-                    setDescription(house.description);
-                    setVisible(true);
-                  } }>
-                    <MaterialIcons name='remove-red-eye' style={{backgroundColor: 'rgb(145, 255, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                </View>
-                <Text style={{padding: 10, fontSize: 14,}}> {house.description}</Text>
+                <Text style={{fontSize: 14, paddingInline: 10}}> {house.description}</Text>
               </View>
             </TouchableOpacity>
             ))}
@@ -147,17 +130,9 @@ export default function HomeScreen() {
               <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', top: 6 ,fontSize: 32, width: 50, height: 50 }}></MaterialCommunityIcons>
             </TouchableOpacity>
             <View style={{ width: '80%', maxWidth: 430, backgroundColor: '#fff', padding: 20, borderRadius: 10 }}>
-                <Text style={{display: 'flex', textAlign: 'center',justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: 24, marginBlockEnd: 15}}>
-                  <MaterialCommunityIcons name='home' style={{fontSize: 32}}></MaterialCommunityIcons> House Details
-                </Text>   
-                { mobile ?
-                <View style={{position: 'absolute', right: 10, top: 5, alignItems: 'center', justifyContent: 'center'}}>
-                  <Animated.Text  style={{ backgroundColor: 'rgb(255, 213, 0)', color: 'rgb(255, 255, 255)', paddingInline: 10, paddingBlock: 2.5, marginBlock: 2.5, borderRadius: 10, fontWeight: 'bold', transform: [{ scale: animation }], transformOrigin: 'bottom'}}>Enable Edit</Animated.Text>
-                  <TouchableOpacity ref={editRef} onFocus={handleFocus} onBlur={handleBlur}>
-                    <MaterialIcons name='edit' style={{backgroundColor: 'rgb(255, 217, 0)', color: '#fff', fontSize: 24, padding: 5, borderRadius: 50}}></MaterialIcons>
-                  </TouchableOpacity>
-                </View> : null
-                }
+              <Text style={{display: 'flex', textAlign: 'center',justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: 24, marginBlockEnd: 15}}>
+                <MaterialCommunityIcons name='home' style={{fontSize: 32}}></MaterialCommunityIcons> House Details
+              </Text>   
               <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                 <MaterialCommunityIcons name='language-haskell' style={{fontSize: 32}}></MaterialCommunityIcons>  Code</Text>
               <TextInput
@@ -203,11 +178,47 @@ export default function HomeScreen() {
                   outline: 'none',
                 }}
               />
+                            <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
+                  { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+                    
+                    <DateTimePicker
+                    value={new Date()}
+                    mode="date"
+                    display="default"
+                    />
+                  )}
+                </View>
+                }
+              </View>
               <View>
+                { updateVisible ?
+                <TouchableOpacity style={{backgroundColor: 'rgb(205, 27, 245)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+                onPress={() => update()}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
+                </TouchableOpacity>
+
+                :
+                
                 <TouchableOpacity style={{backgroundColor: 'rgb(205, 27, 245)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
                 onPress={() => addData()}>
                   <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
                 </TouchableOpacity>
+  }
               </View>
             </View>
           </View>
@@ -285,7 +296,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    padding: 20,
+    padding: 0,
     borderRadius: 20,
     backgroundColor: '#fff',
     shadowColor: '#000',

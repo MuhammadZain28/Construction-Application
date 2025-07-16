@@ -1,7 +1,8 @@
-import { TextInput, Text, View, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal } from "react-native";
+import { TextInput, Text, View, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal, Platform } from "react-native";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Material, House } from "../Class/App";
 import React from "react";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const house = 
   [ 
@@ -17,10 +18,21 @@ const Home: React.FC = () => {
   const [productId, setProductId] = React.useState(-1);
   const [mDropDown, setMDropDown] = React.useState(false);
   const [id, setId] = React.useState(0);
-  const [product, setProduct] = React.useState("Material");
+  const [product, setProduct] = React.useState("Paint");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
   const [home, setHome] = React.useState(0);
+  const [date, setDate] = React.useState(new Date());
+  const [showDate, setShowDate] = React.useState(false);
+  const [mobile, setMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    
+    if (Platform.OS === 'android') {
+      setMobile(true);
+    } 
+  }, []);
+
   const toggleDropdown = () => setDropdownVisible(prev => !prev);
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
 
@@ -48,8 +60,13 @@ const Home: React.FC = () => {
     };
   
   const addData = () => {
-    const data = new Material(house[home], product, no, price);
+    const data = new Material(house[home], product, no, price, date.toLocaleDateString(), false);
     setMaterial(prev => [ ...prev, data]);
+    setPrice(0);
+    setNo(0);
+    setProduct("Material");
+    setProductId(-1);
+    setHome(0);
   }
   const handleDelete = (id: number) => {
     setMaterial(prev => prev.filter(m => m.id !== id));
@@ -58,13 +75,17 @@ const Home: React.FC = () => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === productId
-          ? new Material(house[home], product, no, price, m.date, m.used) // status = true
+          ? new Material(house[home], product, no, price, date.toLocaleString(), m.used) // status = true
           : m
       )
     );
     setUpdateVisible(false);
     setVisible(false);
+    setPrice(0);
+    setNo(0);
+    setProduct("Material");
     setProductId(-1);
+    setHome(0);
   };
   return (
     <ScrollView>
@@ -80,6 +101,7 @@ const Home: React.FC = () => {
               <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
                 <Text style={{ fontWeight: "bold"}}>Material</Text>
               </TouchableOpacity>
+
               <FlatList
                 data={material}
                 keyExtractor={(item) => item.product}
@@ -137,22 +159,16 @@ const Home: React.FC = () => {
         </View>
       </View>
       <View style={styles.body}>
-        <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
           <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Material Purchases</Text>
-              <TouchableOpacity style={{backgroundColor: 'rgb(255, 200, 0)', flexDirection: "row", display: 'flex', justifyContent: 'center', alignItems: 'center',
-                borderRadius: 15, marginInline: 5, marginBlock: 5,
-              }}>
-                <MaterialIcons name='edit' style={{color: '#fff', fontSize: 20, padding: 5, borderRadius: 50}}></MaterialIcons>
-                <Text style={{color: '#fff', fontWeight: 'bold', paddingRight: 5}}>Enable Editing</Text>
-              </TouchableOpacity>
         </View>
         
         <View style={{gap: 5}}>
           {material.map((materials, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true);}}>
-            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
-              <Text style={[styles.data, {fontSize: 22, width: '40%'}]}> {materials.house.name} </Text>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true); setDate(new Date(materials.date));}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
+              <Text style={[styles.data, {fontSize: 22}]}> {materials.house.name} </Text>
               {materials.used ?
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, false)}>
@@ -172,11 +188,11 @@ const Home: React.FC = () => {
               }
             </View>
               
-            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
               <Text style={[styles.data, {fontSize: 18}]}>{materials.product}</Text>
               <Text style={[styles.data, {fontSize: 18}]}> {"Rs. " + materials.price*materials.no}</Text>
             </View> 
-            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
               <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Items : </Text>
                 <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]} >{materials.no.toString()}</Text>
@@ -248,31 +264,61 @@ const Home: React.FC = () => {
                 paddingHorizontal: 10,
                 outline: 'none',
               }}
-            />
-            <View>
-            <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
-              <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                              onPress={toggleDropdown}>
-              <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                { home !== -1 ? house[home].code : 'All Houses'}
-              </Text>
-              <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
-            </TouchableOpacity>
+            /><View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                                  onPress={toggleDropdown}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    { home !== -1 ? house[home].code : 'All Houses'}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+    
+                {isDropdownVisible && (
+                  <FlatList
+                    style={styles.HouseList}
+                    data={house}
+                    keyExtractor={(item) => item.code}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
+                        <Text>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                  /> )}
 
-            {isDropdownVisible && (
-              <FlatList
-                style={styles.HouseList}
-                data={house}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleHouseSelect(item.code)}>
-                    <Text>{item.code}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-            )}
+              </View>
+              <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
+                  { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+                    
+                    <DateTimePicker
+                    value={new Date()}
+                    mode="date"
+                    display="default"
+                    />
+                  )}
+                </View>
+                }
+              </View>
             </View>
+
+            
             { !updateVisible ? 
             <View>
               <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
@@ -290,7 +336,15 @@ const Home: React.FC = () => {
             }
           </View>
           
-          <TouchableOpacity onPress={() =>{ setVisible(false); setUpdateVisible(false);}} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
+          <TouchableOpacity 
+          onPress={() =>{ setVisible(false); 
+                          setUpdateVisible(false);      
+                          setPrice(0);
+                          setNo(0);
+                          setProduct("Material");
+                          setProductId(-1);
+                          setHome(0);
+          }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
         </View>
@@ -313,7 +367,12 @@ const Home: React.FC = () => {
               <View style={{ width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
-                                    onPress={() => { setDelete(false)}}>
+                                    onPress={() => { setDelete(false);
+                                                      setProductId(-1);
+                                                      setHome(0);
+                                                      setProduct("Material");
+                                                      setNo(0);
+                                                      setPrice(0);}}>
                     <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
                     <Text style={{color: 'white', fontWeight: "bold"}}>Cancel</Text>
                   </TouchableOpacity>
@@ -400,14 +459,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(229, 248, 212)',
     borderRadius: 10,
     padding: 5,
-    gap: 5
+    gap: 10,
   },
   data: {
     borderWidth: 0,
     outline: 'none',
     fontSize: 16,
-    fontWeight: 'bold', 
-    paddingInline: 10
+    fontWeight: 'bold'
   }, 
   HouseList: {
     position: 'absolute',

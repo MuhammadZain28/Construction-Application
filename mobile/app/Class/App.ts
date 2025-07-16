@@ -1,15 +1,16 @@
-import { Float, Int32 } from "react-native/Libraries/Types/CodegenTypes";
 
 export class House {
     name: string;
     code: string;
     description: string;
     completed: boolean;
-    constructor(name: string, code: string, description: string, completed = false) {
+    date: string;
+    constructor(name: string, code: string, description: string, completed = false, date = "01-01-2025") {
         this.name = name;
         this.code = code;
         this.description = description;
         this.completed = completed;
+        this.date = date;
     }
 }
 
@@ -19,11 +20,11 @@ export class Material {
     house: House;
     id: number;
     product: string;
-    no: Int32;
-    price: Float;
+    no: number;
+    price: number;
     used: boolean;
     date: string;
-    constructor(house: House, product: string, no: Int32, price: Float, date = "01-01-2025", used = false)
+    constructor(house: House, product: string, no: number, price: number, date = "01-01-2025", used = false)
     {
         this.id = Material.counter++;
         this.house = house;
@@ -32,5 +33,27 @@ export class Material {
         this.price = price;
         this.date = date;
         this.used = used
+    }
+}
+export class Paints {
+    static counter: number = 0; // static int equivalent
+
+    id: number;
+    name: string;
+    house: House;
+    no: number;
+    color: string;
+    price: number;
+    date: string;
+    used: boolean;
+    constructor(name: string, color: string, house: House, no: number, price: number, date = "01-01-2025", used = false) {
+        this.id = Paints.counter++;
+        this.name = name;
+        this.color = color;
+        this.house = house;
+        this.no = no;
+        this.price = price;
+        this.date = date;
+        this.used = used; 
     }
 }
