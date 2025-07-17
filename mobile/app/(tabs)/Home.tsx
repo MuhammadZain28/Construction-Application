@@ -16,7 +16,7 @@ const Home: React.FC = () => {
   const [product, setProduct] = React.useState("Material");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
-  const [home, setHome] = React.useState(0);
+  const [home, setHome] = React.useState("");
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
@@ -38,6 +38,8 @@ const Home: React.FC = () => {
   React.useEffect(() => {
     const fetchData = async () => {
       house = await House.getAllHouses();
+      const dbMaterial = await Material.getAllMaterials();
+      setMaterial(dbMaterial);
     };
     fetchData();
   }, []);
@@ -46,8 +48,7 @@ const Home: React.FC = () => {
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
 
   const handleHouseSelect = (code: string) => {
-    let index = house.findIndex(h => h.code === code);
-    setHome(index);
+    setHome(code);
     toggleDropdown();
   }
   const handleMaterialSelect = (id: string) => {
@@ -67,14 +68,14 @@ const Home: React.FC = () => {
     };
   
   const addData = async() => {
-    const id = await Material.save(house[home], product, no, price, date.toISOString().substring(0, 10), false);
-    const data = new Material(id, house[home], product, no, price, date.toISOString().substring(0, 10), false);
+    const id = await Material.save(home, product, no, price, date.toISOString().substring(0, 10), false);
+    const data = new Material(id, home, product, no, price, date.toISOString().substring(0, 10), false);
     setMaterial(prev => [ ...prev, data]);
     setPrice(0);
     setNo(0);
     setProduct("Material");
     setProductId("");
-    setHome(0);
+    setHome("");
   }
   const handleDelete = (id: string) => {
     setMaterial(prev => prev.filter(m => m.id !== id));
@@ -83,7 +84,7 @@ const Home: React.FC = () => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === productId
-          ? new Material(m.id, house[home], product, no, price, date.toLocaleString().substring(0, 10), m.used) // status = true
+          ? new Material(m.id, home, product, no, price, date.toLocaleString().substring(0, 10), m.used) // status = true
           : m
       )
     );
@@ -93,7 +94,7 @@ const Home: React.FC = () => {
     setNo(0);
     setProduct("Material");
     setProductId("");
-    setHome(0);
+    setHome("");
   };
   return (
     <ScrollView>
@@ -131,7 +132,7 @@ const Home: React.FC = () => {
                               onPress={toggleDropdown}>
               <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 208, 0)', fontSize: 28, paddingInline: 5,}}/>
               <Text style={{color: 'rgb(255, 208, 0)', fontSize: 18, fontWeight: "bold"}}>
-                { house[home]?.name || 'All Houses'}
+                { house[0]?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
 
@@ -146,9 +147,9 @@ const Home: React.FC = () => {
         <View style={{gap: 5}}>
           {material.map((materials, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true); setDate(new Date(materials.date));}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(materials.house); setVisible(true); setUpdateVisible(true); setDate(new Date(materials.date));}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
-              <Text style={[styles.data, {fontSize: 22}]}> {materials.house.name} </Text>
+              <Text style={[styles.data, {fontSize: 22}]}> {house.find(h=>h.code === materials.house)?.name} </Text>
               {materials.used ?
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, false)}>
@@ -251,7 +252,7 @@ const Home: React.FC = () => {
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
                                   onPress={toggleDropdown}>
                   <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home <= house.length ? house[home]?.name : 'All Houses'}
+                    { home !== "" ?house.find(h=> h.code === home)?.name : 'All Houses'}
                   </Text>
                   <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
@@ -312,7 +313,7 @@ const Home: React.FC = () => {
                           setNo(0);
                           setProduct("Material");
                           setProductId("");
-                          setHome(0);
+                          setHome("");
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
@@ -338,7 +339,7 @@ const Home: React.FC = () => {
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
                                                       setProductId("");
-                                                      setHome(0);
+                                                      setHome("");
                                                       setProduct("Material");
                                                       setNo(0);
                                                       setPrice(0);}}>
@@ -369,7 +370,11 @@ const Home: React.FC = () => {
           setDropdownVisible(false)
         }>
           <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-            
+            <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleHouseSelect("")}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>Home</Text>
+              </TouchableOpacity>
+
 
               <FlatList
                     data={house}
@@ -377,7 +382,7 @@ const Home: React.FC = () => {
                     style={styles.dropDown}
                     renderItem={({ item }) => (
                       <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                        { item.code === house[home].code ?
+                        { item.code === home ?
                         <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
                         :
                         <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
@@ -386,6 +391,7 @@ const Home: React.FC = () => {
                       </TouchableOpacity>
                     )}
                   />
+              </View>
           </View>
       </Modal>
       <Modal

@@ -16,9 +16,9 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
   const [deleteVisible, setDelete] = React.useState(false);
-  const [productId, setProductId] = React.useState(-1);
+  const [productId, setProductId] = React.useState("");
   const [mDropDown, setMDropDown] = React.useState(false);
-  const [id, setId] = React.useState(0);
+  const [id, setId] = React.useState("");
   const [product, setProduct] = React.useState("Paint");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
@@ -42,41 +42,39 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     setHome(index);
     toggleDropdown();
   }
-  const handleMaterialSelect = (id: number) => {
+  const handleMaterialSelect = (id: string) => {
     setProduct(material.find(m => m.id === id)?.product || "Paint");
     toggleMaterialDropdown()
   }
-  const [material, setMaterial] = React.useState<Material[]>([
-    new Material(house[0], "Abc", 10, 1000)
-  ]);
+  const [material, setMaterial] = React.useState<Material[]>([]);
 
-  const handleClick = (id: number, status: boolean) => {
+  const handleClick = (id: string, status: boolean) => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === id
-          ? new Material(m.house, m.product, m.no, m.price, m.date, status) // status = true
+          ? new Material(m.id, m.house, m.product, m.no, m.price, m.date, status) // status = true
           : m
         )
       );
     };
   
   const addData = () => {
-    const data = new Material(house[home], product, no, price, date.toLocaleDateString(), false);
+    const data = new Material(id, house[home], product, no, price, date.toLocaleDateString(), false);
     setMaterial(prev => [ ...prev, data]);
     setPrice(0);
     setNo(0);
     setProduct("Paint");
-    setProductId(-1);
+    setProductId("");
     setHome(0);
   }
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setMaterial(prev => prev.filter(m => m.id !== id));
   };
   const handleUpdate = () => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === productId
-          ? new Material(house[home], product, no, price, m.date, m.used) // status = true
+          ? new Material(m.id, house[home], product, no, price, m.date, m.used) // status = true
           : m
       )
     );
@@ -85,7 +83,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     setPrice(0);
     setNo(0);
     setProduct("Paint");
-    setProductId(-1);
+    setProductId("");
     setHome(0);
   };
   return (
@@ -310,7 +308,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                           setPrice(0);
                           setNo(0);
                           setProduct("Paint");
-                          setProductId(-1);
+                          setProductId("");
                           setHome(0);
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
@@ -336,7 +334,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
-                                                      setProductId(-1);
+                                                      setProductId("");
                                                       setHome(0);
                                                       setProduct("Paint");
                                                       setNo(0);
@@ -399,7 +397,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
         }>
           <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <View style={styles.dropDown}>
-              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
+              <TouchableOpacity onPress={() => handleMaterialSelect("")}>
                 <Text style={{ fontWeight: "bold", fontSize: 24}}>Paint</Text>
               </TouchableOpacity>
 

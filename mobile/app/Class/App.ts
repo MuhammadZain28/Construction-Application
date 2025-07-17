@@ -1,5 +1,6 @@
 import { Database } from '../Firebase/firebase';
 import { ref, set, push, get } from 'firebase/database';
+
 export class House {
     name: string;
     code: string;
@@ -50,25 +51,47 @@ export class House {
             });
         }
 
-        return houses;
-    } catch (error) {
-        console.error('Error fetching houses:', error);
-        return [];
+            return houses;
+        } catch (error) {
+            console.error('Error fetching houses:', error);
+            return [];
+        }
     }
-}
-
+    static async getHouseByCode(code: string): Promise<House | null> {
+        const db = await Database();
+        const houseRef = ref(db, `houses/${code}`);
+        try {
+            const snapshot = await get(houseRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                return new House(
+                    data.name,
+                    data.code,
+                    data.description,
+                    data.completed,
+                    data.date
+                );
+            } else {
+                console.warn(`House with code ${code} does not exist.`);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching house:', error);
+            return null;
+        }
+    }
 }
 
 export class Material {
 
-    house: House;
+    house: string;
     id: string;
     product: string;
     no: number;
     price: number;
     used: boolean;
     date: string;
-    constructor(id: string, house: House, product: string, no: number, price: number, date = "01-01-2025", used = false)
+    constructor(id: string, house: string, product: string, no: number, price: number, date = "01-01-2025", used = false)
     {
         this.id = id;
         this.house = house;
@@ -78,12 +101,12 @@ export class Material {
         this.date = date;
         this.used = used
     }
-    static async save(house: House, product: string, no: number, price: number, date: string, used: boolean): Promise<string> {
+    static async save(house: string, product: string, no: number, price: number, date: string, used: boolean): Promise<string> {
         const db = await Database();
         const materialsRef = ref(db, 'materials');
         const newMaterialRef = push(materialsRef);
         await set(newMaterialRef, {
-            house: house.code,
+            house: house,
             product: product,
             no: no,
             price: price,
@@ -91,6 +114,33 @@ export class Material {
             used: used
         });
         return newMaterialRef.key; 
+    }
+    static async getAllMaterials(): Promise<Material[]> {
+        const db = await Database();
+        const materialsRef = ref(db, 'materials');
+        try {
+            const snapshot = await get(materialsRef);
+            const materials: Material[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const material = new Material(
+                        childSnapshot.key,
+                        data.house,
+                        data.product,
+                        data.no,
+                        data.price,
+                        data.date,
+                        data.used
+                    );
+                    materials.push(material);
+                });
+            }
+            return materials;
+        } catch (error) {
+            console.error('Error fetching materials:', error);
+            return [];
+        }
     }
 }
 export class Paints {

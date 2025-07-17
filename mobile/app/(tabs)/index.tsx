@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform } from 'react-native';
 import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
-import { House } from '../Class/App'
+import { House } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen() {
@@ -14,6 +14,7 @@ export default function HomeScreen() {
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const [home, setHome] = useState<House[]>([]);
 
   React.useEffect(() => {
     if (Platform.OS === 'web') {
@@ -40,10 +41,6 @@ export default function HomeScreen() {
     }
   };
 
-  const [home, setHome] = useState([
-    new House("ABC", "01", "A Good House", false),
-    new House("XYZ", "02", "A Good House", false)
-  ]);
 
  
   const handleClick = (code: string, status: boolean) => {
@@ -59,6 +56,15 @@ export default function HomeScreen() {
   const addData = () => {
     const house = new House(name, code, description, false, date.toISOString().substring(0, 10));
     setHome(prev =>[ ...prev, house]);
+    House.save(house).then(() => {
+      setVisible(false);
+      setName("");
+      setCode("");
+      setDescription("");
+      setDate(new Date());
+    }).catch(error => {
+      console.error("Error saving house:", error);
+    });
   }
   const remove = (code: string) => {
     setHome(prevHomes => prevHomes.filter(h => h.code !== code));
