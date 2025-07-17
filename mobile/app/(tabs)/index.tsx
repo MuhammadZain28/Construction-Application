@@ -23,6 +23,14 @@ export default function HomeScreen() {
       setMobile(true);
     }
   }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const houses = await House.getAllHouses();
+      setHome(houses);
+    };
+    fetchData();
+  }, []);
   
   const onChange = (event: any, date?: Date) => {
     if (date) {
@@ -187,12 +195,12 @@ export default function HomeScreen() {
                   outline: 'none',
                 }}
               />
-              <View>
+              <View style={{marginBottom: 20}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?
 
-                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  <input type="date" style={{fontFamily: 'Arial', border: "none", borderBottomWidth: 1, borderColor: '#000'}} value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
                   onChange={(e) => setDate(new Date(e.target.value))}/>
                   :
                   <View>

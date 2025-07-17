@@ -4,20 +4,15 @@ import { Material, House } from "../Class/App";
 import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-const house = 
-  [ 
-    new House("All Houses", "All Houses", "", false),
-    new House("ABC", "01", "A Good House", false),
-    new House("XYZ", "02", "Great House", false),
-  ];
+let house: House[] = [];
 const Home: React.FC = () => {
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
   const [deleteVisible, setDelete] = React.useState(false);
-  const [productId, setProductId] = React.useState(-1);
+  const [productId, setProductId] = React.useState("");
   const [mDropDown, setMDropDown] = React.useState(false);
-  const [id, setId] = React.useState(0);
+  const [id, setId] = React.useState("");
   const [product, setProduct] = React.useState("Material");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
@@ -40,6 +35,13 @@ const Home: React.FC = () => {
     } 
   }, []);
 
+  React.useEffect(() => {
+    const fetchData = async () => {
+      house = await House.getAllHouses();
+    };
+    fetchData();
+  }, []);
+  
   const toggleDropdown = () => setDropdownVisible(prev => !prev);
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
 
@@ -48,41 +50,40 @@ const Home: React.FC = () => {
     setHome(index);
     toggleDropdown();
   }
-  const handleMaterialSelect = (id: number) => {
+  const handleMaterialSelect = (id: string) => {
     setProduct(material.find(m => m.id === id)?.product || "Material");
     toggleMaterialDropdown()
   }
-  const [material, setMaterial] = React.useState<Material[]>([
-    new Material(house[0], "Abc", 10, 1000)
-  ]);
+  const [material, setMaterial] = React.useState<Material[]>([]);
 
-  const handleClick = (id: number, status: boolean) => {
+  const handleClick = (id: string, status: boolean) => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === id
-          ? new Material(m.house, m.product, m.no, m.price, m.date, status) 
+          ? new Material(m.id, m.house, m.product, m.no, m.price, m.date, status) 
           : m
         )
       );
     };
   
-  const addData = () => {
-    const data = new Material(house[home], product, no, price, date.toISOString().substring(0, 10), false);
+  const addData = async() => {
+    const id = await Material.save(house[home], product, no, price, date.toISOString().substring(0, 10), false);
+    const data = new Material(id, house[home], product, no, price, date.toISOString().substring(0, 10), false);
     setMaterial(prev => [ ...prev, data]);
     setPrice(0);
     setNo(0);
     setProduct("Material");
-    setProductId(-1);
+    setProductId("");
     setHome(0);
   }
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setMaterial(prev => prev.filter(m => m.id !== id));
   };
   const handleUpdate = () => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === productId
-          ? new Material(house[home], product, no, price, date.toLocaleString().substring(0, 10), m.used) // status = true
+          ? new Material(m.id, house[home], product, no, price, date.toLocaleString().substring(0, 10), m.used) // status = true
           : m
       )
     );
@@ -91,7 +92,7 @@ const Home: React.FC = () => {
     setPrice(0);
     setNo(0);
     setProduct("Material");
-    setProductId(-1);
+    setProductId("");
     setHome(0);
   };
   return (
@@ -130,7 +131,7 @@ const Home: React.FC = () => {
                               onPress={toggleDropdown}>
               <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 208, 0)', fontSize: 28, paddingInline: 5,}}/>
               <Text style={{color: 'rgb(255, 208, 0)', fontSize: 18, fontWeight: "bold"}}>
-                { house[home].name || 'All Houses'}
+                { house[home]?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
 
@@ -250,14 +251,14 @@ const Home: React.FC = () => {
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
                                   onPress={toggleDropdown}>
                   <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home !== -1 ? house[home].name : 'All Houses'}
+                    { home <= house.length ? house[home]?.name : 'All Houses'}
                   </Text>
                   <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
     
 
               </View>
-              <View>
+              <View style={{flexDirection: 'row', marginBottom: 10}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?
@@ -310,7 +311,7 @@ const Home: React.FC = () => {
                           setPrice(0);
                           setNo(0);
                           setProduct("Material");
-                          setProductId(-1);
+                          setProductId("");
                           setHome(0);
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
@@ -336,7 +337,7 @@ const Home: React.FC = () => {
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
-                                                      setProductId(-1);
+                                                      setProductId("");
                                                       setHome(0);
                                                       setProduct("Material");
                                                       setNo(0);
@@ -396,7 +397,7 @@ const Home: React.FC = () => {
         }>
           <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <View style={styles.dropDown}>
-              <TouchableOpacity onPress={() => handleMaterialSelect(-1)}>
+              <TouchableOpacity onPress={() => handleMaterialSelect("")}>
                 <Text style={{ fontWeight: "bold", fontSize: 24}}>Material</Text>
               </TouchableOpacity>
 
@@ -439,6 +440,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardText: {
     fontSize: 24,
