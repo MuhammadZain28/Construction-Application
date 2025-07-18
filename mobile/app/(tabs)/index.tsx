@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform, Alert } from 'react-native';
 import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
 import { House } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -68,12 +68,41 @@ export default function HomeScreen() {
   }
   const remove = (code: string) => {
     setHome(prevHomes => prevHomes.filter(h => h.code !== code));
+    try {
+    House.deleteHouse(code);
+        setDelete(false);
+        setCode("");
+        Alert.alert(
+            'House Deleted',
+            'The house has been successfully deleted.',
+            [
+                {
+                    text: 'OK',
+                    onPress: () => console.log('House deleted'),
+                }
+            ]
+        );
+      }
+      catch(error) {
+        console.error("Error deleting house:", error);
+      }
   }
   const update = () => {
     setHome(prevHomes => prevHomes.map(h =>
       h.code === code
         ? new House(name, code, description, h.completed, date.toISOString().substring(0, 10)) : h
     ));
+    House.updateHouse(code, new House(name, code, description, false, date.toISOString().substring(0, 10)))
+      .then(() => {
+        setVisible(false);
+        setName("");
+        setCode("");
+        setDescription("");
+        setDate(new Date());
+      })
+      .catch(error => {
+        console.error("Error updating house:", error);
+      });
     setUpdateVisible(false);
     setVisible(false);
   }

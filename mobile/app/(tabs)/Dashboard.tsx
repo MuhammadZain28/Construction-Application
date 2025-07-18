@@ -102,29 +102,12 @@ const Dashboard: React.FC = () => {
         <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
           
           <View style={styles.table}>
-            <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 10}}>
-              <Text
-                style={styles.sectionText}
-                numberOfLines={1}
-                ellipsizeMode="tail">
-                Recent Purchases
-              </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', padding: 10, borderBottomWidth: 1, borderColor: '#ddd'}}>
+              <MaterialIcons name='bar-chart' size={36}/>
+              <Text style={styles.sectionText}>Overview</Text>
             </View>
-            <View style={{width: '100%', borderRadius: 10, borderWidth: 1, gap: 10, borderColor: 'rgb(255, 255, 255)', marginBottom: 10}}>
-              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgb(255, 235, 211)', borderRadius: 10,  gap: 0, paddingHorizontal: 0, width: '100%'}}>
-                <Text
-                  style={{flex: 2, fontSize: 20, width: '50%', paddingInline: 5, fontWeight: 'bold'}}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  --
-                </Text>
-                <Text
-                  style={{flex: 1, fontSize: 20, width: '25%', paddingInline: 5, textAlign: 'center', fontWeight: 'bold'}}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  Rs. 0 
-                </Text>
-              </View>
+            <View style={styles.chart}>
+              <View style={[styles.bar, {width: 200}]}></View>
             </View>
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
@@ -253,8 +236,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
   },
   cardtext: {
     flex: 1,  
@@ -269,5 +250,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     textAlign: 'right',
+  },
+  chart: {
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#000',
+    borderRadius: 10,
+    margin: 10,
+    padding: 5,
+  },
+  bar: {
+    flex: 1,
+    backgroundColor: '#ffbf00ff',
+    borderRadius: 10,
+    marginInline: 5,
+    marginVertical: 10,
+    paddingVertical: 10,
   },
 });

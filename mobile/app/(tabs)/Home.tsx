@@ -84,10 +84,12 @@ const Home: React.FC = () => {
     setMaterial(prev =>
       prev.map(m =>
         m.id === productId
-          ? new Material(m.id, home, product, no, price, date.toLocaleString().substring(0, 10), m.used) // status = true
+          ? new Material(m.id, home, product, no, price, date.toLocaleString().substring(0, 10), m.used) 
           : m
       )
     );
+    Material.UpdateMaterial(productId, home, product, no, price, date.toLocaleString().substring(0, 10));
+    
     setUpdateVisible(false);
     setVisible(false);
     setPrice(0);
@@ -132,7 +134,7 @@ const Home: React.FC = () => {
                               onPress={toggleDropdown}>
               <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 208, 0)', fontSize: 28, paddingInline: 5,}}/>
               <Text style={{color: 'rgb(255, 208, 0)', fontSize: 18, fontWeight: "bold"}}>
-                { house[0]?.name || 'All Houses'}
+                { house.find(h=>home === h.code)?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
 
@@ -149,7 +151,7 @@ const Home: React.FC = () => {
 
           <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(materials.house); setVisible(true); setUpdateVisible(true); setDate(new Date(materials.date));}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
-              <Text style={[styles.data, {fontSize: 22}]}> {house.find(h=>h.code === materials.house)?.name} </Text>
+              <Text style={[styles.data, {fontSize: 22}]}> {house.find(h=>h.code === materials.house)?.name || 'All Houses'}  </Text>
               {materials.used ?
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, false)}>
@@ -244,22 +246,22 @@ const Home: React.FC = () => {
                 marginBottom: 20,
                 paddingHorizontal: 10,
                 outline: 'none',
-              }}
-            /><View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <View>
+              }}/>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View style={{flex: 1, marginRight: 25}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
                                   onPress={toggleDropdown}>
                   <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home !== "" ?house.find(h=> h.code === home)?.name : 'All Houses'}
+                    { house.find(h=> h.code === home)?.name || 'All Houses'}
                   </Text>
                   <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
     
 
               </View>
-              <View style={{flexDirection: 'row', marginBottom: 10}}>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?

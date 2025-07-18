@@ -1,31 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, FlatList, Platform } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Material, House } from '../Class/App'; // Adjust the import path as necessary
+import { House, Paints } from '../Class/App'; // Adjust the import path as necessary
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
-const house = 
-  [ 
-    new House("All Houses", "All Houses", "", false),
-    new House("ABC", "01", "A Good House", false),
-    new House("XYZ", "02", "Great House", false),
-  ];
+let house = [ new House("All Houses", "All Houses", "", false) ];
 export default function TabTwoScreen() {
 const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
   const [deleteVisible, setDelete] = React.useState(false);
-  const [productId, setProductId] = React.useState("");
+  const [colorId, setcolorId] = React.useState("");
   const [mDropDown, setMDropDown] = React.useState(false);
   const [id, setId] = React.useState("");
-  const [product, setProduct] = React.useState("Paint");
+  const [color, setcolor] = React.useState("Paint");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
-  const [home, setHome] = React.useState(0);
+  const [home, setHome] = React.useState("");
+  const [name, setName] = React.useState("");
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
+  const [paint, setPaint] = React.useState<Paints[]>([]);
 
   React.useEffect(() => {
     
@@ -34,57 +31,69 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     } 
   }, []);
 
+  React.useEffect(() => {
+    const fetchData = async () => {
+      house = await House.getAllHouses();
+      const paintsData = await Paints.getAllPaints();
+      setPaint(paintsData);
+    }
+
+    fetchData();
+  }, []);
+
   const toggleDropdown = () => setDropdownVisible(prev => !prev);
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
 
   const handleHouseSelect = (code: string) => {
-    let index = house.findIndex(h => h.code === code);
-    setHome(index);
+    setHome(code);
     toggleDropdown();
   }
   const handleMaterialSelect = (id: string) => {
-    setProduct(material.find(m => m.id === id)?.product || "Paint");
+    setcolor(paint.find(p => p.id === id)?.color || "Paint");
     toggleMaterialDropdown()
   }
-  const [material, setMaterial] = React.useState<Material[]>([]);
 
   const handleClick = (id: string, status: boolean) => {
-    setMaterial(prev =>
-      prev.map(m =>
-        m.id === id
-          ? new Material(m.id, m.house, m.product, m.no, m.price, m.date, status) // status = true
-          : m
+    setPaint(prev =>
+      prev.map(p =>
+        p.id === id
+          ? new Paints(p.id, p.color, p.name, p.house, p.no, p.price, p.date, status) // status = true
+          : p
         )
       );
     };
   
-  const addData = () => {
-    const data = new Material(id, house[home], product, no, price, date.toLocaleDateString(), false);
-    setMaterial(prev => [ ...prev, data]);
+  const addData = async() => {
+    const id = await Paints.save(name, color, home, no, price, date.toLocaleDateString(), false);
+    const data = new Paints(id, name, color, home, no, price, date.toLocaleDateString(), false);
+    setPaint(prev => [ ...prev, data]);
     setPrice(0);
     setNo(0);
-    setProduct("Paint");
-    setProductId("");
-    setHome(0);
+    setcolor("Paint");
+    setcolorId("");
+    setHome("");
   }
   const handleDelete = (id: string) => {
-    setMaterial(prev => prev.filter(m => m.id !== id));
+    setPaint(prev => prev.filter(p => p.id !== id));
+    Paints.deletePaint(id)
   };
   const handleUpdate = () => {
-    setMaterial(prev =>
-      prev.map(m =>
-        m.id === productId
-          ? new Material(m.id, house[home], product, no, price, m.date, m.used) // status = true
-          : m
+    setPaint(prev =>
+      prev.map(p =>
+        p.id === colorId
+          ? new Paints(p.id, name, color, home, no, price, p.date, p.used) // status = true
+          : p
       )
     );
+    Paints.UpdatePaint(colorId, name, color, home, no, price, date.toLocaleDateString());
+
     setUpdateVisible(false);
     setVisible(false);
     setPrice(0);
     setNo(0);
-    setProduct("Paint");
-    setProductId("");
-    setHome(0);
+    setcolor("Paint");
+    setcolorId("");
+    setHome("");
   };
   return (
 
@@ -93,11 +102,11 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
         <View style={[styles.card, {backgroundColor: 'rgba(12, 41, 145, 1)'}]}>
           <View>
             <TouchableOpacity onPress={() => toggleMaterialDropdown()} style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={styles.cardText}>{ product }</Text>
+              <Text style={styles.cardText}>{ color }</Text>
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>    
             
-            <Text style={styles.cardText}>{ product === "Paint" ? material.length : material.filter(m => m.product === product).length}</Text>
+            <Text style={styles.cardText}>{ color === "Paint" ? paint.length : paint.filter(p => p.color === color).length}</Text>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -113,7 +122,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
         <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
             <Text style={styles.cardText}> Spend </Text>            
-            <Text style={styles.cardText}> {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+            <Text style={styles.cardText}> {paint.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -123,7 +132,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                               onPress={toggleDropdown}>
               <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 183, 0)', fontSize: 28, paddingInline: 5,}}/>
               <Text style={{color: 'rgb(255, 183, 0)', fontSize: 18, fontWeight: "bold"}}>
-                { house[home].name || 'All Houses'}
+                { house.find(h => home === h.code)?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
 
@@ -136,14 +145,14 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
         </View>
         
         <View style={{gap: 5}}>
-          {material.map((materials, index) => ( 
+          {paint.map((paints, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(house.findIndex(h => h.code === materials.house.code)); setVisible(true); setUpdateVisible(true);}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(paints.id);}} onPress={() => {setcolorId(paints.id); setcolor(paints.color); setNo(paints.no); setPrice(paints.price); setHome(paints.house); setVisible(true); setUpdateVisible(true);}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
-              <Text style={[styles.data, {fontSize: 22}]}> {materials.house.name} </Text>
-              {materials.used ?
+              <Text style={[styles.data, {fontSize: 22}]}> {paints.house}  </Text>
+              {paints.used ?
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                onPress={()=> handleClick(materials.id, false)}>
+                onPress={()=> handleClick(paints.id, false)}>
                   <View style={{  backgroundColor: 'rgb(6, 149, 13)', flexDirection: 'row', borderRadius: 15, paddingInline: 5, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='done' style={{fontSize: 20, color: 'rgb(255, 255, 255)',  paddingLeft: 5}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold', paddingRight: 5}}> Remain</Text>
@@ -151,7 +160,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 </TouchableOpacity> 
                 :      
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                onPress={()=> handleClick(materials.id, true)}>
+                onPress={()=> handleClick(paints.id, true)}>
                   <View style={{ backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
@@ -161,17 +170,17 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
             </View>
               
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
-              <Text style={[styles.data, {fontSize: 18}]}>{materials.product}</Text>
-              <Text style={[styles.data, {fontSize: 18}]}> {"Rs. " + materials.price*materials.no}</Text>
+              <Text style={[styles.data, {fontSize: 18}]}>{paints.color}   ({paints.name})</Text>
+              <Text style={[styles.data, {fontSize: 18}]}> {"Rs. " + paints.price*paints.no}</Text>
             </View> 
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingInline: 15}}>
               <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Items : </Text>
-                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]} >{materials.no.toString()}</Text>
+                <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]} >{paints.no.toString()}</Text>
               </View>
               <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.data, {fontWeight: 'normal', fontSize: 16}]}>Date : </Text>
-                <Text style={[styles.data, , {fontWeight: 'normal', fontSize: 16}]}> {materials.date}</Text>
+                <Text style={[styles.data, , {fontWeight: 'normal', fontSize: 16}]}> {paints.date}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -192,11 +201,11 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 <MaterialIcons name='construction' style={{fontSize: 32}}/> Materials
               </Text>
             <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Product</Text>
+              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Name</Text>
             <TextInput
               placeholder="Type here..."
-            value={product}
-            onChangeText={setProduct}
+            value={name}
+            onChangeText={setName}
               style={{
                 height: 40,
                 borderColor: 'gray',
@@ -206,13 +215,12 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 outline: 'none',
               }}
             />
-            <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='counter' style={{fontSize: 32}}/>  No of Items</Text>
+            <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Color</Text>
             <TextInput
               placeholder="Type here..."
-              value={no.toString()}
-              onChangeText={(text) => setNo(parseInt(text) || 0)}
-              keyboardType="numeric"
+            value={color}
+            onChangeText={setcolor}
               style={{
                 height: 40,
                 borderColor: 'gray',
@@ -222,35 +230,57 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 outline: 'none',
               }}
             />
-            <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialIcons name='receipt' style={{fontSize: 32}}></MaterialIcons>  Price</Text>
-            <TextInput
-              placeholder="Type here..."
-              value={price.toString()}
-              onChangeText={(text) => setPrice(parseFloat(text) || 0)}
-              style={{
-                height: 40,
-                borderColor: 'gray',
-                borderBottomWidth: 1,
-                marginBottom: 20,
-                paddingHorizontal: 10,
-                outline: 'none',
-              }}
-            />
-            <View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialCommunityIcons name='counter' style={{fontSize: 32}}/>  No of Items</Text>
+                <TextInput
+                  placeholder="Type here..."
+                  value={no.toString()}
+                  onChangeText={(text) => setNo(parseInt(text) || 0)}
+                  keyboardType="numeric"
+                  style={{
+                    height: 40,
+                    borderColor: 'gray',
+                    borderBottomWidth: 1,
+                    marginBottom: 20,
+                    paddingHorizontal: 10,
+                    outline: 'none',
+                  }}
+                />
+              </View>
+              <View>
+                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialIcons name='receipt' style={{fontSize: 32}}></MaterialIcons>  Price</Text>
+                <TextInput
+                  placeholder="Type here..."
+                  value={price.toString()}
+                  onChangeText={(text) => setPrice(parseFloat(text) || 0)}
+                  style={{
+                    height: 40,
+                    borderColor: 'gray',
+                    borderBottomWidth: 1,
+                    marginBottom: 20,
+                    paddingHorizontal: 10,
+                    outline: 'none',
+                  }}
+                />
+              </View>
+            </View>
+            <View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View style={{flex: 1, marginRight: 25}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
                                   onPress={toggleDropdown}>
                   <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home !== -1 ? house[home].name : 'All Houses'}
+                    { home !== "" ? home : 'All Houses'}
                   </Text>
                   <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
               </View>
-              <View>
+              <View style={{flex: 1}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?
@@ -307,9 +337,9 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                           setUpdateVisible(false);      
                           setPrice(0);
                           setNo(0);
-                          setProduct("Paint");
-                          setProductId("");
-                          setHome(0);
+                          setcolor("Paint");
+                          setcolorId("");
+                          setHome("");
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
@@ -334,9 +364,9 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
-                                                      setProductId("");
-                                                      setHome(0);
-                                                      setProduct("Paint");
+                                                      setcolorId("");
+                                                      setHome("");
+                                                      setcolor("Paint");
                                                       setNo(0);
                                                       setPrice(0);}}>
                     <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
@@ -376,7 +406,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => (
                       <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                        { item.code === house[home].code ?
+                        { item.code === home ?
                         <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
                         :
                         <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
@@ -402,16 +432,16 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               </TouchableOpacity>
 
               <FlatList
-                data={material}
-                keyExtractor={(item) => item.product}
+                data={paint}
+                keyExtractor={(item) => item.color}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                    { item.product === product ?
+                    { item.color === color ?
                       <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
                         :
                       <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
                     }
-                    <Text style={{fontSize: 18}}>{item.product}</Text>
+                    <Text style={{fontSize: 18}}>{item.color}</Text>
                   </TouchableOpacity>
                 )}
               />

@@ -1,5 +1,5 @@
 import { Database } from '../Firebase/firebase';
-import { ref, set, push, get } from 'firebase/database';
+import { ref, set, push, get, update, remove } from 'firebase/database';
 
 export class House {
     name: string;
@@ -16,17 +16,15 @@ export class House {
     }
     static async save(house: House): Promise<void> {
     const db = await Database();
-    const housesRef = ref(db, 'houses');
-    const newHouseRef = push(housesRef); // creates unique ID
+    const housesRef = ref(db, `houses/${house.code}`);
 
-    await set(newHouseRef, {
+    await update(housesRef, {
         name: house.name,
-        code: house.code,
         description: house.description,
         completed: house.completed,
         date: house.date
-    });
-}
+        }) ;
+    }
 
     static async getAllHouses(): Promise<House[]> {
     const db = await Database();
@@ -41,12 +39,11 @@ export class House {
                 const data = childSnapshot.val();
                 const house = new House(
                     data.name,
-                    data.code,
+                    childSnapshot.key,
                     data.description,
                     data.completed,
                     data.date
                 );
-                alert("House fetched: " + data.name);
                 houses.push(house);
             });
         }
@@ -57,28 +54,21 @@ export class House {
             return [];
         }
     }
-    static async getHouseByCode(code: string): Promise<House | null> {
+    static async updateHouse(code: string, house: House): Promise<void> {
         const db = await Database();
         const houseRef = ref(db, `houses/${code}`);
-        try {
-            const snapshot = await get(houseRef);
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                return new House(
-                    data.name,
-                    data.code,
-                    data.description,
-                    data.completed,
-                    data.date
-                );
-            } else {
-                console.warn(`House with code ${code} does not exist.`);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching house:', error);
-            return null;
-        }
+        await update(houseRef, {
+            name: house.name,
+            description: house.description,
+            completed: house.completed,
+            date: house.date
+        });
+    }
+    static async deleteHouse(code: string): Promise<void> {
+        const db = await Database();
+        const houseRef = ref(db, `houses/${code}`);
+        await remove(houseRef);
+        
     }
 }
 
@@ -142,20 +132,35 @@ export class Material {
             return [];
         }
     }
+    static async UpdateMaterial(id: string, house: string, product: string, no: number, price: number, date: string): Promise<void> {
+        const db = await Database();
+        const materialRef = ref(db, `materials/${id}`);
+        await update(materialRef, {
+            house: house,
+            product: product,
+            no: no,
+            price: price,
+            date: date,
+        });
+    }
+    static async deleteMaterial(id: string): Promise<void> {
+        const db = await Database();
+        const materialRef = ref(db, `materials/${id}`);
+        await remove(materialRef);
+    }
 }
 export class Paints {
-    static counter: number = 0; // static int equivalent
 
-    id: number;
+    id: string;
     name: string;
-    house: House;
+    house: string;
     no: number;
     color: string;
     price: number;
     date: string;
     used: boolean;
-    constructor(name: string, color: string, house: House, no: number, price: number, date = "01-01-2025", used = false) {
-        this.id = Paints.counter++;
+    constructor(id: string, name: string, color: string, house: string, no: number, price: number, date = "01-01-2025", used = false) {
+        this.id = id;
         this.name = name;
         this.color = color;
         this.house = house;
@@ -163,5 +168,65 @@ export class Paints {
         this.price = price;
         this.date = date;
         this.used = used; 
+    }
+    static async save(name: string, color: string, house: string, no: number, price: number, date: string, used: boolean): Promise<string> {
+        const db = await Database();
+        const paintsRef = ref(db, 'paints');
+        const newPaintRef = push(paintsRef);
+        await set(newPaintRef, {
+            name: name,
+            color: color,
+            house: house,
+            no: no,
+            price: price,
+            date: date,
+            used: used
+        });
+        return newPaintRef.key; 
+    }
+    static async getAllPaints(): Promise<Paints[]> {
+        const db = await Database();
+        const paintsRef = ref(db, 'paints');
+        try {
+            const snapshot = await get(paintsRef);
+            const paints: Paints[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const paint = new Paints(
+                        childSnapshot.key,
+                        data.name,
+                        data.color,
+                        data.house,
+                        data.no,
+                        data.price,
+                        data.date,
+                        data.used
+                    );
+                    paints.push(paint);
+                });
+            }
+            return paints;
+        } catch (error) {
+            console.error('Error fetching paints:', error);
+            return [];
+        }
+    }
+    static async UpdatePaint(id: string, name: string, color: string, house: string, no: number, price: number, date: string): Promise<void> {
+        const db = await Database();
+        const paintRef = ref(db, `paints/${id}`);
+        await update(paintRef, {
+            name: name,
+            color: color,
+            house: house,
+            no: no,
+            price: price,
+            date: date
+        });
+    }
+    static async deletePaint(id: string): Promise<void> {
+        const db = await Database();
+        const paintRef = ref(db, `paints/${id}`);
+        await remove(paintRef);
     }
 }
