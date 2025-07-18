@@ -102,12 +102,39 @@ const Dashboard: React.FC = () => {
         <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
           
           <View style={styles.table}>
-            <View style={{flexDirection: 'row', alignItems: 'center', padding: 10, borderBottomWidth: 1, borderColor: '#ddd'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#f9b728ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
               <MaterialIcons name='bar-chart' size={36}/>
               <Text style={styles.sectionText}>Overview</Text>
-            </View>
-            <View style={styles.chart}>
-              <View style={[styles.bar, {width: 200}]}></View>
+            </View> 
+            <View style={styles.barChart}>
+              <View style={styles.x}>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>1</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>2</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>3</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>4</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>5</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>6</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>7</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>8</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>9</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>10</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>11</Text>
+                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>12</Text>
+              </View>
+              <View style={styles.chart}>
+                <View style={[styles.bar, {width: 200}]}></View>
+                <View style={[styles.bar, {width: 100}]}></View>
+                <View style={[styles.bar, {width: 400}]}></View>
+                <View style={[styles.bar, {width: 100}]}></View>
+                <View style={[styles.bar, {width: 750}]}></View>
+                <View style={[styles.bar, {width: 500}]}></View>
+                <View style={[styles.bar, {width: 700}]}></View>
+                <View style={[styles.bar, {width: 500}]}></View>
+                <View style={[styles.bar, {width: 600}]}></View>
+                <View style={[styles.bar, {width: 400}]}></View>
+                <View style={[styles.bar, {width: 700}]}></View>
+                <View style={[styles.bar, {width: 300}]}></View>
+              </View>
             </View>
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
@@ -251,20 +278,25 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     textAlign: 'right',
   },
+  barChart: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
   chart: {
     borderLeftWidth: 2,
     borderBottomWidth: 2,
     borderColor: '#000',
-    borderRadius: 10,
-    margin: 10,
-    padding: 5,
+    marginInline: 10,
+    gap: 10,
   },
   bar: {
-    flex: 1,
     backgroundColor: '#ffbf00ff',
     borderRadius: 10,
+    height: 25,
     marginInline: 5,
-    marginVertical: 10,
-    paddingVertical: 10,
+  },
+  x: {
+    gap: 15,
   },
 });
