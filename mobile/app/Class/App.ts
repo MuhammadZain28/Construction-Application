@@ -70,6 +70,13 @@ export class House {
         await remove(houseRef);
         
     }
+    static async updateCompleted(code: string, status: boolean): Promise<void> {
+        const db = await Database();
+        const houseRef = ref(db, `houses/${code}`);
+        await update(houseRef, {
+            completed: status
+        });
+    }
 }
 
 export class Material {
@@ -147,6 +154,13 @@ export class Material {
         const db = await Database();
         const materialRef = ref(db, `materials/${id}`);
         await remove(materialRef);
+    }
+    static async UpdateUsed(id: string, status: boolean): Promise<void> {
+        const db = await Database();
+        const materialRef = ref(db, `materials/${id}`);
+        await update(materialRef, {
+            used: status
+        });
     }
 }
 export class Paints {
@@ -228,5 +242,12 @@ export class Paints {
         const db = await Database();
         const paintRef = ref(db, `paints/${id}`);
         await remove(paintRef);
+    }
+    static async UpdateUsed(id: string, status: boolean): Promise<void> {
+        const db = await Database();
+        const paintRef = ref(db, `paints/${id}`);
+        await update(paintRef, {
+            used: status
+        });
     }
 }

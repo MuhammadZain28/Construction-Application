@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Platform, Alert, FlatList } from 'react-native';
 import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
 import { House } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useDataContext } from './DataContext';
 
 export default function HomeScreen() {
+  const { houses } = useDataContext();
   const [visible, setVisible] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
@@ -15,6 +17,7 @@ export default function HomeScreen() {
   const [showDate, setShowDate] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [home, setHome] = useState<House[]>([]);
+  const [search, setSearch] = useState("");
 
   React.useEffect(() => {
     if (Platform.OS === 'web') {
@@ -27,11 +30,10 @@ export default function HomeScreen() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const houses = await House.getAllHouses();
       setHome(houses);
     };
     fetchData();
-  }, []);
+  }, [houses]);
   
   const onChange = (event: any, date?: Date) => {
     if (date) {
@@ -44,13 +46,14 @@ export default function HomeScreen() {
 
  
   const handleClick = (code: string, status: boolean) => {
-  setHome(prev =>
-    prev.map(h =>
-      h.code === code
-        ? new House(h.name, h.code, h.description, status, h.date) // status = true
-        : h
-      )
-    );
+    setHome(prev =>
+      prev.map(h =>
+        h.code === code
+          ? new House(h.name, h.code, h.description, status, h.date) // status = true
+          : h
+        )
+      );
+    House.updateCompleted(code, status).catch(console.error);
   };
 
   const addData = () => {
@@ -112,6 +115,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.headerText}><MaterialIcons name='home' size={26}/> House</Text>
         </View>
+
         <View style={styles.container}>
           <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',  padding: 20}}>
             <Text style={{fontSize: 24, fontWeight: 'bold'}}>House</Text>
@@ -121,6 +125,30 @@ export default function HomeScreen() {
                 <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Create House</Text>
               </View>
             </TouchableOpacity>
+          </View>
+          <View style={styles.searchBar}>
+            <TextInput placeholder='Search....' style={styles.searchInput} value={search} onChangeText={setSearch}/>
+            { search.length > 0 &&
+              <TouchableOpacity onPress={() => setSearch("")} style={{ position: 'absolute', right: 10}}><MaterialIcons name='close' size={18} color={'rgba(198, 10, 250, 1)'}></MaterialIcons></TouchableOpacity>
+            }
+            { search.length > 0 &&
+              <FlatList 
+                data={home.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.code.toLowerCase().includes(search.toLowerCase()))}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => {
+                    setName(item.name);
+                    setCode(item.code);
+                    setDescription(item.description);
+                    setVisible(true);
+                    setUpdateVisible(true);
+                  }}>
+                    <Text style={{ padding: 10, fontSize: 16 }}>{item.name} ({item.code})</Text>
+                  </TouchableOpacity>
+                )}
+                style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(248, 248, 248, 1)', borderRadius: 10, marginTop: 90, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              />
+            }
           </View>
            
           <View>
@@ -235,8 +263,8 @@ export default function HomeScreen() {
                   <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
                   { !mobile ?
 
-                  <input type="date" style={{fontFamily: 'Arial', border: "none", borderBottomWidth: 1, borderColor: '#000'}} value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
                   :
                   <View>
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
@@ -271,7 +299,7 @@ export default function HomeScreen() {
                 onPress={() => addData()}>
                   <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
                 </TouchableOpacity>
-  }
+          }
               </View>
             </View>
           </View>
@@ -372,4 +400,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#f1f1f1ff',
+    marginInline: 20,
+    marginBottom: 10,
+    maxWidth: 350,
+    borderColor: '#000',
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    padding: 10,
+    borderRadius: 20,
+    outline: '0px solid transparent',
+  }
 });

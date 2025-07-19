@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput,
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { House, Paints } from '../Class/App'; // Adjust the import path as necessary
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import { useDataContext } from './DataContext'; // Adjust the import path as necessary
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
-export default function TabTwoScreen() {
-const [isDropdownVisible, setDropdownVisible] = React.useState(false);
+export default function TabTwoScreen(Houses: House[]) {
+  const { houses, paints } = useDataContext();
+  const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
   const [deleteVisible, setDelete] = React.useState(false);
@@ -23,7 +24,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
   const [paint, setPaint] = React.useState<Paints[]>([]);
-
+  const [search, setSearch] = React.useState("");
   React.useEffect(() => {
     
     if (Platform.OS === 'android') {
@@ -33,13 +34,12 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      house = await House.getAllHouses();
-      const paintsData = await Paints.getAllPaints();
-      setPaint(paintsData);
+      house = houses;
+      setPaint(paints);
     }
 
     fetchData();
-  }, []);
+  }, [houses, paints]);
 
   const toggleDropdown = () => setDropdownVisible(prev => !prev);
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
@@ -61,7 +61,8 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
           : p
         )
       );
-    };
+    Paints.UpdateUsed(id, status).catch(console.error);
+  };
   
   const addData = async() => {
     const id = await Paints.save(name, color, home, no, price, date.toLocaleDateString(), false);
@@ -144,10 +145,37 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
           <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Paints</Text>
         </View>
         
+        <View style={styles.searchBar}>
+          <TextInput placeholder='Search....' style={styles.searchInput} value={search} onChangeText={setSearch}/>
+          { search.length > 0 &&
+            <TouchableOpacity onPress={() => setSearch("")} style={{ position: 'absolute', right: 10}}><MaterialIcons name='close' size={18} color={'rgba(12, 6, 137, 1)'}></MaterialIcons></TouchableOpacity>
+          }
+          { search.length > 0 &&
+            <FlatList 
+              data={paint.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.name.toLowerCase().includes(search.toLowerCase()))}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => {
+                  setName(item.name);
+                  setcolor(item.color);
+                  setPrice(item.price);
+                  setNo(item.no);
+                  setHome(item.house);
+                  setcolorId(item.id);
+                  setVisible(true);
+                  setUpdateVisible(true);
+                }}>
+                  <Text style={{ padding: 10, fontSize: 16 }}>{item.color} ({item.name})</Text>
+                </TouchableOpacity>
+              )}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(248, 248, 248, 1)', borderRadius: 10, marginTop: 90, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+            />
+          }
+        </View>
         <View style={{gap: 5}}>
           {paint.map((paints, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(paints.id);}} onPress={() => {setcolorId(paints.id); setcolor(paints.color); setNo(paints.no); setPrice(paints.price); setHome(paints.house); setVisible(true); setUpdateVisible(true);}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(paints.id);}} onPress={() => {setcolorId(paints.id); setcolor(paints.color); setName(paints.name); setNo(paints.no); setPrice(paints.price); setHome(paints.house); setVisible(true); setUpdateVisible(true);}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
               <Text style={[styles.data, {fontSize: 22}]}> {paints.house}  </Text>
               {paints.used ?
@@ -201,7 +229,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                 <MaterialIcons name='construction' style={{fontSize: 32}}/> Materials
               </Text>
             <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Name</Text>
+              <MaterialCommunityIcons name='creative-commons' style={{fontSize: 32}}></MaterialCommunityIcons>  Name</Text>
             <TextInput
               placeholder="Type here..."
             value={name}
@@ -216,7 +244,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               }}
             />
             <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='cart-plus' style={{fontSize: 32}}></MaterialCommunityIcons>  Color</Text>
+              <MaterialCommunityIcons name='format-paint' style={{fontSize: 32}}></MaterialCommunityIcons>  Color</Text>
             <TextInput
               placeholder="Type here..."
             value={color}
@@ -268,7 +296,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
               </View>
             </View>
             <View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <View style={{flex: 1, marginRight: 25}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
@@ -286,7 +314,7 @@ const [isDropdownVisible, setDropdownVisible] = React.useState(false);
                   { !mobile ?
 
                   <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
                   :
                   <View>
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
@@ -469,6 +497,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.128,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardText: {
     fontSize: 24,
@@ -496,6 +529,11 @@ const styles = StyleSheet.create({
   body: {
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.128,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
@@ -528,5 +566,26 @@ const styles = StyleSheet.create({
     width: 150, 
     top: -50,
     height: 120,
+  },
+  
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#f1f1f1ff',
+    marginInline: 20,
+    marginBottom: 10,
+    maxWidth: 350,
+    borderColor: '#000',
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    padding: 10,
+    borderRadius: 20,
+    outline: '0px solid transparent',
   }
 });

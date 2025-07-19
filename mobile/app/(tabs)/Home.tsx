@@ -3,9 +3,11 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Material, House } from "../Class/App";
 import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useDataContext } from "./DataContext";
 
 let house: House[] = [];
 const Home: React.FC = () => {
+  const {houses, materials} = useDataContext();
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
@@ -20,6 +22,7 @@ const Home: React.FC = () => {
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
+  const [search, setSearch] = React.useState("");
 
   const onChange = (event: any, date?: Date) => {
     if (date) {
@@ -37,12 +40,11 @@ const Home: React.FC = () => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      house = await House.getAllHouses();
-      const dbMaterial = await Material.getAllMaterials();
-      setMaterial(dbMaterial);
+      house = houses;
+      setMaterial(materials);
     };
     fetchData();
-  }, []);
+  }, [houses, materials]);
   
   const toggleDropdown = () => setDropdownVisible(prev => !prev);
   const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
@@ -65,7 +67,8 @@ const Home: React.FC = () => {
           : m
         )
       );
-    };
+    Material.UpdateUsed(id, status).catch(console.error);
+  };
   
   const addData = async() => {
     const id = await Material.save(home, product, no, price, date.toISOString().substring(0, 10), false);
@@ -144,6 +147,33 @@ const Home: React.FC = () => {
       <View style={styles.body}>
         <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
           <Text style={{fontSize:24, fontWeight: 'bold', paddingInline: 20}}>Material</Text>
+        </View>
+
+        <View style={styles.searchBar}>
+          <TextInput placeholder='Search....' style={styles.searchInput} value={search} onChangeText={setSearch}/>
+          { search.length > 0 &&
+            <TouchableOpacity onPress={() => setSearch("")} style={{ position: 'absolute', right: 10}}><MaterialIcons name='close' size={18} color={'rgba(2, 144, 59, 1)'}></MaterialIcons></TouchableOpacity>
+          }
+          { search.length > 0 &&
+            <FlatList 
+              data={material.filter(h => h.product.toLowerCase().includes(search.toLowerCase()))}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => {
+                  setProduct(item.product);
+                  setNo(item.no);
+                  setPrice(item.price);
+                  setHome(item.house);
+                  setDate(new Date(item.date));
+                  setVisible(true);
+                  setUpdateVisible(true);
+                }}>
+                  <Text style={{ padding: 10, fontSize: 16 }}>{item.product}</Text>
+                </TouchableOpacity>
+              )}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(248, 248, 248, 1)', borderRadius: 10, marginTop: 90, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+            />
+          }
         </View>
         
         <View style={{gap: 5}}>
@@ -247,7 +277,7 @@ const Home: React.FC = () => {
                 paddingHorizontal: 10,
                 outline: 'none',
               }}/>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <View style={{flex: 1, marginRight: 25}}>
                 <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                   <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
@@ -267,7 +297,7 @@ const Home: React.FC = () => {
                   { !mobile ?
 
                   <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setDate(new Date(e.target.value))}/>
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
                   :
                   <View>
                   <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
@@ -450,7 +480,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.128,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -480,6 +510,11 @@ const styles = StyleSheet.create({
   body: {
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.128,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
@@ -512,5 +547,25 @@ const styles = StyleSheet.create({
     width: 150, 
     top: -50,
     height: 120,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#f1f1f1ff',
+    marginInline: 20,
+    marginBottom: 10,
+    maxWidth: 350,
+    borderColor: '#000',
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    padding: 10,
+    borderRadius: 20,
+    outline: '0px solid transparent',
   }
 });
