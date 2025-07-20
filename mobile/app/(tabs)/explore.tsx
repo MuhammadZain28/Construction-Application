@@ -154,6 +154,7 @@ export default function TabTwoScreen(Houses: House[]) {
             <FlatList 
               data={paint.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.name.toLowerCase().includes(search.toLowerCase()))}
               keyExtractor={(item) => item.id}
+              scrollEnabled={false}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => {
                   setName(item.name);

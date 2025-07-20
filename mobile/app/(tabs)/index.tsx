@@ -135,6 +135,7 @@ export default function HomeScreen() {
               <FlatList 
                 data={home.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.code.toLowerCase().includes(search.toLowerCase()))}
                 keyExtractor={(item) => item.code}
+                scrollEnabled={false}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => {
                     setName(item.name);

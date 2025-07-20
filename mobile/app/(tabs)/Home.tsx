@@ -158,6 +158,7 @@ const Home: React.FC = () => {
             <FlatList 
               data={material.filter(h => h.product.toLowerCase().includes(search.toLowerCase()))}
               keyExtractor={(item) => item.id}
+              scrollEnabled={false}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => {
                   setProduct(item.product);
