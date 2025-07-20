@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
         </View>
         <View style={styles.top}>
           <View
-            style={[styles.container, {backgroundColor: 'rgba(245, 195, 58, 1)'}]}>
+            style={[styles.container, {backgroundColor: 'rgba(245, 174, 22, 1)'}]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -103,8 +103,8 @@ const Dashboard: React.FC = () => {
           
           <View style={styles.table}>
             <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#f9b728ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
-              <MaterialIcons name='bar-chart' size={36}/>
-              <Text style={styles.sectionText}>Overview</Text>
+              <MaterialIcons name='bar-chart' size={36} color={'rgb(255, 255, 255)'}/>
+              <Text style={[styles.sectionText, {color: 'rgb(255, 255, 255)'}]}>Overview</Text>
             </View> 
             <View style={styles.barChart}>
               <View style={styles.x}>
@@ -122,35 +122,63 @@ const Dashboard: React.FC = () => {
                 <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>12</Text>
               </View>
               <View style={styles.chart}>
-                <View style={[styles.bar, {width: 200}]}></View>
-                <View style={[styles.bar, {width: 100}]}></View>
-                <View style={[styles.bar, {width: 400}]}></View>
-                <View style={[styles.bar, {width: 100}]}></View>
-                <View style={[styles.bar, {width: 750}]}></View>
-                <View style={[styles.bar, {width: 500}]}></View>
-                <View style={[styles.bar, {width: 700}]}></View>
-                <View style={[styles.bar, {width: 500}]}></View>
-                <View style={[styles.bar, {width: 600}]}></View>
-                <View style={[styles.bar, {width: 400}]}></View>
-                <View style={[styles.bar, {width: 700}]}></View>
-                <View style={[styles.bar, {width: 300}]}></View>
+                <View style={[styles.bar, {width: 200}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 100}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 400}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 100}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 750}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 500}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 700}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 500}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 600}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 400}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 700}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
+                <View style={[styles.bar, {width: 300}]}>
+                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                </View>
               </View>
             </View>
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
             <View style={styles.sidebar}>
-              <Text style={styles.sectionText}>🏗️ &nbsp; Material</Text>
-              <Text style={styles.cardtext}>Remaining</Text>
-              <Text style={styles.cardnumber}>0</Text>
-              <Text style={styles.cardtext}>Used</Text>
-              <Text style={styles.cardnumber}>0</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#be28f9ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
+                <MaterialIcons name='construction' size={36} color={'rgb(255, 255, 255)'}/>
+                <Text style={styles.sectionText}> Material</Text>
+              </View>
             </View>
             <View style={styles.sidebar}>
-              <Text style={styles.sectionText}>🎨 &nbsp; Paints</Text>
-              <Text style={styles.cardtext}>Remaining</Text>
-              <Text style={styles.cardnumber}>0</Text>
-              <Text style={styles.cardtext}>Used</Text>
-              <Text style={styles.cardnumber}>0</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#2836f9ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
+                <MaterialIcons name='format-paint' size={36} color={'rgb(255, 255, 255)'}/>
+                <Text style={styles.sectionText}> Paints</Text>
+              </View>
+              <View style={styles.pieChart}>
+                <View style={[styles.slice, {borderLeftWidth: 10, borderRightWidth: 10,}]} />
+                <View style={[styles.pie]} >
+                  
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -229,7 +257,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     backgroundColor: '#ffffff',
-    minWidth: 340,
+    width: 340,
     borderRadius: 10,
     padding: 0,
     shadowColor: '#000',
@@ -262,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 2,
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: 'rgb(255, 255, 255)',
   },
   cardtext: {
     flex: 1,  
@@ -299,5 +327,40 @@ const styles = StyleSheet.create({
   x: {
     gap: 15,
   },
+  pieChart: {
+    position: 'relative',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pie: {
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    borderColor: 'rgba(31, 103, 0, 1)',
+    borderWidth: 20,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerPie: {
+    width: 110,
+    height: 110,
+    borderRadius: 75,
+    borderColor: 'rgba(244, 20, 8, 1)',
+    borderWidth: 20,
+    backgroundColor: '#ffffffff',
+  },
+  slice: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    borderTopWidth: 170,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#ffffffff',
+    zIndex: 1,
+  }
 });
 
