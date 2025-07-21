@@ -1,59 +1,174 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Modal, TextInput, FlatList, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, FontAwesome6 } from '@expo/vector-icons';
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useDataContext } from './DataContext';
+import { House, Wallets } from '../Class/App';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+
 export default function Wallet() {
+  const { houses } = useDataContext();
   const [card, setCard] = React.useState(false);
   const [created, setCreated] = React.useState(false);
   const [recordVisible, setRecordVisible] = React.useState(false);  
+  const [transactionVisible, setTransactionVisible] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+  const [searchData, setSearchData] = React.useState('');
+  const [house, setHouse] = React.useState<House[]>([]);
+  const [home, setHome] = React.useState<string>('');
+  const [isDropdownVisible, setDropdownVisible] = React.useState(false);
+  const [showDate, setShowDate] = React.useState(false);
+  const [date, setDate] = React.useState<Date>(new Date());
+  const [mobile, setMobile] = React.useState<boolean>(false);
+  const [wallets, setWallets] = React.useState<Wallets[]>([]);  
+  const [cash, setCash] = React.useState<number>(0);
+  const [name, setName] = React.useState<string>('');
+  const [id, setId] = React.useState<string>('');
+  const [showWallets, setShowWallets] = React.useState<boolean>(false);
+  const [reason, setReason] = React.useState<string>('');
+  const [index, setIndex] = React.useState<number>(0);
+  const [showReasons, setShowReasons] = React.useState<boolean>(false);
+  const [type, setType] = React.useState<'In' | 'Out'>('In');
+  const transactionReasons = [
+  // Income-Related
+  "Sale",
+  "Payment Received",
+  "Refund Received",
+  "Bonus",
+  "Interest Income",
+  "Investment Return",
+
+  // Expense-Related
+  "Purchase",
+  "Bill Payment",
+  "Rent",
+  "Utilities",
+  "Salary Payment",
+  "Refund Issued",
+  "Maintenance",
+  "Transportation",
+  "Marketing",
+  "Subscription",
+
+  // Transfer/Adjustment
+  "Fund Transfer",
+  "Cash Deposit",
+  "Cash Withdrawal",
+  "Internal Adjustment",
+  "Currency Exchange",
+
+  // Inventory/Material Usage
+  "Stock Purchase",
+  "Stock Sale",
+  "Damaged Goods",
+  "Returned Items",
+  "Sample Distribution",
+
+  // Custom/Other
+  "Miscellaneous",
+  "Donation",
+  "Correction",
+  "Penalty",
+  "Commission",
+  "Tax Payment"
+];
+  React.useEffect(() => {
+    const fetch = () => {
+      setHouse(houses);
+    }
+
+    fetch();
+  }, [houses]);
+
+  const onChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDate(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
+  React.useEffect(() => {
+    const check = () => {
+      if (Platform.OS === 'web') {
+        setMobile(false);
+      }
+    }
+
+    check();
+  }, []);
+
+  const handleHouseSelect = (code: string) => {
+    setHome(code);
+    setDropdownVisible(false);
+  };
+
+  const add = async () => {
+    if (home === '') {
+      Alert.alert('Please select a house');
+      return;
+    }
+    try {
+      //const n = await Wallets.save(name, home, cash, date.toISOString());
+      setId('2');
+      setWallets(prev => [...prev, new Wallets(id, name, home, cash, date.toISOString())]);
+      setCreated(false);
+    } 
+    catch (error) {
+      console.error('Error creating wallet:', error);
+    }
+  }
+
   return (
     <ScrollView>
         <View style={styles.main}>
           <View style={[styles.row, { justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10 }]}>
-            <LinearGradient
-              colors={['#192f5d', '#3b5998', '#4c669f'  ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              locations={[0, 0.5, 1]}
-              style ={styles.card}>
-                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Ionicons name="wallet" size={28} color="#fff" />
-                  <Text style={styles.head}>Wallet</Text>
-                </TouchableOpacity>
-                <View>
-                  <Text style={styles.text}>Rs. 0</Text>
-                </View>
-                <View style={styles.container}>
-                  <View style={[styles.circle1]} />
-                  <View style={[styles.circle2]} />
-                </View> 
-                <TouchableOpacity style={{ position: 'absolute', top: 90, right: 23, backgroundColor: 'rgba(0, 0, 0, 0.5)', paddingInline: 12, paddingBlock: 5, borderRadius: 50, flexDirection: 'row', alignItems: 'center', gap: 5 }} onPress={() => setCard(true)}>
-                  <Ionicons name="add-circle" size={20} color="#fff" />
-                  <Text style={{color: 'rgb(255,255,255)', fontWeight: '700'}}>Cash In</Text>
-                </TouchableOpacity>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
-                  <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
-                    <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly In</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                      <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
-                      <View style={{ backgroundColor: 'rgba(10, 255, 10, 0.52)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
-                        <Ionicons name='arrow-up' size={12} color={'rgb(255, 255,255)'}/>
-                        <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
+            <TouchableOpacity style ={[styles.card, {backgroundColor: 'transparent', zIndex: 1}]}>
+              <LinearGradient
+                colors={['#192f5d', '#3b5998', '#4c669f'  ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                locations={[0, 0.5, 1]}
+                style ={[styles.card, { padding: 20, borderRadius: 10, margin: 0 }]}>
+                  <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onPress={() => setShowWallets(!showWallets)}>
+                    <Ionicons name="wallet" size={28} color="#fff" />
+                    <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
+                  </TouchableOpacity>
+                  <View>
+                    <Text style={styles.text}>Rs. {wallets[index]?.amount}</Text>
+                  </View>
+                  <View style={styles.container}>
+                    <View style={[styles.circle1]} />
+                    <View style={[styles.circle2]} />
+                  </View> 
+                  <TouchableOpacity style={{ position: 'absolute', top: 90, right: 23, backgroundColor: 'rgba(0, 0, 0, 0.5)', paddingInline: 12, paddingBlock: 5, borderRadius: 50, flexDirection: 'row', alignItems: 'center', gap: 5 }} onPress={() => setCard(true)}>
+                    <Ionicons name="add-circle" size={20} color="#fff" />
+                    <Text style={{color: 'rgb(255,255,255)', fontWeight: '700'}}>Cash In</Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
+                    <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
+                      <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly In</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
+                        <View style={{ backgroundColor: 'rgba(10, 255, 10, 0.52)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
+                          <Ionicons name='arrow-up' size={12} color={'rgb(255, 255,255)'}/>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
+                      <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly Out</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
+                        <View style={{ backgroundColor: 'rgba(255, 0, 0, 0.6)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
+                          <Ionicons name='arrow-down' size={12} color={'rgb(255, 255,255)'}/>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
+                        </View>
                       </View>
                     </View>
                   </View>
-                  <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
-                    <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly Out</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                      <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
-                      <View style={{ backgroundColor: 'rgba(255, 0, 0, 0.6)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
-                        <Ionicons name='arrow-down' size={12} color={'rgb(255, 255,255)'}/>
-                        <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-            </LinearGradient>
+              </LinearGradient>
+            </TouchableOpacity>
             <TouchableOpacity style={[styles.card, { width: '100%', justifyContent: 'center', alignItems: 'center' }]} onPress={() => setCreated(true)}>
               <Ionicons name='add' size={36}/>
             </TouchableOpacity>
@@ -61,11 +176,32 @@ export default function Wallet() {
           <View style={styles.body}>
             <View style={styles.row}>
               <Text style={styles.icon}>Transactions</Text>
-              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]}>
+              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => setTransactionVisible(true)}>
                 <Ionicons name='receipt' color={'rgb(255,255,255)'} size={20}></Ionicons>
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Transaction</Text>
               </TouchableOpacity>
             </View>
+            
+        <View style={styles.searchBar}>
+          <TextInput placeholder='Search....' style={styles.searchInput} value={search} onChangeText={setSearch}/>
+          { search.length > 0 &&
+            <TouchableOpacity onPress={() => setSearch("")} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
+          }
+          { search.length > 0 &&
+            <FlatList 
+              data= 'ABC'
+              keyExtractor={(item) => item}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => {
+                }}>
+                  <Text style={{ padding: 10, fontSize: 16 }}>{item}</Text>
+                </TouchableOpacity>
+              )}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+            />
+          }
+        </View>
             <View style={{ gap: 10, marginTop: 10 }}>
               <TouchableOpacity style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]}>
                 <Text style={{fontSize: 16, color: 'rgba(4, 159, 9, 1)', fontWeight: 700}}>Name</Text>
@@ -93,6 +229,27 @@ export default function Wallet() {
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Record</Text>
               </TouchableOpacity>
             </View>
+                
+            <View style={styles.searchBar}>
+              <TextInput placeholder='Search....' style={styles.searchInput} value={searchData} onChangeText={setSearchData}/>
+              { searchData.length > 0 &&
+                <TouchableOpacity onPress={() => setSearchData("")} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
+              }
+              { searchData.length > 0 &&
+                <FlatList 
+                  data= 'ABC'
+                  keyExtractor={(item) => item}
+                  scrollEnabled={false}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => {
+                    }}>
+                      <Text style={{ padding: 10, fontSize: 16 }}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                  style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+                />
+              }
+            </View>
             <View style={{ gap: 10, marginTop: 10 }}>
               <TouchableOpacity style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]}>
                 <View style={[styles.row, { gap: 10 }]}>
@@ -112,6 +269,7 @@ export default function Wallet() {
             </View>
           </View>
         </View>
+
         <Modal
           visible={card}
           transparent={true}
@@ -121,12 +279,36 @@ export default function Wallet() {
           }}>
             <View style={styles.back}>
               <View style={styles.form}>
-                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 20, }}>CASH IN</Text>
+                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 40, }}>CASH IN</Text>
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
                   <TextInput style={[styles.input, {outline: 'none'}]}/>
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
                   <TextInput style={[styles.input, {outline: 'none'}]}/>
-                <TouchableOpacity onPress={() => setCard(false)} style={{width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 213, 0, 1)', borderRadius: 20, padding: 10}}>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
+                { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20,  fontFamily: 'Arial'}}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <Ionicons name="chevron-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+
+                    <DateTimePicker
+                    value={new Date(date)}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
+                  )}
+                </View>
+                }
+                <TouchableOpacity onPress={() => setCard(false)} style={{width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 191, 0, 1)', borderRadius: 20, padding: 10, marginBlock: 20}}>
                   <Text style={styles.text}>Confirm</Text>
                 </TouchableOpacity>
               </View>
@@ -148,17 +330,43 @@ export default function Wallet() {
           }}>
             <View style={styles.back}>
               <View style={styles.form}>
-                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 20, }}>WALLET</Text>
+                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>WALLET</Text>
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
-                <TextInput style={[styles.input, {outline: 'none'}]}/>
+                <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash In</Text>
-                <TextInput style={[styles.input, {outline: 'none'}]}/>
+                <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(text) => setCash(parseInt(text))} keyboardType='numeric'/>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
+                { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <Ionicons name="chevron-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+
+                    <DateTimePicker
+                    value={new Date(date)}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
+                  )}
+                </View>
+                }
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>House</Text>
-                <TouchableOpacity style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]}>
-                  <Text style={{color: 'rgb(0,0,0)'}}>Select House</Text>
+                <TouchableOpacity style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]} onPress={() => setDropdownVisible(true)}>
+                  <Text style={{color: 'rgb(0,0,0)'}}>
+                    { house.find(h => h.code === home)?.name || 'All Houses'}
+                  </Text>
                   <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setCreated(false)} style={{width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 213, 0, 1)', borderRadius: 20, padding: 10}}>
+                <TouchableOpacity onPress={() => add()} style={{width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 187, 0, 1)', borderRadius: 20, padding: 10, marginTop: 20}}>
                   <Text style={styles.text}>Confirm</Text>
                 </TouchableOpacity>
               </View>
@@ -180,19 +388,48 @@ export default function Wallet() {
           }}>
             <View style={styles.back}>
               <View style={styles.form}>
-                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 20, }}>WALLET</Text>
+                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Records</Text>
                 <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
                 <TextInput style={[styles.input, {outline: 'none'}]}/>
-                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash In</Text>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
                 <TextInput style={[styles.input, {outline: 'none'}]}/>
-                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>House</Text>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
                 <TouchableOpacity style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]}>
-                  <Text style={{color: 'rgb(0,0,0)'}}>Select House</Text>
+                  <Text style={{color: 'rgb(0,0,0)'}}>Select Reason</Text>
                   <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setRecordVisible(false)} style={{width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 213, 0, 1)', borderRadius: 20, padding: 10}}>
-                  <Text style={styles.text}>Confirm</Text>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
+                { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <Ionicons name="chevron-down" style={{fontSize: 20}}/>
                 </TouchableOpacity>
+                  {showDate && (
+
+                    <DateTimePicker
+                    value={new Date(date)}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
+                  )}
+                </View>
+                }
+                <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
+                  <TouchableOpacity onPress={() => setRecordVisible(false)} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                    <Text style={styles.text}>Out</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setRecordVisible(false)} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                    <Text style={styles.text}>In</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <TouchableOpacity 
@@ -202,6 +439,160 @@ export default function Wallet() {
               </TouchableOpacity>
             </View>
         </Modal>
+        
+        <Modal
+          visible={transactionVisible}
+          transparent={true}
+          animationType='fade'
+          onRequestClose={()=>{
+            setTransactionVisible(false);
+          }}>
+            <View style={styles.back}>
+              <View style={styles.form}>
+                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Transaction</Text>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
+                <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash In</Text>
+                <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(e) => setCash(parseInt(e))}/>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
+                <View style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10}]}>
+                  <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={reason} onChangeText={(e) => {setReason(e); setShowReasons(true)}}/>
+                  <TouchableOpacity>
+                    <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
+                  </TouchableOpacity>
+                  { (reason.length > 0 && showReasons) &&
+                    <FlatList
+                          data={transactionReasons.filter(t => t.toLowerCase().includes(reason.toLowerCase()))}
+                          keyExtractor={(item) => item}
+                          style={{ position: 'absolute', width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, left: 0, zIndex: 100, shadowColor: '#000', height: 250,shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+                          scrollEnabled={true}
+                          renderScrollComponent={(props) => <ScrollView {...props} />}
+                          renderItem={({ item }) => (
+                            <TouchableOpacity onPress={() => {
+                              setReason(item);
+                              setShowReasons(false);
+                            }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
+                              { item === reason ?
+                              <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                              :
+                              <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                              }
+                              <Text style={{fontSize: 18}}>{item}</Text>
+                            </TouchableOpacity>
+                          )}
+                      />
+                  }
+                </View>
+                <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
+                { !mobile ?
+
+                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                  :
+                  <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                  onPress={() => setShowDate(true)}>
+                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                    {date.toLocaleDateString()}
+                  </Text>
+                  <Ionicons name="chevron-down" style={{fontSize: 20}}/>
+                </TouchableOpacity>
+                  {showDate && (
+
+                    <DateTimePicker
+                    value={new Date(date)}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
+                  )}
+                </View>
+                }
+                <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
+                  <TouchableOpacity onPress={() => setType("Out")} style={{width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, padding: 5}}>
+                    <Text style={styles.text}>Out</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setType("In")} style={{width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(54, 163, 0, 1)', borderRadius: 20, padding: 5}}>
+                    <Text style={styles.text}>In</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <TouchableOpacity 
+              onPress={() =>{ setTransactionVisible(false) }} 
+              style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center',}}>
+                <Ionicons name='close' style={{ color: '#ffffffff', textAlign: 'center', fontSize: 32, padding: 10 }}/>
+              </TouchableOpacity>
+            </View>
+        </Modal>
+          
+      <Modal
+        visible={isDropdownVisible}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() => 
+          setDropdownVisible(false)
+        }>
+          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleHouseSelect("")}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>Home</Text>
+              </TouchableOpacity>
+
+
+              <FlatList
+                    data={house}
+                    keyExtractor={(item) => item.name}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
+                        { item.code === home ?
+                        <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                        :
+                        <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                        }
+                        <Text style={{fontSize: 18}}>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+              </View>
+          </View>
+      </Modal>
+
+      <Modal
+        visible={showWallets}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() =>
+          setShowWallets(false)
+        }>
+          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => {
+                        setId('main');
+                        setIndex(wallets.findIndex(w => w.id === id));
+                        setShowWallets(false)}} style={{ padding: 10, borderBottomColor: '#ddd', borderBottomWidth: 1 }}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>Wallets</Text>
+              </TouchableOpacity>
+              <FlatList
+                    data={wallets}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity onPress={() => {
+                        setId(item.id);
+                        setIndex(wallets.findIndex(w => w.id === item.id));
+                        setShowWallets(false);
+                      }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
+                        { item.id === id ?
+                        <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                        :
+                        <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                        }
+                        <Text style={{fontSize: 18}}>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+            </View>
+          </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -212,10 +603,9 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#a6a6a7ff',
-    padding: 20,
     borderRadius: 10,
-    margin: 10,
     maxWidth: 450,
+    margin: 10,
     width: '100%',
     height: 225,
     gap: 20,
@@ -303,6 +693,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: '100%',
+    gap: 20,
   }, 
   input: {
     height: 40,
@@ -312,5 +703,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     width: '100%',
     outline: 'none',
-  }
+  }, 
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#f1f1f1ff',
+    marginInline: 30,
+    marginBottom: 10,
+    maxWidth: 350,
+    borderColor: '#000',
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    padding: 10,
+    borderRadius: 20,
+    outline: '0px solid transparent',
+  },
+  dropDown: {
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    borderRadius: 10,
+    width: '80%',
+    maxWidth: 350,
+    height: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    padding: 10,
+    zIndex: 100,
+  },
 })

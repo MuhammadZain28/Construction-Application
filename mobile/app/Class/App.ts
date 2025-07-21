@@ -251,3 +251,144 @@ export class Paints {
         });
     }
 }
+
+export class Wallets {
+    id: string;
+    name: string;
+    house: string;
+    amount: number;
+    date: string;
+
+    constructor(id: string, name: string, house: string, amount: number, date = new Date().toISOString().split('T')[0]) {
+        this.id = id;
+        this.name = name;
+        this.house = house;
+        this.amount = amount;
+        this.date = date;
+    }
+
+    static async save(name: string, house: string, amount: number, date: string): Promise<string> {
+        const db = await Database();
+        const walletsRef = ref(db, 'wallets');
+        const newWalletRef = push(walletsRef);
+        await set(newWalletRef, {
+            name: name,
+            house: house,
+            amount: amount,
+            date: date
+        });
+        return newWalletRef.key; 
+    }
+
+    static async getAllWallets(): Promise<Wallets[]> {
+        const db = await Database();
+        const walletsRef = ref(db, 'wallets');
+        try {
+            const snapshot = await get(walletsRef);
+            const wallets: Wallets[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const wallet = new Wallets(
+                        childSnapshot.key,
+                        data.name,
+                        data.house,
+                        data.amount,
+                        data.date
+                    );
+                    wallets.push(wallet);
+                });
+            }
+            return wallets;
+        } catch (error) {
+            console.error('Error fetching wallets:', error);
+            return [];
+        }
+    }
+
+    static async UpdateWallet(id: string, name: string, house: string, amount: number, date: string): Promise<void> {
+        const db = await Database();
+        const walletRef = ref(db, `wallets/${id}`);
+        await update(walletRef, {
+            name: name,
+            house: house,
+            amount: amount,
+            date: date
+        });
+    }
+
+    static async UpdateAmount(id: string, amount: number): Promise<void> {
+        const db = await Database();
+        const walletRef = ref(db, `wallets/${id}`);
+        await update(walletRef, {
+            amount: amount
+        });
+    }
+
+    static async deleteWallet(id: string): Promise<void> {
+        const db = await Database();
+        const walletRef = ref(db, `wallets/${id}`);
+        await remove(walletRef);
+    }
+}
+
+export class Transactions {
+    id: string;
+    wallet: string;
+    amount: number;
+    type: 'In' | 'Out';
+    date: string;
+
+    constructor(id: string, wallet: string, amount: number, type: 'In' | 'Out', date = new Date().toISOString().split('T')[0]) {
+        this.id = id;
+        this.wallet = wallet;
+        this.amount = amount;
+        this.type = type;
+        this.date = date;
+    }
+
+    static async save(wallet: string, amount: number, type: 'In' | 'Out', date: string): Promise<string> {
+        const db = await Database();
+        const transactionsRef = ref(db, 'transactions');
+        const newTransactionRef = push(transactionsRef);
+        await set(newTransactionRef, {
+            wallet: wallet,
+            amount: amount,
+            type: type,
+            date: date
+        });
+        return newTransactionRef.key; 
+    }
+
+    static async getAllTransactions(): Promise<Transactions[]> {
+        const db = await Database();
+        const transactionsRef = ref(db, 'transactions');
+        try {
+            const snapshot = await get(transactionsRef);
+            const transactions: Transactions[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const transaction = new Transactions(
+                        childSnapshot.key,
+                        data.wallet,
+                        data.amount,
+                        data.type,
+                        data.date
+                    );
+                    transactions.push(transaction);
+                });
+            }
+            return transactions;
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            return [];
+        }
+    }
+
+    static async deleteTransaction(id: string): Promise<void> {
+        const db = await Database();
+        const transactionRef = ref(db, `transactions/${id}`);
+        await remove(transactionRef);
+    }
+}
