@@ -1,9 +1,10 @@
 import React from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-const val = 2.670353755551324252;
+import Svg, {Circle} from 'react-native-svg';
+  
 const Dashboard: React.FC = () => {
-  const [piePiece, setPiePiece] = React.useState(5);
+
   return (
     <ScrollView>
       <View style={styles.main}>
@@ -165,19 +166,12 @@ const Dashboard: React.FC = () => {
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
             <View style={styles.sidebar}>
-              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#be28f9ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
-                <MaterialIcons name='construction' size={36} color={'rgb(255, 255, 255)'}/>
-                <Text style={styles.sectionText}> Material</Text>
-              </View>
-            </View>
-            <View style={styles.sidebar}>
               <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#2836f9ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
                 <MaterialIcons name='format-paint' size={36} color={'rgb(255, 255, 255)'}/>
                 <Text style={styles.sectionText}> Paints</Text>
               </View>
               <View style={styles.pieChart}>
-                <View style={[styles.slice, {borderLeftWidth: piePiece*val, borderRightWidth: piePiece*val, borderTopRightRadius: 8.5, borderTopLeftRadius: 8.5}]} />
-                <View style={[styles.pie]}/>
+                <CircularProgress radius={85} stroke={10} progress={50}/>
               </View>
             </View>
           </View>
@@ -187,6 +181,42 @@ const Dashboard: React.FC = () => {
   );
 };
 export default Dashboard;
+
+const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
+    const normalizedRadius = radius - stroke / 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (circumference * progress) / 100;
+    return(
+    <Svg height={radius * 2} width={radius * 2} style={{transform: [{rotate: '180deg'}]}}>
+      <Circle
+        stroke="#e6e6e6"
+        fill="none"
+        cx={radius}
+        cy={radius}
+        r={normalizedRadius}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        rotation="-90"
+        originX={radius}
+        originY={radius}
+      />
+      <Circle
+        stroke="#3498db"
+        fill="none"
+        cx={radius}
+        cy={radius}
+        r={normalizedRadius}
+        strokeWidth={stroke}
+        strokeDasharray={`${circumference} ${circumference}`}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+        rotation="-90"
+        originX={radius}
+        originY={radius}
+      />
+    </Svg>
+  )}
+export { CircularProgress };
 const styles = StyleSheet.create({
   header: {
     position: 'relative',
