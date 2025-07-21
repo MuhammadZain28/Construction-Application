@@ -1,7 +1,9 @@
 import React from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+const val = 2.670353755551324252;
 const Dashboard: React.FC = () => {
+  const [piePiece, setPiePiece] = React.useState(5);
   return (
     <ScrollView>
       <View style={styles.main}>
@@ -174,10 +176,8 @@ const Dashboard: React.FC = () => {
                 <Text style={styles.sectionText}> Paints</Text>
               </View>
               <View style={styles.pieChart}>
-                <View style={[styles.slice, {borderLeftWidth: 10, borderRightWidth: 10,}]} />
-                <View style={[styles.pie]} >
-                  
-                </View>
+                <View style={[styles.slice, {borderLeftWidth: piePiece*val, borderRightWidth: piePiece*val, borderTopRightRadius: 8.5, borderTopLeftRadius: 8.5}]} />
+                <View style={[styles.pie]}/>
               </View>
             </View>
           </View>
@@ -354,12 +354,11 @@ const styles = StyleSheet.create({
   },
   slice: {
     position: 'absolute',
-    width: 0,
-    height: 0,
-    borderTopWidth: 170,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: '#ffffffff',
+    width: 20,
+    backgroundColor: 'rgba(251, 25, 25, 1)',
+    height: 100,
+    top: 5,
+    borderTopColor: '#fcd6d6ff',
     zIndex: 1,
   }
 });
