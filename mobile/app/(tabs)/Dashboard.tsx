@@ -103,11 +103,10 @@ const Dashboard: React.FC = () => {
           </View>
         </View>
         <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
-          
           <View style={styles.table}>
-            <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#f9b728ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
-              <MaterialIcons name='bar-chart' size={36} color={'rgb(255, 255, 255)'}/>
-              <Text style={[styles.sectionText, {color: 'rgb(255, 255, 255)'}]}>Overview</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000000ff'}}>
+              <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
+              <Text style={[styles.sectionText, {color: 'rgba(0, 0, 0, 1)'}]}>Overview</Text>
             </View> 
             <View style={styles.barChart}>
               <View style={styles.x}>
@@ -126,52 +125,76 @@ const Dashboard: React.FC = () => {
               </View>
               <View style={styles.chart}>
                 <View style={[styles.bar, {width: 200}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 100}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 400}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 100}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 750}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 500}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 700}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 500}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 600}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 400}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 700}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
                 <View style={[styles.bar, {width: 300}]}>
-                  <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)'}}>0</Text>
+                  <Text style={styles.graphText}>0</Text>
                 </View>
               </View>
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, marginLeft: 35, width: '100%'}}>
+              <Text >0</Text>
+              <Text >0</Text>
+              <Text >0</Text>
+              <Text >0</Text>
+              <Text >0</Text>
             </View>
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
             <View style={styles.sidebar}>
-              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#2836f9ff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000'}}>
-                <MaterialIcons name='format-paint' size={36} color={'rgb(255, 255, 255)'}/>
-                <Text style={styles.sectionText}> Paints</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderRadius: 10, borderBottomWidth: 2, borderColor: 'rgba(1, 62, 0, 1)', width: '40%'}}>
+                <MaterialIcons name='format-paint' size={36} color={'rgba(0, 0, 0, 1)'}/>
+                <Text style={styles.sectionText}> Products</Text>
               </View>
               <View style={styles.pieChart}>
-                <CircularProgress radius={85} stroke={10} progress={50}/>
+                <View style={styles.pie}>
+                  <CircularProgress radius={95} stroke={10} progress={10}></CircularProgress>
+                  <Text style={styles.pieText}>Materials</Text>
+                </View>
+                <View style={styles.pie}>
+                  <CircularProgress radius={75} stroke={10} progress={10}></CircularProgress>
+                  <Text style={[styles.pieText, {bottom: 35}]}>Paints</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginLeft: 160, marginTop: -50, gap: 5}}>
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>10%</Text>
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>10%</Text>
+                </View> 
+              </View>
+              <View style={{display: 'flex', flex: 1}}>
+                <Text>Materials</Text>
+              </View>
+              <View>
+                <Text>Paints</Text>
               </View>
             </View>
           </View>
@@ -183,11 +206,18 @@ const Dashboard: React.FC = () => {
 export default Dashboard;
 
 const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
-    const normalizedRadius = radius - stroke / 2;
-    const circumference = normalizedRadius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (circumference * progress) / 100;
-    return(
-    <Svg height={radius * 2} width={radius * 2} style={{transform: [{rotate: '180deg'}]}}>
+  progress *= 0.75;
+  const normalizedRadius = radius - stroke / 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+
+  const strokeDashoffset = circumference - (circumference * progress) / 100;
+  const percentage = circumference - (circumference * 75) / 100;
+  return (
+    <Svg
+      height={radius * 2}
+      width={radius * 2}
+      style={{ transform: [{ rotateY: '180deg' }] }} 
+    >
       <Circle
         stroke="#e6e6e6"
         fill="none"
@@ -195,13 +225,16 @@ const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
         cy={radius}
         r={normalizedRadius}
         strokeWidth={stroke}
+        strokeDasharray={`${circumference} ${circumference}`}
+        strokeDashoffset={percentage}
         strokeLinecap="round"
         rotation="-90"
         originX={radius}
         originY={radius}
       />
+
       <Circle
-        stroke="#3498db"
+        stroke="#3b9a08ff"
         fill="none"
         cx={radius}
         cy={radius}
@@ -215,7 +248,9 @@ const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
         originY={radius}
       />
     </Svg>
-  )}
+  );
+};
+
 export { CircularProgress };
 const styles = StyleSheet.create({
   header: {
@@ -287,7 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     backgroundColor: '#ffffff',
-    width: 340,
+    minWidth: 350,
     borderRadius: 10,
     padding: 0,
     shadowColor: '#000',
@@ -302,7 +337,7 @@ const styles = StyleSheet.create({
   sidebar: {
     position: 'relative',
     flex: 1,
-    height: 'auto',
+    minWidth: 350,
     flexDirection: 'column',
     backgroundColor: '#ffffff',
     padding: 0,
@@ -320,7 +355,7 @@ const styles = StyleSheet.create({
     flex: 2,
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'rgb(255, 255, 255)',
+    color: 'rgba(0, 0, 0, 1)',
   },
   cardtext: {
     flex: 1,  
@@ -349,6 +384,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   bar: {
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#ffbf00ff',
     borderRadius: 10,
     height: 25,
@@ -365,30 +402,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pie: {
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    borderColor: 'rgba(31, 103, 0, 1)',
-    borderWidth: 20,
-    display: 'flex',
+    position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  innerPie: {
-    width: 110,
-    height: 110,
-    borderRadius: 75,
-    borderColor: 'rgba(244, 20, 8, 1)',
-    borderWidth: 20,
-    backgroundColor: '#ffffffff',
+  pieText: {
+    color: '#000000ff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
-  slice: {
-    position: 'absolute',
-    width: 20,
-    backgroundColor: 'rgba(251, 25, 25, 1)',
-    height: 100,
-    top: 5,
-    borderTopColor: '#fcd6d6ff',
-    zIndex: 1,
+  graphText: {
+    color: 'rgba(255, 255, 255, 1)',
+    fontSize: 12,
+    fontWeight: 'bold',
   }
 });
