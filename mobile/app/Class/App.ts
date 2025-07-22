@@ -317,11 +317,12 @@ export class Wallets {
         });
     }
 
-    static async UpdateAmount(id: string, amount: number): Promise<void> {
+    static async UpdateAmount(id: string, amount: number, date: string): Promise<void> {
         const db = await Database();
         const walletRef = ref(db, `wallets/${id}`);
         await update(walletRef, {
-            amount: amount
+            amount: amount,
+            date: date
         });
     }
 
@@ -338,23 +339,34 @@ export class Transactions {
     amount: number;
     type: 'In' | 'Out';
     date: string;
+    reason?: string;
+    name: string;
 
-    constructor(id: string, wallet: string, amount: number, type: 'In' | 'Out', date = new Date().toISOString().split('T')[0]) {
+    constructor(id: string, wallet: string, amount: number, type: 'In' | 'Out', date = new Date().toISOString().split('T')[0], name: string, reason?: string, ) {
         this.id = id;
         this.wallet = wallet;
         this.amount = amount;
         this.type = type;
         this.date = date;
+        this.reason = reason;
+        this.name = name;
     }
 
-    static async save(wallet: string, amount: number, type: 'In' | 'Out', date: string): Promise<string> {
+    static async save(wallet: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string, name?: string ): Promise<string> {
         const db = await Database();
         const transactionsRef = ref(db, 'transactions');
         const newTransactionRef = push(transactionsRef);
+        const walletRef = ref(db, `wallets/${wallet}`);
         await set(newTransactionRef, {
             wallet: wallet,
             amount: amount,
             type: type,
+            date: date,
+            reason: reason,
+            name: name
+        });
+        await update(walletRef, {
+            amount: cash,
             date: date
         });
         return newTransactionRef.key; 
@@ -374,7 +386,9 @@ export class Transactions {
                         data.wallet,
                         data.amount,
                         data.type,
-                        data.date
+                        data.date,
+                        data.name,
+                        data.reason
                     );
                     transactions.push(transaction);
                 });
@@ -390,5 +404,105 @@ export class Transactions {
         const db = await Database();
         const transactionRef = ref(db, `transactions/${id}`);
         await remove(transactionRef);
+    }
+    static async update(id: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string, name?: string): Promise<void> {
+        const db = await Database();
+        const transactionRef = ref(db, `transactions/${id}`);
+        const walletRef = ref(db, `wallets/${wallet}`);
+        const currentTransaction = await get(transactionRef);
+        if (currentTransaction.exists()) {
+            const currentData = currentTransaction.val();
+            const Amount = currentData.type === 'In' ? currentData.amount : -currentData.amount;
+            const currentAmount = type === 'In' ? Amount + amount : Amount - amount;
+            await update(walletRef, {
+                amount: currentAmount,
+                date: date
+            });
+        }
+        await update(transactionRef, {
+            wallet: wallet,
+            amount: amount,
+            type: type,
+            date: date,
+            reason: reason,
+            name: name
+        });
+    }
+}
+
+export class Records {
+    id: string;
+    name: string;
+    wallet: string;
+    amount: number;
+    type: 'In' | 'Out';
+    date: string;
+    reason?: string;
+    constructor(id: string, name: string, wallet: string, amount: number, type: 'In' | 'Out', date = new Date().toISOString().split('T')[0], reason?: string) {
+        this.id = id;
+        this.name = name;
+        this.wallet = wallet;
+        this.amount = amount;
+        this.type = type;
+        this.date = date;
+        this.reason = reason;
+    }
+    static async save(name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<string> {
+        const db = await Database();
+        const recordsRef = ref(db, 'records');
+        const newRecordRef = push(recordsRef);
+        await set(newRecordRef, {
+            name: name,
+            wallet: wallet,
+            amount: amount,
+            type: type,
+            date: date,
+            reason: reason
+        });
+        return newRecordRef.key; 
+    }
+    static async getAllRecords(): Promise<Records[]> {
+        const db = await Database();
+        const recordsRef = ref(db, 'records');
+        try {
+            const snapshot = await get(recordsRef);
+            const records: Records[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const record = new Records(
+                        childSnapshot.key,
+                        data.name,
+                        data.wallet,
+                        data.amount,
+                        data.type,
+                        data.date,
+                        data.reason
+                    );
+                    records.push(record);
+                });
+            }
+            return records;
+        } catch (error) {
+            console.error('Error fetching records:', error);
+            return [];
+        }
+    }
+    static async deleteRecord(id: string): Promise<void> {
+        const db = await Database();
+        const recordRef = ref(db, `records/${id}`);
+        await remove(recordRef);
+    }
+    static async UpdateRecord(id: string, name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<void> {
+        const db = await Database();
+        const recordRef = ref(db, `records/${id}`);
+        await update(recordRef, {
+            name: name,
+            wallet: wallet,
+            amount: amount,
+            type: type,
+            date: date,
+            reason: reason
+        });
     }
 }
