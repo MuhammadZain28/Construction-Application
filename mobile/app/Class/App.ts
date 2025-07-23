@@ -367,7 +367,6 @@ export class Transactions {
         });
         await update(walletRef, {
             amount: cash,
-            date: date
         });
         return newTransactionRef.key; 
     }
@@ -403,22 +402,28 @@ export class Transactions {
     static async deleteTransaction(id: string): Promise<void> {
         const db = await Database();
         const transactionRef = ref(db, `transactions/${id}`);
+        const transactionData = await get(transactionRef);
+        if (transactionData.exists()) {
+            const data = transactionData.val();
+            const walletRef = ref(db, `wallets/${data.wallet}`);
+            const currentWallet = await get(walletRef);
+            if (currentWallet.exists()) {
+                const currentAmount = currentWallet.val().amount;
+                const newAmount = data.type === 'In' ? currentAmount - data.amount : currentAmount + data.amount;
+                await update(walletRef, {
+                    amount: newAmount,
+                });
+            }
+        }
         await remove(transactionRef);
     }
-    static async update(id: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string, name?: string): Promise<void> {
+    static async update(id: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string, name?: string): Promise<void> {
         const db = await Database();
         const transactionRef = ref(db, `transactions/${id}`);
         const walletRef = ref(db, `wallets/${wallet}`);
-        const currentTransaction = await get(transactionRef);
-        if (currentTransaction.exists()) {
-            const currentData = currentTransaction.val();
-            const Amount = currentData.type === 'In' ? currentData.amount : -currentData.amount;
-            const currentAmount = type === 'In' ? Amount + amount : Amount - amount;
-            await update(walletRef, {
-                amount: currentAmount,
-                date: date
-            });
-        }
+        await update(walletRef, {
+            amount: cash,
+        });
         await update(transactionRef, {
             wallet: wallet,
             amount: amount,
@@ -447,10 +452,14 @@ export class Records {
         this.date = date;
         this.reason = reason;
     }
-    static async save(name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<string> {
+    static async save(name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string): Promise<string> {
         const db = await Database();
         const recordsRef = ref(db, 'records');
         const newRecordRef = push(recordsRef);
+        const walletRef = ref(db, `wallets/${wallet}`);
+        await update(walletRef, {
+            amount: cash
+        });
         await set(newRecordRef, {
             name: name,
             wallet: wallet,
@@ -491,11 +500,28 @@ export class Records {
     static async deleteRecord(id: string): Promise<void> {
         const db = await Database();
         const recordRef = ref(db, `records/${id}`);
+        const recordData = await get(recordRef);
+        if (recordData.exists()) {
+            const data = recordData.val();
+            const walletRef = ref(db, `wallets/${data.wallet}`);
+            const currentWallet = await get(walletRef);
+            if (currentWallet.exists()) {
+                const currentAmount = currentWallet.val().amount;
+                const newAmount = data.type === 'In' ? currentAmount - data.amount : currentAmount + data.amount;
+                await update(walletRef, {
+                    amount: newAmount,
+                });
+            }
+        }
         await remove(recordRef);
     }
-    static async UpdateRecord(id: string, name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<void> {
+    static async UpdateRecord(id: string, name: string, wallet: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string): Promise<void> {
         const db = await Database();
         const recordRef = ref(db, `records/${id}`);
+        const walletRef = ref(db, `wallets/${wallet}`);
+        await update(walletRef, {
+            amount: amount,
+        });
         await update(recordRef, {
             name: name,
             wallet: wallet,
