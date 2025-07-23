@@ -1,16 +1,18 @@
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
+import {View, Text, StyleSheet, ScrollView, Platform} from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, {Circle} from 'react-native-svg';
   
 const Dashboard: React.FC = () => {
-
+  const [mobile, setMobile] = React.useState(false);
   return (
+    React.useEffect(() => {
+      if (Platform.OS === 'android') {
+        setMobile(true);
+      }
+    }, []),
     <ScrollView>
       <View style={styles.main}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Dashboard</Text>
-        </View>
         <View style={styles.top}>
           <View
             style={[styles.container, {backgroundColor: 'rgba(245, 174, 22, 1)'}]}>
@@ -104,75 +106,152 @@ const Dashboard: React.FC = () => {
         </View>
         <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
           <View style={styles.table}>
-            <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderRadius: 10, borderBottomWidth: 2, borderColor: '#000000ff'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderBottomLeftRadius: 20, borderBottomWidth: 2, borderColor: '#000000ff'}}>
               <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
               <Text style={[styles.sectionText, {color: 'rgba(0, 0, 0, 1)'}]}>Overview</Text>
             </View> 
             <View style={styles.barChart}>
               <View style={styles.x}>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>1</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>2</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>3</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>4</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>5</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>6</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>7</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>8</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>9</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>10</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>11</Text>
-                <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>12</Text>
-              </View>
-              <View style={styles.chart}>
-                <View style={[styles.bar, {width: 200}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Jan</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 100}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Feb</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 400}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Mar</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 100}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Apr</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 750}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>May</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 500}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Jun</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 700}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Jul</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 500}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Aug</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 600}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Sep</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 400}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Oct</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 700}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Nov</Text>
+                  <Text>-</Text>
                 </View>
-                <View style={[styles.bar, {width: 300}]}>
-                  <Text style={styles.graphText}>0</Text>
+                <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
+                  <Text style={{height: 20, justifyContent: 'center', alignItems: 'center'}}>Dec</Text>
+                  <Text>-</Text>
                 </View>
               </View>
-            </View>
-            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, marginLeft: 35, width: '100%'}}>
-              <Text >0</Text>
-              <Text >0</Text>
-              <Text >0</Text>
-              <Text >0</Text>
-              <Text >0</Text>
+              <View style={{width: mobile ? '95%' : '90%'}}>
+                <View style={styles.chart}>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '75%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '25%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '50%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '15%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '95%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '65%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '25%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '80%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '60%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '30%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '10%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.bar, {width: '50%'}]}>
+                      <Text style={styles.graphText}>0</Text>
+                    </View>
+                  </View> 
+                </View>
+                <View style={{flexDirection: 'row', paddingHorizontal: 0, justifyContent: 'space-between', backgroundColor: '#ffffffff'}}>
+                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
+                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                    <Text >10000</Text>
+                  </View>
+                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
+                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                    <Text >10000</Text>
+                  </View>
+                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
+                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                    <Text >10000</Text>
+                  </View>
+                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
+                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                    <Text >10000</Text>
+                  </View>
+                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
+                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                    <Text >10000</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
           <View style={{flex: 1, gap: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
             <View style={styles.sidebar}>
-              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderRadius: 10, borderBottomWidth: 2, borderColor: 'rgba(1, 62, 0, 1)', width: '40%'}}>
+              <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderBottomLeftRadius: 20, borderBottomWidth: 2, borderColor: 'rgba(0, 0, 0, 1)', width: '40%'}}>
                 <MaterialIcons name='format-paint' size={36} color={'rgba(0, 0, 0, 1)'}/>
                 <Text style={styles.sectionText}> Products</Text>
               </View>
@@ -190,17 +269,31 @@ const Dashboard: React.FC = () => {
                   <Text style={{fontSize: 12, fontWeight: 'bold'}}>10%</Text>
                 </View> 
               </View>
-              <View style={{display: 'flex', flex: 1}}>
-                <Text>Materials</Text>
-              </View>
-              <View>
-                <Text>Paints</Text>
+              <View style={{display: 'flex', flex: 1, padding: 10, gap: 20}}>
+                <View style={{gap: 5,}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>Materials</Text>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10}}>Types : </Text>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
+                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Remaining : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Used : 00</Text>
+                  </View>
+                </View>
+                <View>
+                <View style={{gap: 5,}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>Paints</Text>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10}}>Types : </Text>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
+                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Remaining : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Used : 00</Text>
+                  </View>
+                </View>
               </View>
             </View>
           </View>
         </View>
       </View>
-    </ScrollView>
+    </View>
+  </ScrollView>
   );
 };
 export default Dashboard;
@@ -234,7 +327,7 @@ const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
       />
 
       <Circle
-        stroke="#3b9a08ff"
+        stroke="#000000ff"
         fill="none"
         cx={radius}
         cy={radius}
@@ -270,7 +363,7 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     position: 'relative',
-    backgroundColor: '#00000011',
+    backgroundColor: '#cbcbcbff',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
@@ -373,29 +466,32 @@ const styles = StyleSheet.create({
   },
   barChart: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'stretch',
     padding: 10,
+    width: '100%',
   },
   chart: {
     borderLeftWidth: 2,
     borderBottomWidth: 2,
     borderColor: '#000',
-    marginInline: 10,
     gap: 10,
   },
   bar: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffbf00ff',
+    backgroundColor: '#000000ff',
     borderRadius: 10,
     height: 25,
-    marginInline: 5,
   },
   x: {
     gap: 15,
+    width: '5%',
+    minWidth: 40,
   },
   pieChart: {
     position: 'relative',
+    height: '50%',
+    minHeight: 270,
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
@@ -415,5 +511,13 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 1)',
     fontSize: 12,
     fontWeight: 'bold',
-  }
+  },
+  progressBar: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    backgroundColor: '#ffffffff',
+    width: '95%',
+    marginHorizontal: '2%'
+  },
 });
