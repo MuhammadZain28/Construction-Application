@@ -2,8 +2,10 @@ import React from 'react';
 import {View, Text, StyleSheet, ScrollView, Platform} from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, {Circle} from 'react-native-svg';
+import { useDataContext } from './DataContext';
   
 const Dashboard: React.FC = () => {
+  const {houses, transactions} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
   return (
     React.useEffect(() => {
@@ -34,7 +36,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='pending-actions' style={{fontSize: 42, color: 'rgba(245, 195, 58, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>0</Text>
+            <Text style={styles.number}>{houses.filter((house) => house.completed === false).length}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(15, 151, 37, 1)'}]}>
@@ -57,7 +59,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='done-all' style={{fontSize: 42, color: 'rgba(17, 151, 37, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>0</Text>
+            <Text style={styles.number}>{houses.filter((house) => house.completed === true).length}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(197, 50, 255, 1)'}]}>
@@ -79,7 +81,7 @@ const Dashboard: React.FC = () => {
               <MaterialCommunityIcons name='cash' style={{fontSize: 42, color: 'rgba(195, 53, 251, 1)'}}></MaterialCommunityIcons>
               </View>
             </View>
-            <Text style={styles.number}>0</Text>
+            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
@@ -101,10 +103,10 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>0</Text>
+            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
         </View>
-        <View style={{flexDirection: 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', flexWrap: 'wrap'}}>
+        <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
           <View style={styles.table}>
             <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderBottomLeftRadius: 20, borderBottomWidth: 2, borderColor: '#000000ff'}}>
               <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
@@ -161,7 +163,7 @@ const Dashboard: React.FC = () => {
                   <Text>-</Text>
                 </View>
               </View>
-              <View style={{width: mobile ? '95%' : '90%'}}>
+              <View style={{width: mobile ? '85%' : '95%'}}>
                 <View style={styles.chart}>
                   <View style={styles.progressBar}>
                     <View style={[styles.bar, {width: '75%'}]}>
@@ -224,25 +226,25 @@ const Dashboard: React.FC = () => {
                     </View>
                   </View> 
                 </View>
-                <View style={{flexDirection: 'row', paddingHorizontal: 0, justifyContent: 'space-between', backgroundColor: '#ffffffff'}}>
-                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
-                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                <View style={{flexDirection: 'row', paddingHorizontal: 0, justifyContent: 'space-between', backgroundColor: '#ffffffff', borderTopWidth: 2, borderTopColor: '#000000ff'}}>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
                     <Text >10000</Text>
                   </View>
-                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
-                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
                     <Text >10000</Text>
                   </View>
-                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
-                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
                     <Text >10000</Text>
                   </View>
-                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
-                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
                     <Text >10000</Text>
                   </View>
-                  <View style={{justifyContent: 'space-between', width: 40, alignItems: 'center', transform: [{translateY: -10}]}}>
-                    <Text style={{transform: [{rotate: '90deg'}], fontSize: 18}}>-</Text>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
                     <Text >10000</Text>
                   </View>
                 </View>
@@ -270,21 +272,21 @@ const Dashboard: React.FC = () => {
                 </View> 
               </View>
               <View style={{display: 'flex', flex: 1, padding: 10, gap: 20}}>
-                <View style={{gap: 5,}}>
-                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>Materials</Text>
-                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10}}>Types : </Text>
+                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 10, padding: 10}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Materials</Text>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
-                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Remaining : 00</Text>
-                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Used : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : 00</Text>
                   </View>
                 </View>
                 <View>
-                <View style={{gap: 5,}}>
-                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>Paints</Text>
-                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10}}>Types : </Text>
+                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 10, padding: 10}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Paints</Text>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
-                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Remaining : 00</Text>
-                    <Text style={{fontSize: 14, fontWeight: 'bold'}}>Used : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : 00</Text>
                   </View>
                 </View>
               </View>
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     position: 'relative',
-    backgroundColor: '#cbcbcbff',
+    backgroundColor: '#efefefff',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
@@ -384,8 +386,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(254, 240, 161)',
     minWidth: 250,
     borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -415,7 +415,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     backgroundColor: '#ffffff',
-    minWidth: 350,
     borderRadius: 10,
     padding: 0,
     shadowColor: '#000',
@@ -430,7 +429,6 @@ const styles = StyleSheet.create({
   sidebar: {
     position: 'relative',
     flex: 1,
-    minWidth: 350,
     flexDirection: 'column',
     backgroundColor: '#ffffff',
     padding: 0,
@@ -445,7 +443,6 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   sectionText: {
-    flex: 2,
     fontSize: 24,
     fontWeight: 'bold',
     color: 'rgba(0, 0, 0, 1)',
@@ -472,9 +469,10 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderLeftWidth: 2,
-    borderBottomWidth: 2,
     borderColor: '#000',
     gap: 10,
+    paddingBottom: 10,
+    marginTop: 20,
   },
   bar: {
     justifyContent: 'center',
@@ -484,6 +482,7 @@ const styles = StyleSheet.create({
     height: 25,
   },
   x: {
+    marginTop: 20,
     gap: 15,
     width: '5%',
     minWidth: 40,
