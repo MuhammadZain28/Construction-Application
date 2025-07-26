@@ -21,7 +21,7 @@ export default function Wallet() {
   const [name, setName] = React.useState<string>('');
   const [id, setId] = React.useState<string>('');
   const [Walletid, setWalletid] = React.useState<string>('main');
-  const [reason, setReason] = React.useState<string>('');
+  const [reason, setReason] = React.useState<string>('Other');
   const [index, setIndex] = React.useState<number>(0);
   const [showReasons, setShowReasons] = React.useState<boolean>(false);
   const [transaction, setTransaction] = React.useState<Transactions[]>([]);
@@ -148,10 +148,8 @@ export default function Wallet() {
         Alert.alert('Wallet not found');
         return;
       }
-      const amount = type === 'In' ? walletItem.amount + cash : walletItem.amount - cash;
-      const transaction = await Transactions.save(Walletid, cash, type, date.toISOString(), amount, reason, name);
+      const transaction = await Transactions.save(Walletid, cash, type, date.toISOString(), reason, name);
       setTransaction(prev => [...prev, new Transactions(transaction, Walletid, cash, type, date.toISOString(), name, reason)]);
-      setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, amount, date.toISOString()) : item));
       setFormType('');
       setUpdateVisible(false);
     } 
@@ -171,10 +169,8 @@ export default function Wallet() {
         Alert.alert('Wallet not found');
         return;
       }
-      const amount = type === 'In' ? walletItem.amount + cash : walletItem.amount - cash;
-      const record = await Records.save(name, Walletid, cash, type, date.toISOString(), amount, reason);
+      const record = await Records.save(name, Walletid, cash, type, date.toISOString(), reason);
       setRecords(prev => [...prev, new Records(record, name, Walletid, cash, type, date.toISOString(), reason)]);
-      setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, amount, item.date) : item));
       setFormType('');
       setUpdateVisible(false);
     } 
@@ -187,11 +183,6 @@ export default function Wallet() {
     try {
       if (type === 'transaction') {
         Transactions.deleteTransaction(id);
-        const transactionItem = transaction.find(item => item.id === id);
-        if (transactionItem) {
-          const amount = transactionItem.type === 'In' ? transactionItem.amount : -transactionItem.amount;
-          setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, item.amount - amount, item.date) : item));
-        }
         setTransaction(prev => prev.filter(item => item.id !== id));
         setDropDownType('');
       }
@@ -202,11 +193,6 @@ export default function Wallet() {
       }
       else if (type === 'record') {
         Records.deleteRecord(id);
-        const transactionItem = records.find(item => item.id === id);
-        if (transactionItem) {
-          const amount = transactionItem.type === 'In' ? transactionItem.amount : -transactionItem.amount;
-          setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, item.amount - amount, item.date) : item));
-        }
         setRecords(prev => prev.filter(item => item.id !== id));
         setDropDownType('');
       }
@@ -225,18 +211,10 @@ export default function Wallet() {
       return;
     }
     try {
-      const walletItem = wallets.find(item => item.id === Walletid);
-      const transactionItem = transaction.find(item => item.id === id);
-      if (walletItem && transactionItem) {
-        const currentAmount = transactionItem.type === 'In' ? -transactionItem.amount : transactionItem.amount;
-        const newAmount = type === 'In' ? walletItem.amount + cash + currentAmount : walletItem.amount - cash + currentAmount;
-
-        setTransaction(prev => prev.map(item => item.id === id ? new Transactions(id, Walletid, cash, type, date.toISOString(), name, reason) : item));
-        setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, newAmount, item.date) : item));
-        Transactions.update(id, Walletid, cash, type, date.toISOString(), newAmount, reason, name);
-      }
+      setTransaction(prev => prev.map(item => item.id === id ? new Transactions(id, Walletid, cash, type, date.toISOString(), name, reason) : item));
+      Transactions.update(id, Walletid, cash, type, date.toISOString(), reason, name);
       setFormType('');
-    } 
+    }
     catch (error) {
       console.error('Error updating transaction:', error);
     }
@@ -247,19 +225,10 @@ export default function Wallet() {
       return;
     }
     try {
-      const walletItem = wallets.find(item => item.id === Walletid);
-      const recordItem = records.find(item => item.id === id);
-      if (walletItem && recordItem) {
-        alert('Record updated');
-        const currentAmount = recordItem.type === 'In' ? -recordItem.amount : recordItem.amount;
-        const newAmount = type === 'In' ? walletItem.amount + cash + currentAmount : walletItem.amount - cash + currentAmount;
-
-        setRecords(prev => prev.map(item => item.id === id ? new Records(id, name, Walletid, cash, type, date.toISOString(), reason) : item));
-        setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, newAmount, item.date) : item));
-        Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString(), newAmount, reason);
-      }
+      setRecords(prev => prev.map(item => item.id === id ? new Records(id, name, Walletid, cash, type, date.toISOString(), reason) : item));
+      Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString(), reason);
       setFormType('');
-    } 
+    }
     catch (error) {
       console.error('Error updating record:', error);
     }
@@ -281,7 +250,7 @@ export default function Wallet() {
                     <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
                   </TouchableOpacity>
                   <View>
-                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.reduce((sum, item) => sum + item.price*item.no, 0) - paints.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.reduce((sum, item) => sum + item.price*item.no, 0) - paints.reduce((sum, item) => sum + item.price*item.no, 0) + transaction.reduce((sum, item) => sum + item.amount, 0) + records.reduce((sum, item) => sum + item.amount, 0)}</Text>
                   </View>
                   <View style={styles.container}>
                     <View style={[styles.circle1]} />
@@ -339,7 +308,7 @@ export default function Wallet() {
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || ''); setFormType('Transaction'); setId(item.id);}}>
+                <TouchableOpacity onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{ padding: 10, fontSize: 16 }}>{item.name}</Text>
                 </TouchableOpacity>
               )}
@@ -352,7 +321,7 @@ export default function Wallet() {
                  item.type === 'In' ?
                 <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
                 onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
-                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || ''); setFormType('Transaction'); setId(item.id);}}>
+                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{fontSize: 16, color: 'rgba(4, 159, 9, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
                     <Text style={{color: 'rgba(4, 159, 9, 1)', fontSize: 16, fontWeight: 700}}>Rs. {item.amount}</Text>
@@ -361,7 +330,7 @@ export default function Wallet() {
                 </TouchableOpacity>
                 :
                 <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
-                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || ''); setFormType('Transaction'); setId(item.id);}}>
+                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{fontSize: 16, color: 'rgba(211, 0, 0, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
                     <Text style={{color: 'rgba(211, 0, 0, 1)', fontSize: 16, fontWeight: 700}}>Rs. {item.amount}</Text>
@@ -396,7 +365,7 @@ export default function Wallet() {
                       setName(item.name);
                       setCash(item.amount);
                       setDate(new Date(item.date));
-                      setReason(item.reason || '');
+                      setReason(item.reason || 'Other');
                       setFormType('Record');
                     }}>
                       <Text style={{ padding: 10, fontSize: 16 }}>{item.name}</Text>
@@ -416,7 +385,7 @@ export default function Wallet() {
                       setName(item.name);
                       setCash(item.amount);
                       setDate(new Date(item.date));
-                      setReason(item.reason || '');
+                      setReason(item.reason || 'Other');
                       setFormType('Record');
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
@@ -433,7 +402,7 @@ export default function Wallet() {
                       setName(item.name);
                       setCash(item.amount);
                       setDate(new Date(item.date));
-                      setReason(item.reason || '');
+                      setReason(item.reason || 'Other');
                       setFormType('Record');
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>

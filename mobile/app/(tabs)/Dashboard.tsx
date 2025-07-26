@@ -5,15 +5,17 @@ import Svg, {Circle} from 'react-native-svg';
 import { useDataContext } from './DataContext';
   
 const Dashboard: React.FC = () => {
-  const {houses, transactions, materials, paints} = useDataContext();
+  const {houses, transactions, materials, paints, paintSum, materialSum} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
   const [materialProgress, setMaterialProgress] = React.useState(0);
   const [paintProgress, setPaintProgress] = React.useState(0);
+  const [spend, setSpend] = React.useState(0);
   return (
     React.useEffect(() => {
       if (Platform.OS === 'android') {
         setMobile(true);
       }
+
     }, []),
 
     React.useEffect(() => {
@@ -24,7 +26,14 @@ const Dashboard: React.FC = () => {
       const totalPaints = paints.length;
       const usedPaints = paints.filter(p => p.used === false).length;
       setPaintProgress((usedPaints / totalPaints) * 100);
-    }, [materials, paints]),
+      let totalSpend = 0;
+      for (let i = 1; i < 12; i++) {
+        const month = `${i}`;
+        totalSpend += materialSum[`2025-${month.padStart(2, '0')}`] + paintSum[`2025-${month.padStart(2, '0')}`];
+      }
+      setSpend(totalSpend);
+
+    }, [materials, paints, materialSum, paintSum]),
 
     <ScrollView>
       <View style={styles.main}>
@@ -49,7 +58,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='pending-actions' style={{fontSize: 42, color: 'rgba(245, 195, 58, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{houses.filter((house) => house.completed === false).length}</Text>
+            <Text style={styles.number}>{houses.filter((house) => house.completed === false).length - 1}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(15, 151, 37, 1)'}]}>
@@ -116,15 +125,16 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + spend}</Text>
           </View>
         </View>
         <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
           <View style={styles.table}>
             <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderBottomLeftRadius: 20, borderBottomWidth: 2, borderColor: '#000000ff'}}>
               <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
-              <Text style={[styles.sectionText, {color: 'rgba(0, 0, 0, 1)'}]}>Overview</Text>
-            </View> 
+              <Text style={[styles.sectionText, {color: 'rgba(0, 0, 0, 1)',}]}>Overview</Text>
+            </View>
+            <Text style={[{color: 'rgba(0, 0, 0, 1)', marginInline: 40, paddingTop: 10, fontSize: 12, fontWeight: 'bold',  borderBlockEndColor: 'rgba(0, 0, 0, 1)', borderBottomWidth: 2}]}>The Graphical Representation of Spending on Materials and Paints on Monthly Basis.</Text>
             <View style={styles.barChart}>
               <View style={styles.x}>
                 <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
@@ -179,86 +189,90 @@ const Dashboard: React.FC = () => {
               <View style={{width: mobile ? '85%' : '95%'}}>
                 <View style={styles.chart}>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '75%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-01'] + materialSum['2025-01']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-01'] + materialSum['2025-01']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '25%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-02'] + materialSum['2025-02']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-02'] + materialSum['2025-02']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '50%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-03'] + materialSum['2025-03']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-03'] + materialSum['2025-03']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '15%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-04'] + materialSum['2025-04']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-04'] + materialSum['2025-04']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '95%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-05'] + materialSum['2025-05']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-05'] + materialSum['2025-05']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '65%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-06'] + materialSum['2025-06']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-06'] + materialSum['2025-06']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '25%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-07'] + materialSum['2025-07']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-07'] + materialSum['2025-07']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '80%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-08'] + materialSum['2025-08']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-08'] + materialSum['2025-08']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '60%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-09'] + materialSum['2025-09']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-09'] + materialSum['2025-09']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '30%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-10'] + materialSum['2025-10']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-10'] + materialSum['2025-10']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '10%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-11'] + materialSum['2025-11']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-11'] + materialSum['2025-11']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: '50%'}]}>
-                      <Text style={styles.graphText}>0</Text>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-12'] + materialSum['2025-12']) / 30000 * 100}%`}]}>
+                      <Text style={styles.graphText}>Rs. {paintSum['2025-12'] + materialSum['2025-12']}</Text>
                     </View>
-                  </View> 
+                  </View>
                 </View>
                 <View style={{flexDirection: 'row', paddingHorizontal: 0, justifyContent: 'space-between', backgroundColor: '#ffffffff', borderTopWidth: 2, borderTopColor: '#000000ff'}}>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >10000</Text>
+                    <Text >0</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >10000</Text>
+                    <Text >6000</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >10000</Text>
+                    <Text >12000</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >10000</Text>
+                    <Text >18000</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >10000</Text>
+                    <Text >24000</Text>
+                  </View>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
+                    <Text >30000</Text>
                   </View>
                 </View>
               </View>

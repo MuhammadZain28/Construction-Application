@@ -8,6 +8,8 @@ type DataContextType = {
   wallet: Wallets[];
   transactions: Transactions[];
   record: Records[];
+  paintSum: { [key: string]: number };
+  materialSum: { [key: string]: number };
   setHouses: (houses: House[]) => void;
   setMaterials: (materials: Material[]) => void;
   setPaints: (paints: Paints[]) => void;
@@ -24,6 +26,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [wallet, setWallets] = useState<Wallets[]>([]);
   const [transactions, setTransactions] = useState<Transactions[]>([]); 
   const [record, setRecords] = useState<Records[]>([]);
+  const [paintSum, setPaintSum] = useState<{ [key: string]: number }>({});
+  const [materialSum, setMaterialSum] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,12 +37,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const walletsData = await Wallets.getAllWallets();
         const transactionsData = await Transactions.getAllTransactions();
         const recordsData = await Records.getAllRecords();
+        const paintSumData = await Paints.getMonthlySum();
+        const materialSumData = await Material.getMonthlySum();
         setHouses(housesData);
         setMaterials(materialsData);
         setPaints(paintsData);
         setWallets(walletsData);
         setTransactions(transactionsData);
         setRecords(recordsData);
+        setPaintSum(paintSumData);
+        setMaterialSum(materialSumData);
     }
 
     fetchData().catch(console.error);
@@ -46,7 +54,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <DataContext.Provider value={{ houses, materials, paints, wallet, transactions, record, setHouses, setMaterials, setPaints, setWallets, setTransactions, setRecords }}>
+    <DataContext.Provider value={{ houses, materials, paints, wallet, transactions, record, paintSum, materialSum, setHouses, setMaterials, setPaints, setWallets, setTransactions, setRecords }}>
       {children}
     </DataContext.Provider>
   );

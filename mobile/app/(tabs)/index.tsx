@@ -117,7 +117,7 @@ export default function HomeScreen() {
   };
   
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor: '#efefefff'}}>
       <View style={styles.main}>
         <View style={styles.header}>
           <View style={[styles.card, {backgroundColor: 'rgba(206, 58, 255, 1)'}]}>
