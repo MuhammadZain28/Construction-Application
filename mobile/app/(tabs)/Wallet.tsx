@@ -7,7 +7,7 @@ import { House, Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function Wallet() {
-  const { houses, wallet, transactions, record } = useDataContext();
+  const { houses, wallet, transactions, record, materials, paints } = useDataContext();
   const [search, setSearch] = React.useState('');
   const [searchData, setSearchData] = React.useState('');
   const [house, setHouse] = React.useState<House[]>([]);
@@ -266,7 +266,7 @@ export default function Wallet() {
   }
 
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: '#efefefff' }}>
         <View style={styles.main}>
           <View style={[styles.row, { justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10 }]}>
             <TouchableOpacity style ={[styles.card, {backgroundColor: 'transparent', zIndex: 1}]}>
@@ -281,7 +281,7 @@ export default function Wallet() {
                     <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
                   </TouchableOpacity>
                   <View>
-                    <Text style={styles.text}>Rs. {wallets[index]?.amount}</Text>
+                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.reduce((sum, item) => sum + item.price*item.no, 0) - paints.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
                   </View>
                   <View style={styles.container}>
                     <View style={[styles.circle1]} />
@@ -412,6 +412,7 @@ export default function Wallet() {
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
               onPress={() => {
+                      setId(item.id);
                       setName(item.name);
                       setCash(item.amount);
                       setDate(new Date(item.date));
@@ -428,6 +429,7 @@ export default function Wallet() {
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
               onPress={() => {
+                      setId(item.id);
                       setName(item.name);
                       setCash(item.amount);
                       setDate(new Date(item.date));

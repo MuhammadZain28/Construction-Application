@@ -18,6 +18,7 @@ export default function HomeScreen() {
   const [mobile, setMobile] = useState(false);
   const [home, setHome] = useState<House[]>([]);
   const [search, setSearch] = useState("");
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   React.useEffect(() => {
     if (Platform.OS === 'web') {
@@ -43,7 +44,10 @@ export default function HomeScreen() {
     }
   };
 
-
+  const handleHouseSelect = (code: string) => {
+    setDropdownVisible(false);
+    setCode(code);
+  };
  
   const handleClick = (code: string, status: boolean) => {
     setHome(prev =>
@@ -68,7 +72,8 @@ export default function HomeScreen() {
     }).catch(error => {
       console.error("Error saving house:", error);
     });
-  }
+  };
+
   const remove = (code: string) => {
     setHome(prevHomes => prevHomes.filter(h => h.code !== code));
     try {
@@ -89,7 +94,8 @@ export default function HomeScreen() {
       catch(error) {
         console.error("Error deleting house:", error);
       }
-  }
+  };
+
   const update = () => {
     setHome(prevHomes => prevHomes.map(h =>
       h.code === code
@@ -108,14 +114,53 @@ export default function HomeScreen() {
       });
     setUpdateVisible(false);
     setVisible(false);
-  }
+  };
+  
   return (
     <ScrollView>
       <View style={styles.main}>
         <View style={styles.header}>
-          <Text style={styles.headerText}><MaterialIcons name='home' size={26}/> House</Text>
-        </View>
-
+          <View style={[styles.card, {backgroundColor: 'rgba(206, 58, 255, 1)'}]}>
+            <View style={{flexDirection: 'column', gap: 25}}>
+              <TouchableOpacity onPress={() => setDropdownVisible(true)} 
+                style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                <Text style={styles.cardText}>{ houses.find(h => h.code === code)?.name || 'Home'}</Text>
+                <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
+              </TouchableOpacity>    
+              <View style={{flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10,}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)',  width: 75}}>Material</Text>                
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>0</Text>
+                </View>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', width: 75}}>Paint</Text>  
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>0</Text>
+                </View>
+              </View>
+            </View>
+            <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
+              <View style={styles.iconContainer}>
+                <MaterialIcons name='home' style={[styles.icon, {color: 'rgba(206, 58, 255, 1)'}]}/>
+              </View>
+            </View>
+          </View>
+          <View style={[styles.card, {backgroundColor: 'rgba(255, 200, 0, 1)'}]}>
+            <View style={{flexDirection: 'column', gap: 20}}>
+              <Text style={styles.cardText}> Spend </Text>
+              <View style={{flexDirection: 'row', alignItems: 'center', marginInline: 20, justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 10, paddingBlock: 5, borderRadius: 20}}>
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgb(255, 200, 0)', paddingInline: 15,}}>Rs.</Text>  
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgb(255, 200, 0)', paddingInline: 15,}}>0</Text>
+              </View>
+            </View>
+            <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgb(255, 208, 0)'}]}/>
+              </View>
+            </View>
+          </View>
+        </View>        
         <View style={styles.container}>
           <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',  padding: 20}}>
             <Text style={{fontSize: 24, fontWeight: 'bold'}}>House</Text>
@@ -154,7 +199,7 @@ export default function HomeScreen() {
            
           <View>
             {
-            home.map((house, index) => (
+            home.filter(h => h.code !== "All Houses").map((house, index) => (
             <TouchableOpacity key={index} onPress={() => {
                     setName(house.name);
                     setCode(house.code);
@@ -300,11 +345,12 @@ export default function HomeScreen() {
                 onPress={() => addData()}>
                   <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
                 </TouchableOpacity>
-          }
+                }
               </View>
             </View>
           </View>
         </Modal>
+
         <Modal
               visible={deleteVisible}
               transparent={true}
@@ -341,28 +387,79 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-          </Modal>
-          
+        </Modal>
+  
+        <Modal
+          visible={isDropdownVisible}
+          animationType='slide'
+          transparent={true}
+          onRequestClose={() => 
+            setDropdownVisible(false)
+          }>
+            <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={styles.dropdown}>
+                <TouchableOpacity onPress={() => handleHouseSelect("")}>
+                  <Text style={{ fontWeight: "bold", fontSize: 24}}>Home</Text>
+                </TouchableOpacity>
+  
+  
+                <FlatList
+                      data={home}
+                      keyExtractor={(item) => item.name}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
+                          { item.code === code ?
+                          <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                          :
+                          <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                          }
+                          <Text style={{fontSize: 18}}>{item.name}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                </View>
+            </View>
+        </Modal>
       </View>
     </ScrollView>
   );
 }
 const styles = StyleSheet.create({
   header: {
-    position: 'relative',
+    display: 'flex',
+    flexWrap: 'wrap',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 60,
-    marginBlockEnd: 40,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    gap: 20,
+    paddingBlock: 20,
+  },
+  card: {
+    flex: 1,
+    minWidth: 300,
+    minHeight: 170,
+    padding: 10,
+    borderRadius: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.128,
     shadowRadius: 4,
     elevation: 2,
+  },
+  cardText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'rgb(255, 255, 255)',
+  },
+  iconContainer: {
+    backgroundColor: 'rgb(255, 255, 255)',
+    borderRadius: 50,
+    padding: 20,
+  },
+  icon: {
+    fontSize: 46
   },
   headerText: {
     justifyContent: 'center',
@@ -373,7 +470,7 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     position: 'relative',
-    backgroundColor: '#00000011',
+    backgroundColor: '#efefefff',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
@@ -420,5 +517,18 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     outline: '0px solid transparent',
+  },
+  dropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    width: '80%',
+    maxWidth: 400,
+    height: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.258,
+    shadowRadius: 4,
+    elevation: 2,
   }
 });
