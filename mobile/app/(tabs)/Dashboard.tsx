@@ -5,14 +5,27 @@ import Svg, {Circle} from 'react-native-svg';
 import { useDataContext } from './DataContext';
   
 const Dashboard: React.FC = () => {
-  const {houses, transactions} = useDataContext();
+  const {houses, transactions, materials, paints} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
+  const [materialProgress, setMaterialProgress] = React.useState(0);
+  const [paintProgress, setPaintProgress] = React.useState(0);
   return (
     React.useEffect(() => {
       if (Platform.OS === 'android') {
         setMobile(true);
       }
     }, []),
+
+    React.useEffect(() => {
+      const totalMaterials = materials.length;
+      const usedMaterials = materials.filter(m => m.used === false).length;
+      setMaterialProgress((usedMaterials / totalMaterials) * 100);
+
+      const totalPaints = paints.length;
+      const usedPaints = paints.filter(p => p.used === false).length;
+      setPaintProgress((usedPaints / totalPaints) * 100);
+    }, [materials, paints]),
+
     <ScrollView>
       <View style={styles.main}>
         <View style={styles.top}>
@@ -259,11 +272,11 @@ const Dashboard: React.FC = () => {
               </View>
               <View style={styles.pieChart}>
                 <View style={styles.pie}>
-                  <CircularProgress radius={95} stroke={10} progress={10}></CircularProgress>
+                  <CircularProgress radius={95} stroke={10} progress={materialProgress}></CircularProgress>
                   <Text style={styles.pieText}>Materials</Text>
                 </View>
                 <View style={styles.pie}>
-                  <CircularProgress radius={75} stroke={10} progress={10}></CircularProgress>
+                  <CircularProgress radius={75} stroke={10} progress={paintProgress}></CircularProgress>
                   <Text style={[styles.pieText, {bottom: 35}]}>Paints</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginLeft: 160, marginTop: -50, gap: 5}}>
@@ -276,8 +289,8 @@ const Dashboard: React.FC = () => {
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Materials</Text>
                   <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
-                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : 00</Text>
-                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : {materials.filter(m => m.used === false).length}</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : {materials.filter(m => m.used === true).length}</Text>
                   </View>
                 </View>
                 <View>
@@ -285,8 +298,8 @@ const Dashboard: React.FC = () => {
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Paints</Text>
                   <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
-                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : 00</Text>
-                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : 00</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Remaining : {paints.filter(p => p.used === false).length}</Text>
+                    <Text style={{fontSize: 14, fontWeight: 'bold', color: '#ffffff'}}>Used : {paints.filter(p => p.used === true).length}</Text>
                   </View>
                 </View>
               </View>
