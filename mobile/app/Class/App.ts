@@ -167,17 +167,19 @@ export class Material {
         const materialsRef = ref(db, 'materials');
         const snapshot = await get(materialsRef);
         let sums: { [key: string]: number } = {};
-        
+        for (let i = 1; i <= 12; i++) {
+            sums[`2025-${String(i).padStart(2, '0')}`] = 0; 
+        }
         snapshot.forEach((childSnapshot) => {
             const data = childSnapshot.val();
             const month = data.date.split('-')[1];
             const year = data.date.split('-')[0];
-            const key = `${year}-${String(month).padStart(2, '0')}`;
+            const key = `${year}-${month}`;
             if (sums[key] !== undefined) {
                 sums[key] += data.price * data.no;
+                alert(`Key: ${key}, Value: ${sums[key]}`); 
             }
         });
-        
         return sums;
     }
 }
@@ -274,24 +276,19 @@ export class Paints {
         const snapshot = await get(paintsRef);
         let sums: { [key: string]: number } = {};
 
-        let monthKeys: string[] = [];
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            Object.values(data).forEach(txn => {
-                const t = txn as { date?: string; price?: number, no?: number };
-                if (t.date && t.price && t.no) {
-                const parts = t.date.split('/');
-                if (parts.length === 3) {
-                    const [month, , year] = parts;
-                    const key = `${year}-${month.padStart(2, '0')}`;
-                    monthKeys.push(key);
-                    if (sums.hasOwnProperty(key)) {
-                        sums[key] += t.price*t.no;
-                    }
-                }
-            }
-            });
+        for (let i = 1; i <= 12; i++) {
+            sums[`2025-${String(i).padStart(2, '0')}`] = 0;
         }
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const month = data.date.split('-')[1];
+            const year = data.date.split('-')[0];
+            const key = `${year}-${month}`;
+            if (sums[key] !== undefined) {
+                sums[key] += data.price * data.no;
+                alert(`Key: ${key}, Value: ${sums[key]}`);
+            }
+        });
         return sums;
     }
 }

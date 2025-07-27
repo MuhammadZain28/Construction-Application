@@ -66,7 +66,7 @@ export default function HomeScreen() {
     House.save(house).then(() => {
       setVisible(false);
       setName("");
-      setCode("");
+      setCode("All Houses");
       setDescription("");
       setDate(new Date());
     }).catch(error => {
@@ -79,7 +79,7 @@ export default function HomeScreen() {
     try {
     House.deleteHouse(code);
         setDelete(false);
-        setCode("");
+        setCode("All Houses");
         Alert.alert(
             'House Deleted',
             'The house has been successfully deleted.',
@@ -105,7 +105,7 @@ export default function HomeScreen() {
       .then(() => {
         setVisible(false);
         setName("");
-        setCode("");
+        setCode("All Houses");
         setDescription("");
         setDate(new Date());
       })
@@ -117,7 +117,7 @@ export default function HomeScreen() {
   };
   
   return (
-    <ScrollView style={{backgroundColor: '#efefefff'}}>
+    <ScrollView style={{backgroundColor: '#dbdbdbff'}}>
       <View style={styles.main}>
         <View style={styles.header}>
           <View style={[styles.card, {backgroundColor: 'rgba(206, 58, 255, 1)'}]}>
@@ -146,17 +146,17 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
-          <View style={[styles.card, {backgroundColor: 'rgba(255, 200, 0, 1)'}]}>
+          <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
             <View style={{flexDirection: 'column', gap: 20}}>
               <Text style={styles.cardText}> Spend </Text>
               <View style={{flexDirection: 'row', alignItems: 'center', marginInline: 20, justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 10, paddingBlock: 5, borderRadius: 20}}>
-                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgb(255, 200, 0)', paddingInline: 15,}}>Rs.</Text>  
-                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgb(255, 200, 0)', paddingInline: 15,}}>0</Text>
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>Rs.</Text>  
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>0</Text>
               </View>
             </View>
             <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
               <View style={styles.iconContainer}>
-                <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgb(255, 208, 0)'}]}/>
+                <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgba(255, 183, 0, 1)'}]}/>
               </View>
             </View>
           </View>
@@ -229,7 +229,7 @@ export default function HomeScreen() {
                     :      
                     <TouchableOpacity style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                     onPress={()=> handleClick(house.code, true)}>
-                      <View style={{backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                      <View style={{backgroundColor: 'rgba(255, 183, 0, 1)', flexDirection: 'row', borderRadius: 15, paddingInline: 15, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                         <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}></MaterialIcons>
                         <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Pending</Text>
                       </View>
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.128,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -473,6 +473,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#efefefff',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
+    padding: 10,
   },
   container: {
     flex: 1,
@@ -482,7 +483,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },

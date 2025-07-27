@@ -7,7 +7,7 @@ import { House, Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function Wallet() {
-  const { houses, wallet, transactions, record, materials, paints } = useDataContext();
+  const { houses, wallet, transactions, record, materials, paints, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
   const [search, setSearch] = React.useState('');
   const [searchData, setSearchData] = React.useState('');
   const [house, setHouse] = React.useState<House[]>([]);
@@ -84,6 +84,10 @@ export default function Wallet() {
     fetch();
   }, [houses, wallet, transactions, record]);
 
+  React.useEffect(() => {
+    setIndex(wallets.findIndex(item => item.id === Walletid));
+  }, [wallets, Walletid]);
+
   const onChange = (event: any, selectedDate: Date | undefined) => {
     setShowDate(false);
     if (selectedDate) {
@@ -112,8 +116,8 @@ export default function Wallet() {
       return;
     }
     try {
-      const n = await Wallets.save(name, home, cash, date.toISOString());
-      setWallets(prev => [...prev, new Wallets(n, name, home, cash, date.toISOString())]);
+      Wallets.save(name, home, cash, date.toISOString());
+      setIsWalletUpdated(true);
       setFormType('');
     } 
     catch (error) {
@@ -129,7 +133,7 @@ export default function Wallet() {
       }
       const amount = walletItem.amount + cash;
       Wallets.UpdateAmount(Walletid, amount, date.toISOString());
-      setWallets(prev => prev.map(item => item.id === Walletid ? new Wallets(item.id, item.name, item.house, amount, date.toISOString()) : item));
+      setIsWalletUpdated(true);
       setFormType('');
     }
     catch (error) {
@@ -143,13 +147,8 @@ export default function Wallet() {
       return;
     }
     try {
-      const walletItem = wallets.find(item => item.id === Walletid);
-      if (!walletItem) {
-        Alert.alert('Wallet not found');
-        return;
-      }
-      const transaction = await Transactions.save(Walletid, cash, type, date.toISOString(), reason, name);
-      setTransaction(prev => [...prev, new Transactions(transaction, Walletid, cash, type, date.toISOString(), name, reason)]);
+      await Transactions.save(Walletid, cash, type, date.toISOString(), reason, name);
+      setIsTransactionUpdated(true);
       setFormType('');
       setUpdateVisible(false);
     } 
@@ -164,13 +163,8 @@ export default function Wallet() {
       return;
     }
     try {
-      const walletItem = wallets.find(item => item.id === Walletid);
-      if (!walletItem) {
-        Alert.alert('Wallet not found');
-        return;
-      }
-      const record = await Records.save(name, Walletid, cash, type, date.toISOString(), reason);
-      setRecords(prev => [...prev, new Records(record, name, Walletid, cash, type, date.toISOString(), reason)]);
+      await Records.save(name, Walletid, cash, type, date.toISOString(), reason);
+      setIsRecordUpdated(true);
       setFormType('');
       setUpdateVisible(false);
     } 
@@ -183,17 +177,17 @@ export default function Wallet() {
     try {
       if (type === 'transaction') {
         Transactions.deleteTransaction(id);
-        setTransaction(prev => prev.filter(item => item.id !== id));
+        setIsTransactionUpdated(true);
         setDropDownType('');
       }
       else if (type === 'wallet') {
         Wallets.deleteWallet(id);
-        setWallets(prev => prev.filter(item => item.id !== id));
+        setIsWalletUpdated(true);
         setDropDownType('');
       }
       else if (type === 'record') {
         Records.deleteRecord(id);
-        setRecords(prev => prev.filter(item => item.id !== id));
+        setIsRecordUpdated(true);
         setDropDownType('');
       }
       else {
@@ -211,8 +205,8 @@ export default function Wallet() {
       return;
     }
     try {
-      setTransaction(prev => prev.map(item => item.id === id ? new Transactions(id, Walletid, cash, type, date.toISOString(), name, reason) : item));
       Transactions.update(id, Walletid, cash, type, date.toISOString(), reason, name);
+      setIsTransactionUpdated(true);
       setFormType('');
     }
     catch (error) {
@@ -225,8 +219,9 @@ export default function Wallet() {
       return;
     }
     try {
-      setRecords(prev => prev.map(item => item.id === id ? new Records(id, name, Walletid, cash, type, date.toISOString(), reason) : item));
+      
       Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString(), reason);
+      setIsRecordUpdated(true);
       setFormType('');
     }
     catch (error) {
@@ -235,22 +230,21 @@ export default function Wallet() {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: '#efefefff' }}>
+    <ScrollView style={{ backgroundColor: '#dbdbdbff', padding: 10 }}>
         <View style={styles.main}>
-          <View style={[styles.row, { justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10 }]}>
-            <TouchableOpacity style ={[styles.card, {backgroundColor: 'transparent', zIndex: 1}]}>
+          <View style={[styles.row, { justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10, width: '100%' }]}>
               <LinearGradient
                 colors={['#192f5d', '#3b5998', '#4c669f'  ]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 locations={[0, 0.5, 1]}
-                style ={[styles.card, { padding: 20, borderRadius: 10, margin: 0 }]}>
+                style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]}>
                   <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onPress={() => setDropDownType('Wallet')}>
                     <Ionicons name="wallet" size={28} color="#fff" />
                     <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
                   </TouchableOpacity>
                   <View>
-                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.reduce((sum, item) => sum + item.price*item.no, 0) - paints.reduce((sum, item) => sum + item.price*item.no, 0) + transaction.reduce((sum, item) => sum + item.amount, 0) + records.reduce((sum, item) => sum + item.amount, 0)}</Text>
+                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.filter(item => item.house === wallets[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) - paints.filter(item => item.house === wallets[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) + transaction.filter(item => item.wallet === wallets[index]?.id).reduce((sum, item) => sum + item.amount, 0) + records.filter(item => item.wallet === wallets[index]?.id).reduce((sum, item) => sum + item.amount, 0)}</Text>
                   </View>
                   <View style={styles.container}>
                     <View style={[styles.circle1]} />
@@ -283,9 +277,8 @@ export default function Wallet() {
                     </View>
                   </View>
               </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.card, { width: '100%', justifyContent: 'center', alignItems: 'center' }]} onPress={() => setFormType('Card')}>
-              <Ionicons name='add' size={36}/>
+            <TouchableOpacity style={[{ width: '100%', justifyContent: 'center', alignItems: 'center' }]} onPress={() => setFormType('Card')}>
+              <Ionicons name='add' size={36} style={{padding: 20, backgroundColor: 'rgba(255, 255, 255, 0.75)', borderRadius: 50, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2}}/>
             </TouchableOpacity>
           </View>
           <View style={styles.body}>
@@ -764,12 +757,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   card: {
-    backgroundColor: '#a6a6a7ff',
+    backgroundColor: 'transparent',
     borderRadius: 10,
     maxWidth: 450,
-    margin: 10,
-    width: '100%',
-    height: 225,
+    width: '110%',
     gap: 20,
     shadowColor: '#000',
     shadowOffset: {
@@ -872,9 +863,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     backgroundColor: '#f1f1f1ff',
-    marginInline: 30,
+    marginInline: 20,
     marginBottom: 10,
     maxWidth: 350,
+    width: '90%',
     borderColor: '#000',
     borderWidth: 1,
     zIndex: 2,

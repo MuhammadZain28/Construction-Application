@@ -3,25 +3,37 @@ import { House, Material, Paints, Transactions, Wallets, Records } from '../Clas
 
 type DataContextType = {
   houses: House[];
+  isHouseUpdated: boolean;
+  setIsHouseUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   materials: Material[];
+  isMaterialUpdated: boolean;
+  setIsMaterialUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   paints: Paints[];
+  isPaintUpdated: boolean;
+  setIsPaintUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   wallet: Wallets[];
+  isWalletUpdated: boolean;
+  setIsWalletUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   transactions: Transactions[];
+  isTransactionUpdated: boolean;
+  setIsTransactionUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   record: Records[];
+  isRecordUpdated: boolean;
+  setIsRecordUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   paintSum: { [key: string]: number };
   materialSum: { [key: string]: number };
-  setHouses: (houses: House[]) => void;
-  setMaterials: (materials: Material[]) => void;
-  setPaints: (paints: Paints[]) => void;
-  setWallets: (wallets: Wallets[]) => void;
-  setTransactions: (transactions: Transactions[]) => void;
-  setRecords: (records: Records[]) => void;
 };
 
 const DataContext = React.createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [houses, setHouses] = useState<House[]>([]);
+  const [isHouseUpdated, setIsHouseUpdated] = useState<boolean>(true);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [isMaterialUpdated, setIsMaterialUpdated] = useState<boolean>(true);
+  const [isPaintUpdated, setIsPaintUpdated] = useState<boolean>(true);
+  const [isTransactionUpdated, setIsTransactionUpdated] = useState<boolean>(true);
+  const [isWalletUpdated, setIsWalletUpdated] = useState<boolean>(true);
+  const [isRecordUpdated, setIsRecordUpdated] = useState<boolean>(true);
   const [paints, setPaints] = useState<Paints[]>([]);
   const [wallet, setWallets] = useState<Wallets[]>([]);
   const [transactions, setTransactions] = useState<Transactions[]>([]); 
@@ -29,32 +41,66 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [paintSum, setPaintSum] = useState<{ [key: string]: number }>({});
   const [materialSum, setMaterialSum] = useState<{ [key: string]: number }>({});
 
-  useEffect(() => {
-    const fetchData = async () => {
+    const fetchHouses = async () => {
         const housesData = await House.getAllHouses();
-        const materialsData = await Material.getAllMaterials();
-        const paintsData = await Paints.getAllPaints();
-        const walletsData = await Wallets.getAllWallets();
-        const transactionsData = await Transactions.getAllTransactions();
-        const recordsData = await Records.getAllRecords();
-        const paintSumData = await Paints.getMonthlySum();
-        const materialSumData = await Material.getMonthlySum();
         setHouses(housesData);
+        setIsHouseUpdated(false);
+    }
+    const fetchMaterials = async () => {
+        const materialsData = await Material.getAllMaterials();
+        const materialSumData = await Material.getMonthlySum();
         setMaterials(materialsData);
-        setPaints(paintsData);
-        setWallets(walletsData);
-        setTransactions(transactionsData);
-        setRecords(recordsData);
-        setPaintSum(paintSumData);
         setMaterialSum(materialSumData);
+        setIsMaterialUpdated(false);
+    }
+    const fetchPaints = async () => {
+        const paintsData = await Paints.getAllPaints();
+        const paintSumData = await Paints.getMonthlySum();
+        setPaints(paintsData);
+        setPaintSum(paintSumData);
+        setIsPaintUpdated(false);
+    }
+    const fetchWallets = async () => {
+        const walletsData = await Wallets.getAllWallets();
+        setWallets(walletsData);
+        setIsWalletUpdated(false);
+    }
+    const fetchTransactions = async () => {
+        const transactionsData = await Transactions.getAllTransactions();
+        setTransactions(transactionsData);
+        setIsTransactionUpdated(false);
+    }
+    const fetchRecords = async () => {
+        const recordsData = await Records.getAllRecords();
+        setRecords(recordsData);
+        setIsRecordUpdated(false);
     }
 
-    fetchData().catch(console.error);
+  useEffect(() => {
+    if (isHouseUpdated) {
+      fetchHouses();
+    }
+    if (isMaterialUpdated) {
+      fetchMaterials();
+    }
+    if (isPaintUpdated) {
+      fetchPaints();
+    }
+    if (isWalletUpdated) {
+      fetchWallets();
+    }
+    if (isTransactionUpdated) {
+      fetchTransactions();
+    }
+    if (isRecordUpdated) {
+      fetchRecords();
+    }
+  },
 
-  }, []);
+  [ isHouseUpdated, isMaterialUpdated, isPaintUpdated, isWalletUpdated, isTransactionUpdated, isRecordUpdated ]);
 
   return (
-    <DataContext.Provider value={{ houses, materials, paints, wallet, transactions, record, paintSum, materialSum, setHouses, setMaterials, setPaints, setWallets, setTransactions, setRecords }}>
+    <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum}}>
       {children}
     </DataContext.Provider>
   );

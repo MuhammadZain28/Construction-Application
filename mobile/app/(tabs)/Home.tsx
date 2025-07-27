@@ -7,7 +7,7 @@ import { useDataContext } from "./DataContext";
 
 let house: House[] = [];
 const Home: React.FC = () => {
-  const {houses, materials} = useDataContext();
+  const {houses, materials, setIsMaterialUpdated} = useDataContext();
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
@@ -60,49 +60,36 @@ const Home: React.FC = () => {
   const [material, setMaterial] = React.useState<Material[]>([]);
 
   const handleClick = (id: string, status: boolean) => {
-    setMaterial(prev =>
-      prev.map(m =>
-        m.id === id
-          ? new Material(m.id, m.house, m.product, m.no, m.price, m.date, status) 
-          : m
-        )
-      );
     Material.UpdateUsed(id, status).catch(console.error);
+    setIsMaterialUpdated(true);
   };
   
   const addData = async() => {
-    const id = await Material.save(home, product, no, price, date.toISOString().substring(0, 10), false);
-    const data = new Material(id, home, product, no, price, date.toISOString().substring(0, 10), false);
-    setMaterial(prev => [ ...prev, data]);
+    Material.save(home, product, no, price, date.toISOString().substring(0, 10), false);
+    setIsMaterialUpdated(true);
     setPrice(0);
     setNo(0);
     setProduct("Material");
     setProductId("");
-    setHome("");
+    setHome("All Houses");
   }
   const handleDelete = (id: string) => {
-    setMaterial(prev => prev.filter(m => m.id !== id));
+    Material.deleteMaterial(id).catch(console.error);
+    setIsMaterialUpdated(true);
   };
   const handleUpdate = () => {
-    setMaterial(prev =>
-      prev.map(m =>
-        m.id === productId
-          ? new Material(m.id, home, product, no, price, date.toLocaleString().substring(0, 10), m.used) 
-          : m
-      )
-    );
-    Material.UpdateMaterial(productId, home, product, no, price, date.toLocaleString().substring(0, 10));
-    
+    Material.UpdateMaterial(productId, home, product, no, price, date.toISOString().substring(0, 10));
+    setIsMaterialUpdated(true);
     setUpdateVisible(false);
     setVisible(false);
     setPrice(0);
     setNo(0);
     setProduct("Material");
     setProductId("");
-    setHome("");
+    setHome("All Houses");
   };
   return (
-    <ScrollView>
+    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgb(7, 180, 48)'}]}>
           <View>
@@ -124,19 +111,19 @@ const Home: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={[styles.card, {backgroundColor: 'rgb(255, 208, 0)'}]}>
+        <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
             <Text style={styles.cardText}> Spend </Text>            
             <Text style={styles.cardText}> {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgb(255, 208, 0)'}]}/>
+              <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgba(255, 183, 0, 1)'}]}/>
             </View>
             <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', width: 170, borderRadius: 20, paddingInline: 15, paddingBlock: 5, alignItems: "center", justifyContent: "center", flexDirection: "row"}} 
                               onPress={toggleDropdown}>
-              <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 208, 0)', fontSize: 28, paddingInline: 5,}}/>
-              <Text style={{color: 'rgb(255, 208, 0)', fontSize: 18, fontWeight: "bold"}}>
+              <MaterialCommunityIcons name="home" style={{color: 'rgba(255, 183, 0, 1)', fontSize: 28, paddingInline: 5,}}/>
+              <Text style={{color: 'rgba(255, 183, 0, 1)', fontSize: 18, fontWeight: "bold"}}>
                 { house.find(h=>home === h.code)?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
@@ -145,8 +132,8 @@ const Home: React.FC = () => {
         </View>
       </View>
       <View style={styles.body}>
-        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
-          <Text style={{fontSize:24, fontWeight: 'bold', paddingInline: 20}}>Material</Text>
+        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10, marginInline: 15}}>
+          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Material</Text>
         </View>
 
         <View style={styles.searchBar}>
@@ -177,7 +164,7 @@ const Home: React.FC = () => {
           }
         </View>
         
-        <View style={{gap: 5}}>
+        <View style={{gap: 15}}>
           {material.map((materials, index) => ( 
 
           <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(materials.id);}} onPress={() => {setProductId(materials.id); setProduct(materials.product); setNo(materials.no); setPrice(materials.price); setHome(materials.house); setVisible(true); setUpdateVisible(true); setDate(new Date(materials.date));}}>
@@ -194,7 +181,7 @@ const Home: React.FC = () => {
                 :      
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(materials.id, true)}>
-                  <View style={{ backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                  <View style={{ backgroundColor: 'rgba(255, 183, 0, 1)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
                   </View>
@@ -346,7 +333,7 @@ const Home: React.FC = () => {
                           setNo(0);
                           setProduct("Material");
                           setProductId("");
-                          setHome("");
+                          setHome("All Houses");
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
@@ -372,7 +359,7 @@ const Home: React.FC = () => {
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
                                                       setProductId("");
-                                                      setHome("");
+                                                      setHome("All Houses");
                                                       setProduct("Material");
                                                       setNo(0);
                                                       setPrice(0);}}>
@@ -481,7 +468,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.128,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -510,10 +497,11 @@ const styles = StyleSheet.create({
   },
   body: {
     backgroundColor: 'rgb(255, 255, 255)',
+    paddingBottom: 20,
     borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.128,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },

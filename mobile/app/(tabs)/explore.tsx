@@ -7,7 +7,7 @@ import { useDataContext } from './DataContext'; // Adjust the import path as nec
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
 export default function TabTwoScreen(Houses: House[]) {
-  const { houses, paints } = useDataContext();
+  const { houses, paints, setIsPaintUpdated } = useDataContext();
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
@@ -54,39 +54,26 @@ export default function TabTwoScreen(Houses: House[]) {
   }
 
   const handleClick = (id: string, status: boolean) => {
-    setPaint(prev =>
-      prev.map(p =>
-        p.id === id
-          ? new Paints(p.id, p.color, p.name, p.house, p.no, p.price, p.date, status) // status = true
-          : p
-        )
-      );
+    setIsPaintUpdated(true);
     Paints.UpdateUsed(id, status).catch(console.error);
   };
   
   const addData = async() => {
-    const id = await Paints.save(name, color, home, no, price, date.toLocaleDateString(), false);
-    const data = new Paints(id, name, color, home, no, price, date.toLocaleDateString(), false);
-    setPaint(prev => [ ...prev, data]);
+    await Paints.save(name, color, home, no, price, date.toISOString().substring(0, 10), false);
+    setIsPaintUpdated(true);
     setPrice(0);
     setNo(0);
     setcolor("Paint");
     setcolorId("");
-    setHome("");
+    setHome("All Houses");
   }
   const handleDelete = (id: string) => {
-    setPaint(prev => prev.filter(p => p.id !== id));
+    setIsPaintUpdated(true)
     Paints.deletePaint(id)
   };
   const handleUpdate = () => {
-    setPaint(prev =>
-      prev.map(p =>
-        p.id === colorId
-          ? new Paints(p.id, name, color, home, no, price, p.date, p.used) // status = true
-          : p
-      )
-    );
-    Paints.UpdatePaint(colorId, name, color, home, no, price, date.toLocaleDateString());
+    setIsPaintUpdated(true);
+    Paints.UpdatePaint(colorId, name, color, home, no, price, date.toISOString().substring(0, 10));
 
     setUpdateVisible(false);
     setVisible(false);
@@ -94,11 +81,11 @@ export default function TabTwoScreen(Houses: House[]) {
     setNo(0);
     setcolor("Paint");
     setcolorId("");
-    setHome("");
+    setHome("All Houses");
   };
   return (
 
-    <ScrollView>
+    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgba(12, 41, 145, 1)'}]}>
           <View>
@@ -141,8 +128,8 @@ export default function TabTwoScreen(Houses: House[]) {
         </View>
       </View>
       <View style={styles.body}>
-        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10,}}>
-          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5}}>Paints</Text>
+        <View style={{flexDirection: "row", justifyContent: "space-between", marginBlock: 10, marginInline: 15}}>
+          <Text style={{fontSize:24, fontWeight: 'bold', padding: 5,}}>Paints</Text>
         </View>
         
         <View style={styles.searchBar}>
@@ -152,7 +139,7 @@ export default function TabTwoScreen(Houses: House[]) {
           }
           { search.length > 0 &&
             <FlatList 
-              data={paint.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.name.toLowerCase().includes(search.toLowerCase()))}
+              data={paint.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.color.toLowerCase().includes(search.toLowerCase()))}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
@@ -173,7 +160,7 @@ export default function TabTwoScreen(Houses: House[]) {
             />
           }
         </View>
-        <View style={{gap: 5}}>
+        <View style={{gap: 15}}>
           {paint.map((paints, index) => ( 
 
           <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(paints.id);}} onPress={() => {setcolorId(paints.id); setcolor(paints.color); setName(paints.name); setNo(paints.no); setPrice(paints.price); setHome(paints.house); setVisible(true); setUpdateVisible(true);}}>
@@ -190,7 +177,7 @@ export default function TabTwoScreen(Houses: House[]) {
                 :      
                 <TouchableOpacity style={{padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}
                 onPress={()=> handleClick(paints.id, true)}>
-                  <View style={{ backgroundColor: 'rgb(237, 188, 29)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
+                  <View style={{ backgroundColor: 'rgba(255, 183, 0, 1)', flexDirection: 'row', borderRadius: 15, paddingInline: 10, paddingBlock: 5, justifyContent: 'center', alignItems: 'center'}}>
                     <MaterialIcons name='incomplete-circle' style={{fontSize: 20, color: 'rgb(255, 255, 255)', paddingLeft: 2}}></MaterialIcons>
                     <Text style={{color: 'rgb(255,255,255)', fontWeight: 'bold'}}> Finish</Text>
                   </View>
@@ -368,7 +355,7 @@ export default function TabTwoScreen(Houses: House[]) {
                           setNo(0);
                           setcolor("Paint");
                           setcolorId("");
-                          setHome("");
+                          setHome("All Houses");
           }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
             <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
           </TouchableOpacity>
@@ -394,7 +381,7 @@ export default function TabTwoScreen(Houses: House[]) {
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
                                     onPress={() => { setDelete(false);
                                                       setcolorId("");
-                                                      setHome("");
+                                                      setHome("All Houses");
                                                       setcolor("Paint");
                                                       setNo(0);
                                                       setPrice(0);}}>
@@ -500,7 +487,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.128,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -530,9 +517,10 @@ const styles = StyleSheet.create({
   body: {
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
+    paddingBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.128,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },

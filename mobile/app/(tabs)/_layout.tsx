@@ -9,6 +9,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { DataProvider } from './DataContext';
 
 export default function TabLayout() {
@@ -16,19 +17,16 @@ export default function TabLayout() {
 
   return (
     <DataProvider>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
-          tabBarStyle: Platform.select({
-            ios: {
-              // Use a transparent background on iOS to show the blur effect
-              position: 'absolute',
-            },
-            default: {},
-          }),
+          tabBarStyle: {
+            height: Platform.OS === 'android' ? 70 : 60,
+          },
         }}>
           
         <Tabs.Screen
@@ -67,6 +65,7 @@ export default function TabLayout() {
         }}
       />
       </Tabs>
+      </SafeAreaView>
     </DataProvider>
   );
 }

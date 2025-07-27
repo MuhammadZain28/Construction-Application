@@ -5,7 +5,7 @@ import Svg, {Circle} from 'react-native-svg';
 import { useDataContext } from './DataContext';
   
 const Dashboard: React.FC = () => {
-  const {houses, transactions, materials, paints, paintSum, materialSum} = useDataContext();
+  const {houses, transactions, materials, paints, record, paintSum, materialSum} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
   const [materialProgress, setMaterialProgress] = React.useState(0);
   const [paintProgress, setPaintProgress] = React.useState(0);
@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
               <MaterialCommunityIcons name='cash' style={{fontSize: 42, color: 'rgba(195, 53, 251, 1)'}}></MaterialCommunityIcons>
               </View>
             </View>
-            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter((r) => r.type === 'In').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + spend}</Text>
+            <Text style={styles.number}>{-transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + spend - record.filter((r) => r.type === 'Out').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
         </View>
         <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
@@ -134,7 +134,6 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
               <Text style={[styles.sectionText, {color: 'rgba(0, 0, 0, 1)',}]}>Overview</Text>
             </View>
-            <Text style={[{color: 'rgba(0, 0, 0, 1)', marginInline: 40, paddingTop: 10, fontSize: 12, fontWeight: 'bold',  borderBlockEndColor: 'rgba(0, 0, 0, 1)', borderBottomWidth: 2}]}>The Graphical Representation of Spending on Materials and Paints on Monthly Basis.</Text>
             <View style={styles.barChart}>
               <View style={styles.x}>
                 <View style={{flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center'}}>
@@ -294,9 +293,9 @@ const Dashboard: React.FC = () => {
                   <Text style={[styles.pieText, {bottom: 35}]}>Paints</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginLeft: 160, marginTop: -50, gap: 5}}>
-                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>10%</Text>
-                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>10%</Text>
-                </View> 
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{materialProgress}%</Text>
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{paintProgress}%</Text>
+                </View>
               </View>
               <View style={{display: 'flex', flex: 1, padding: 10, gap: 20}}>
                 <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 10, padding: 10}}>
