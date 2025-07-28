@@ -4,6 +4,7 @@ import { Material, House } from "../Class/App";
 import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useDataContext } from "./DataContext";
+import Loading from "@/components/Loading";
 
 let house: House[] = [];
 const Home: React.FC = () => {
@@ -23,6 +24,7 @@ const Home: React.FC = () => {
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
   const [search, setSearch] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
 
   const onChange = (event: any, date?: Date) => {
     if (date) {
@@ -31,6 +33,12 @@ const Home: React.FC = () => {
       setShowDate(false);
     }
   };
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   React.useEffect(() => {
     
     if (Platform.OS === 'android') {
@@ -88,6 +96,11 @@ const Home: React.FC = () => {
     setProductId("");
     setHome("All Houses");
   };
+  
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
       <View style={styles.header}>
@@ -115,8 +128,8 @@ const Home: React.FC = () => {
         <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
             <Text style={styles.cardText}> Spend </Text> 
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
-              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)'}]}>Rs.  {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 5, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 15, borderRadius: 50}}>
+              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)', fontSize: 24}]}>Rs.  {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
             </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -502,6 +515,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(255, 255, 255)',
     paddingBottom: 20,
     borderRadius: 15,
+    marginBlock: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

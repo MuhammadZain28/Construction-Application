@@ -5,6 +5,7 @@ import { Ionicons, FontAwesome6, MaterialCommunityIcons, MaterialIcons } from '@
 import { useDataContext } from './DataContext';
 import { House, Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
 
 export default function Wallet() {
   const { houses, wallet, transactions, record, materials, paints, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
@@ -33,6 +34,7 @@ export default function Wallet() {
   const [outSum, setOutSum] = React.useState<number>(0);
   const [lastInTransaction, setLastInTransaction] = React.useState<number>(0);
   const [lastOutTransaction, setLastOutTransaction] = React.useState<number>(0);
+  const router = useRouter();
   const transactionReasons = [
   "Other",
   // Income-Related
@@ -372,7 +374,7 @@ export default function Wallet() {
           <View style={styles.body}>
             <View style={styles.row}>
               <Text style={styles.icon}>Records</Text>
-              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => {setFormType('Record'); setUpdateVisible(true);}}>
+              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { router.push({pathname: '/Record', params: { id: Walletid }}); setUpdateVisible(true);}}>
                 <Ionicons name='book' color={'rgb(255,255,255)'} size={20}></Ionicons>
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Record</Text>
               </TouchableOpacity>
@@ -852,7 +854,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: '100%',
     paddingBlock: 20,
-    marginBlock: 10,
+    marginBlock: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

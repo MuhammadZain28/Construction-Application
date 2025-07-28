@@ -111,8 +111,8 @@ export default function TabTwoScreen(Houses: House[]) {
         <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
             <Text style={styles.cardText}> Spend </Text>        
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
-              <Text style={[styles.cardText, { color: 'rgba(255, 183, 0, 1)' }]}>Rs. {paint.filter(p => p.house === home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 5, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 15, borderRadius: 50}}>
+              <Text style={[styles.cardText, { color: 'rgba(255, 183, 0, 1)', fontSize: 24 }]}>Rs. {paint.filter(p => p.house === home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
             </View>    
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -521,6 +521,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
     paddingBottom: 20,
+    marginBlock: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
