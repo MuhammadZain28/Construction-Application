@@ -29,6 +29,10 @@ export default function Wallet() {
   const [records, setRecords] = React.useState<Records[]>([]);
   const [updateVisible, setUpdateVisible] = React.useState<boolean>(false);
   const [dropDownType, setDropDownType] = React.useState<string>('');
+  const [sum, setSum] = React.useState<number>(0);
+  const [outSum, setOutSum] = React.useState<number>(0);
+  const [lastInTransaction, setLastInTransaction] = React.useState<number>(0);
+  const [lastOutTransaction, setLastOutTransaction] = React.useState<number>(0);
   const transactionReasons = [
   "Other",
   // Income-Related
@@ -73,6 +77,37 @@ export default function Wallet() {
   "Commission",
   "Tax Payment"
 ];
+
+ React.useEffect(() => {
+    const MonthlySum = async () => {
+      const month = new Date().toISOString().slice(0, 7);
+      let sum = 0;
+      setSum(0);
+      setOutSum(0);
+      sum = await Wallets.getMonthlySum(month, Walletid);
+      setSum(prev => prev + sum);
+      sum = await Transactions.getMonthlySum(month, 'In', Walletid);
+      setSum(prev => prev + sum);
+      sum = await Records.getMonthlySum(month, 'In', Walletid);
+      setSum(prev => prev + sum);
+      sum = await Transactions.getMonthlySum(month, 'Out', Walletid);
+      setOutSum(prev => prev + sum);
+      sum = await Records.getMonthlySum(month, 'Out', Walletid);
+      setOutSum(prev => prev + sum);
+    }
+    MonthlySum();
+  }, [Walletid, transactions, records]);
+
+  React.useEffect(() => {
+    const lastTransaction = async () => {
+      const amount = transactions.filter(item => item.wallet === Walletid && item.type === 'In').sort((a, b) => a.date.localeCompare(b.date));
+      setLastInTransaction(amount[amount.length - 1]?.amount || 0);
+      const outAmount = transactions.filter(item => item.wallet === Walletid && item.type === 'Out').sort((a, b) => a.date.localeCompare(b.date));
+      setLastOutTransaction(outAmount[outAmount.length - 1]?.amount || 0);
+    }
+    lastTransaction();
+  }, [Walletid, transactions]);
+
   React.useEffect(() => {
     const fetch = () => {
       setHouse(houses);
@@ -116,7 +151,7 @@ export default function Wallet() {
       return;
     }
     try {
-      Wallets.save(name, home, cash, date.toISOString());
+      Wallets.save(name, home, cash, date.toISOString().substring(0, 10));
       setIsWalletUpdated(true);
       setFormType('');
     } 
@@ -132,7 +167,7 @@ export default function Wallet() {
         return;
       }
       const amount = walletItem.amount + cash;
-      Wallets.UpdateAmount(Walletid, amount, date.toISOString());
+      Wallets.UpdateAmount(Walletid, amount, date.toISOString().substring(0, 10), cash);
       setIsWalletUpdated(true);
       setFormType('');
     }
@@ -147,7 +182,7 @@ export default function Wallet() {
       return;
     }
     try {
-      await Transactions.save(Walletid, cash, type, date.toISOString(), reason, name);
+      await Transactions.save(Walletid, cash, type, date.toISOString().substring(0, 10), reason, name);
       setIsTransactionUpdated(true);
       setFormType('');
       setUpdateVisible(false);
@@ -163,7 +198,7 @@ export default function Wallet() {
       return;
     }
     try {
-      await Records.save(name, Walletid, cash, type, date.toISOString(), reason);
+      await Records.save(name, Walletid, cash, type, date.toISOString().substring(0, 10), reason);
       setIsRecordUpdated(true);
       setFormType('');
       setUpdateVisible(false);
@@ -205,7 +240,7 @@ export default function Wallet() {
       return;
     }
     try {
-      Transactions.update(id, Walletid, cash, type, date.toISOString(), reason, name);
+      Transactions.update(id, Walletid, cash, type, date.toISOString().substring(0, 10), reason, name);
       setIsTransactionUpdated(true);
       setFormType('');
     }
@@ -219,8 +254,8 @@ export default function Wallet() {
       return;
     }
     try {
-      
-      Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString(), reason);
+
+      Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString().substring(0, 10), reason);
       setIsRecordUpdated(true);
       setFormType('');
     }
@@ -258,20 +293,20 @@ export default function Wallet() {
                     <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
                       <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly In</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {sum}</Text>
                         <View style={{ backgroundColor: 'rgba(10, 255, 10, 0.52)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
                           <Ionicons name='arrow-up' size={12} color={'rgb(255, 255,255)'}/>
-                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {lastInTransaction}</Text>
                         </View>
                       </View>
                     </View>
                     <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
                       <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly Out</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. 0</Text>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {outSum}</Text>
                         <View style={{ backgroundColor: 'rgba(255, 0, 0, 0.6)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
                           <Ionicons name='arrow-down' size={12} color={'rgb(255, 255,255)'}/>
-                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> 0</Text>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {lastOutTransaction}</Text>
                         </View>
                       </View>
                     </View>
@@ -310,7 +345,7 @@ export default function Wallet() {
           }
         </View>
             <View style={{ gap: 10, marginTop: 10 }}>
-              { transaction.map((item, index) => (
+              { transaction.filter(t => t.wallet === Walletid).map((item, index) => (
                  item.type === 'In' ?
                 <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
                 onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
@@ -369,7 +404,7 @@ export default function Wallet() {
               }
             </View>
             <View style={{ gap: 10, marginTop: 10 }}>
-              { records.map((item, index) => (
+              { records.filter(r => r.wallet === Walletid).map((item, index) => (
                 item.type === 'In' ?
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}

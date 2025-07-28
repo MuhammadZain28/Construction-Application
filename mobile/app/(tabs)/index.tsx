@@ -6,7 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
 
 export default function HomeScreen() {
-  const { houses } = useDataContext();
+  const { houses, materials, paints } = useDataContext();
   const [visible, setVisible] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
@@ -131,12 +131,12 @@ export default function HomeScreen() {
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)',  width: 75}}>Material</Text>                
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>0</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{materials.filter(m => m.house === code).length}</Text>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', width: 75}}>Paint</Text>  
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>0</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{paints.filter(p => p.house === code).length}</Text>
                 </View>
               </View>
             </View>
@@ -151,7 +151,7 @@ export default function HomeScreen() {
               <Text style={styles.cardText}> Spend </Text>
               <View style={{flexDirection: 'row', alignItems: 'center', marginInline: 20, justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 10, paddingBlock: 5, borderRadius: 20}}>
                 <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>Rs.</Text>  
-                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>0</Text>
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>{materials.filter(m => m.house === code).reduce((acc, curr) => acc + curr.price*curr.no, 0) + paints.filter(p => p.house === code).reduce((acc, curr) => acc + curr.price*curr.no, 0)}</Text>
               </View>
             </View>
             <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>

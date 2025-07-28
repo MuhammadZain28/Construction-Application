@@ -93,8 +93,9 @@ export default function TabTwoScreen(Houses: House[]) {
               <Text style={styles.cardText}>{ color }</Text>
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>    
-            
-            <Text style={styles.cardText}>{ color === "Paint" ? paint.length : paint.filter(p => p.color === color).length}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 120, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
+              <Text style={[styles.cardText, {color: 'rgba(12, 41, 145, 1)',}]}>{ color === "Paint" ? paint.length : paint.filter(p => p.color === color).length}</Text>
+            </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -109,8 +110,10 @@ export default function TabTwoScreen(Houses: House[]) {
         </View>
         <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
-            <Text style={styles.cardText}> Spend </Text>            
-            <Text style={styles.cardText}> {paint.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+            <Text style={styles.cardText}> Spend </Text>        
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
+              <Text style={[styles.cardText, { color: 'rgba(255, 183, 0, 1)' }]}>Rs. {paint.filter(p => p.house === home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+            </View>    
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
             <View style={styles.iconContainer}>
@@ -492,7 +495,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: 'rgb(255, 255, 255)',
   },

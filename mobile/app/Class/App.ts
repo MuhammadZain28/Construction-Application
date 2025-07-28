@@ -1,5 +1,5 @@
 import { Database } from '../Firebase/firebase';
-import { ref, set, push, get, update, remove } from 'firebase/database';
+import { ref, set, push, get, update, remove, query, orderByChild, limitToLast, equalTo } from 'firebase/database';
 
 export class House {
     name: string;
@@ -177,7 +177,6 @@ export class Material {
             const key = `${year}-${month}`;
             if (sums[key] !== undefined) {
                 sums[key] += data.price * data.no;
-                alert(`Key: ${key}, Value: ${sums[key]}`); 
             }
         });
         return sums;
@@ -286,7 +285,6 @@ export class Paints {
             const key = `${year}-${month}`;
             if (sums[key] !== undefined) {
                 sums[key] += data.price * data.no;
-                alert(`Key: ${key}, Value: ${sums[key]}`);
             }
         });
         return sums;
@@ -316,7 +314,9 @@ export class Wallets {
             name: name,
             house: house,
             amount: amount,
-            date: date
+            date: date,
+            lastCashIn: amount,
+            lastUpdated: date,
         });
         return newWalletRef.key; 
     }
@@ -358,12 +358,13 @@ export class Wallets {
         });
     }
 
-    static async UpdateAmount(id: string, amount: number, date: string): Promise<void> {
+    static async UpdateAmount(id: string, amount: number, date: string, cash: number): Promise<void> {
         const db = await Database();
         const walletRef = ref(db, `wallets/${id}`);
         await update(walletRef, {
             amount: amount,
-            date: date
+            lastUpdated: date,
+            lastCashIn: cash
         });
     }
 
@@ -371,6 +372,26 @@ export class Wallets {
         const db = await Database();
         const walletRef = ref(db, `wallets/${id}`);
         await remove(walletRef);
+    }
+
+    static async getMonthlySum(month: string, walletId: string): Promise<number> {
+        const db = await Database();
+        const walletsRef = ref(db, `wallets/${walletId}`);
+        const snapshot = await get(walletsRef);
+        let sum = 0;
+        console.log(snapshot);
+        if (!snapshot.exists()) {
+            return 0;
+        }
+        else {
+            const data = snapshot.val();
+            const walletMonth = data.lastUpdated.split('-')[1];
+            const walletYear = data.lastUpdated.split('-')[0];
+            if (`${walletYear}-${walletMonth}` === month ) {
+                sum += data.lastCashIn;
+            }
+        }
+        return sum;
     }
 }
 
@@ -453,6 +474,34 @@ export class Transactions {
             name: name
         });
     }
+    static async getMonthlySum(month: string, type: 'In' | 'Out', wallet: string): Promise<number> {
+        const db = await Database();
+        const transactionsRef = ref(db, 'transactions');
+        const snapshot = await get(transactionsRef);
+        let sum = 0;
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const transactionMonth = data.date.split('-')[1];
+            const transactionYear = data.date.split('-')[0];
+            if (`${transactionYear}-${transactionMonth}` === month && data.type === type && data.wallet === wallet) {
+                sum += data.amount;
+            }
+        });
+        return sum;
+    }
+    static async getLastTransaction(walletId: string): Promise<number> {
+        const db = await Database();
+        const transactionsRef = ref(db, 'transactions');
+        const q = query(transactionsRef, orderByChild('type'), equalTo('In'), orderByChild('wallet'), equalTo(walletId), orderByChild('date'), limitToLast(1));
+        const snapshot = await get(q);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const lastTransactionKey = Object.keys(data)[0];
+            return data[lastTransactionKey].amount;
+        } else {
+            return 0; // No transactions found
+        }
+    }
 }
 
 export class Records {
@@ -529,5 +578,20 @@ export class Records {
             date: date,
             reason: reason
         });
+    }
+    static async getMonthlySum(month: string, type: 'In' | 'Out', wallet: string): Promise<number> {
+        const db = await Database();
+        const recordsRef = ref(db, 'records');
+        const snapshot = await get(recordsRef);
+        let sum = 0;
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const recordMonth = data.date.split('-')[1];
+            const recordYear = data.date.split('-')[0];
+            if (`${recordYear}-${recordMonth}` === month && data.type === type && data.wallet === wallet) {
+                sum += data.amount;
+            }
+        });
+        return sum;
     }
 }
