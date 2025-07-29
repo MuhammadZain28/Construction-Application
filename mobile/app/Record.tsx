@@ -1,12 +1,294 @@
 import React from "react";
-import { ActivityIndicator, StyleSheet, View, ScrollView } from "react-native";
+import { Text, StyleSheet, View, ScrollView, TouchableOpacity, TextInput, FlatList, Platform, Modal } from "react-native";
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLocalSearchParams } from "expo-router";
+import { Data, Records } from "./Class/App";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Record: React.FC = () => {
+  const { Recordid } = useLocalSearchParams();
+  const [searchData, setSearchData] = React.useState("");
+  const [record, setRecord] = React.useState<Data[]>([]);
+  const [cash, setCash] = React.useState(0);
+  const [date, setDate] = React.useState(new Date());
+  const [reason, setReason] = React.useState("Other");
+  const [formType, setFormType] = React.useState("Record");
+  const [showReasons, setShowReasons] = React.useState(false);
+  const [showDate, setShowDate] = React.useState(false);
+  const [id, setId] = React.useState("");
+  const [dropDownType, setDropDownType] = React.useState("");
+  const [deleteType, setDeleteType] = React.useState("");
+  const [updateVisible, setUpdateVisible] = React.useState(false);
+  const [mobile, setMobile] = React.useState(false);
+  const [RecordId, setRecordId] = React.useState<string>("");
+const transactionReasons = [
+  "Other",
+  // Income-Related
+  "Sale",
+  "Payment Received",
+  "Refund Received",
+  "Bonus",
+  "Interest Income",
+  "Investment Return",
+
+  // Expense-Related
+  "Purchase",
+  "Bill Payment",
+  "Rent",
+  "Utilities",
+  "Salary Payment",
+  "Refund Issued",
+  "Maintenance",
+  "Transportation",
+  "Marketing",
+  "Subscription",
+
+  // Transfer/Adjustment
+  "Fund Transfer",
+  "Cash Deposit",
+  "Cash Withdrawal",
+  "Internal Adjustment",
+  "Currency Exchange",
+
+  // Inventory/Material Usage
+  "Stock Purchase",
+  "Stock Sale",
+  "Damaged Goods",
+  "Returned Items",
+  "Sample Distribution",
+
+  // Custom/Other
+  "Miscellaneous",
+  "Donation",
+  "Correction",
+  "Penalty",
+  "Commission",
+  "Tax Payment"
+];
+  React.useEffect(() => {
+    const fetchRecords = async () => {
+      if (typeof Recordid === "string") {
+        setRecordId(Recordid);
+      } else if (Array.isArray(Recordid)) {
+        setRecordId(Recordid[0]);
+      }
+      const fetchedRecords = await Records.getRecordsByID(RecordId);
+      setRecord(fetchedRecords);
+    };
+    fetchRecords();
+  }, [Recordid, RecordId]);
+
+  React.useEffect(() => {
+    const check = () => {
+      if (Platform.OS === 'web') {
+        setMobile(false);
+      }
+    }
+
+    check();
+  }, []);
+  const onChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDate(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    } else {
+      setDate(new Date());
+    }
+  };
+  const saveRecord = async (type: 'In' | 'Out') => {
+    if (cash <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+    if (reason.length === 0) {
+      alert("Please enter a reason");
+      return;
+    }
+    await Data.save(id, cash, type, date.toISOString(), reason);
+    setUpdateVisible(false);
+    setCash(0);
+    setDate(new Date());
+    setReason("Other");
+    setId("");
+    setFormType("Record");
+  };
+  const updateRecord = async (type: 'In' | 'Out') => {
+    if (cash <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+    if (reason.length === 0) {
+      alert("Please enter a reason");
+      return;
+    }
+    await Data.updateData(RecordId, id, cash, type, date.toISOString(), reason);
+    setUpdateVisible(false);
+    setCash(0);
+    setDate(new Date());
+    setReason("Other");
+    setId("");
+    setFormType("Record");
+  };
   return (
     <ScrollView style={styles.container}>
       <View style={styles.body}>
-        <ActivityIndicator size="large" color="#585858ff" />
+        <View style={styles.row}>
+          <Text style={styles.icon}>Records</Text>
+          <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, paddingInline: 20, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { setFormType('Record'); setUpdateVisible(true); }}>
+            <Ionicons name='book' color={'rgb(255,255,255)'} size={20}></Ionicons>
+            <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Record</Text>
+          </TouchableOpacity>
+        </View>
+            
+        <View style={styles.searchBar}>
+          <TextInput placeholder='Search....' style={styles.searchInput} value={searchData} onChangeText={setSearchData}/>
+          { searchData.length > 0 &&
+            <TouchableOpacity onPress={() => setSearchData("")} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
+          }
+          { searchData.length > 0 &&
+            <FlatList 
+              data= {record.filter(item => item.amount.toString().includes(searchData.toLowerCase()))}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => {
+                  setCash(item.amount);
+                  setDate(new Date(item.date));
+                  setReason(item.reason || 'Other');
+                  setFormType('Record');
+                }}>
+                  <Text style={{ padding: 10, fontSize: 16 }}>{item.amount}</Text>
+                </TouchableOpacity>
+              )}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+            />
+          }
+        </View>
+        <View style={{ gap: 10, marginTop: 10 }}>
+          { record.map((item, index) => (
+            item.type === 'In' ?
+          <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
+          onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
+          onPress={() => {
+                  setId(item.id);
+                  setCash(item.amount);
+                  setDate(new Date(item.date));
+                  setReason(item.reason || 'Other');
+                  setFormType('Record');
+                }}>
+            <View style={[styles.row, { gap: 10 }]}>
+              <FontAwesome6 name='user-circle' size={30} color={'rgba(4, 159, 9, 1)'} />
+              <Text style={{fontSize: 16, color: 'rgba(4, 159, 9, 1)', fontWeight: 700}}>Rs.  {item.amount}</Text>
+            </View>
+            <Text style={{color: 'rgba(4, 159, 9, 1)', fontSize: 16, fontWeight: 700}}>{item.date}</Text>
+          </TouchableOpacity>
+          :
+          <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
+          onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
+          onPress={() => {
+                  setId(item.id);
+                  setCash(item.amount);
+                  setDate(new Date(item.date));
+                  setReason(item.reason || 'Other');
+                  setFormType('Record');
+                }}>
+            <View style={[styles.row, { gap: 10 }]}>
+              <FontAwesome6 name='user-circle' size={30} color={'rgba(211, 0, 0, 1)'} />
+              <Text style={{fontSize: 16, color: 'rgba(211, 0, 0, 1)', fontWeight: 700}}>Rs.  {item.amount}</Text>
+            </View>
+            <Text style={{color: 'rgba(211, 0, 0, 1)', fontSize: 16, fontWeight: 700}}>{item.date}</Text>
+          </TouchableOpacity>
+          ))}
+        </View>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={updateVisible}
+        onRequestClose={() => {
+          setUpdateVisible(false);
+        }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+  
+          <View style={styles.form}>
+            <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Records</Text>
+            <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
+            <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(e) => {setCash(parseInt(e))}} keyboardType='numeric'/>
+            <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
+            <View style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10}]}>
+              <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={reason} onChangeText={(e) => {setReason(e); setShowReasons(true)}}/>
+              <TouchableOpacity>
+                <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
+              </TouchableOpacity>
+              { (reason.length > 0 && showReasons) &&
+                <FlatList
+                      data={transactionReasons.filter(t => t.toLowerCase().includes(reason.toLowerCase()))}
+                      keyExtractor={(item) => item}
+                      style={{ position: 'absolute', width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, left: 0, zIndex: 100, shadowColor: '#000', height: 250,shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+                      scrollEnabled={true}
+                      renderScrollComponent={(props) => <ScrollView {...props} />}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => {
+                          setReason(item);
+                          setShowReasons(false);
+                        }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
+                          { item === reason ?
+                          <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                          :
+                          <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
+                          }
+                          <Text style={{fontSize: 18}}>{item}</Text>
+                        </TouchableOpacity>
+                      )}
+                  />
+              }
+            </View>
+            <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
+            { !mobile ?
+
+              <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
+              onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+              :
+              <View>
+              <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+              onPress={() => setShowDate(true)}>
+              <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                {date.toLocaleDateString()}
+              </Text>
+              <Ionicons name="chevron-down" style={{fontSize: 20}}/>
+            </TouchableOpacity>
+              {showDate && (
+
+                <DateTimePicker
+                value={new Date(date)}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
+              )}
+            </View>
+            }
+            { updateVisible ?
+            <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
+              <TouchableOpacity onPress={() => saveRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                <Text style={styles.text}>Out</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => saveRecord('In')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                <Text style={styles.text}>In</Text>
+              </TouchableOpacity>
+            </View>
+            :
+            <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
+              <TouchableOpacity onPress={() => updateRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                <Text style={styles.text}>Out</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => updateRecord('In')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
+                <Text style={styles.text}>In</Text>
+              </TouchableOpacity>
+            </View>
+            }
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -27,7 +309,62 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     margin: 10,
-  }
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  icon: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'rgba(0, 35, 123, 1)',
+  }, 
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#f1f1f1ff',
+    marginInline: 20,
+    marginBottom: 10,
+    maxWidth: 350,
+    width: '90%',
+    borderColor: '#000',
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    padding: 10,
+    borderRadius: 20,
+    outline: '0px solid transparent',
+  },
+  form: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  input: {
+    borderBottomColor: '#000',
+    borderBottomWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+    fontSize: 16,
+    color: 'rgb(0,0,0)',
+  },
+  text: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default Record;

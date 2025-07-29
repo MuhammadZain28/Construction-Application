@@ -90,11 +90,7 @@ export default function Wallet() {
       setSum(prev => prev + sum);
       sum = await Transactions.getMonthlySum(month, 'In', Walletid);
       setSum(prev => prev + sum);
-      sum = await Records.getMonthlySum(month, 'In', Walletid);
-      setSum(prev => prev + sum);
       sum = await Transactions.getMonthlySum(month, 'Out', Walletid);
-      setOutSum(prev => prev + sum);
-      sum = await Records.getMonthlySum(month, 'Out', Walletid);
       setOutSum(prev => prev + sum);
     }
     MonthlySum();
@@ -374,7 +370,7 @@ export default function Wallet() {
           <View style={styles.body}>
             <View style={styles.row}>
               <Text style={styles.icon}>Records</Text>
-              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { router.push({pathname: '/Record', params: { id: Walletid }}); setUpdateVisible(true);}}>
+              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { setFormType('Record'); setUpdateVisible(true);}}>
                 <Ionicons name='book' color={'rgb(255,255,255)'} size={20}></Ionicons>
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Record</Text>
               </TouchableOpacity>
@@ -407,16 +403,11 @@ export default function Wallet() {
             </View>
             <View style={{ gap: 10, marginTop: 10 }}>
               { records.filter(r => r.wallet === Walletid).map((item, index) => (
-                item.type === 'In' ?
+                item.amount >= 0 ?
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
               onPress={() => {
-                      setId(item.id);
-                      setName(item.name);
-                      setCash(item.amount);
-                      setDate(new Date(item.date));
-                      setReason(item.reason || 'Other');
-                      setFormType('Record');
+                      router.push({pathname: '/Record', params: { id: item.id }});
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
                   <FontAwesome6 name='user-circle' size={30} color={'rgba(4, 159, 9, 1)'} />
@@ -428,12 +419,7 @@ export default function Wallet() {
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
               onPress={() => {
-                      setId(item.id);
-                      setName(item.name);
-                      setCash(item.amount);
-                      setDate(new Date(item.date));
-                      setReason(item.reason || 'Other');
-                      setFormType('Record');
+                      router.push({pathname: '/Record', params: { Recordid: item.id }});
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
                   <FontAwesome6 name='user-circle' size={30} color={'rgba(211, 0, 0, 1)'} />
@@ -761,11 +747,11 @@ export default function Wallet() {
                 </View>
               </View>,
             House:
+            <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <View style={styles.dropDown}>
-                <TouchableOpacity onPress={() => handleHouseSelect("")}>
+                <TouchableOpacity onPress={() => handleHouseSelect("All Houses")}>
                   <Text style={{ fontWeight: "bold", fontSize: 24}}>Home</Text>
                 </TouchableOpacity>
-
 
                 <FlatList
                       data={house}
@@ -782,7 +768,7 @@ export default function Wallet() {
                       )}
                     />
               </View>
-
+            </View>
           }[dropDownType]}
       </Modal>
     </ScrollView>
