@@ -16,8 +16,6 @@ const Record: React.FC = () => {
   const [showReasons, setShowReasons] = React.useState(false);
   const [showDate, setShowDate] = React.useState(false);
   const [id, setId] = React.useState("");
-  const [dropDownType, setDropDownType] = React.useState("");
-  const [deleteType, setDeleteType] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
   const [RecordId, setRecordId] = React.useState<string>("");
@@ -69,10 +67,12 @@ const transactionReasons = [
     const fetchRecords = async () => {
       if (typeof Recordid === "string") {
         setRecordId(Recordid);
+        alert(Recordid)
       } else if (Array.isArray(Recordid)) {
         setRecordId(Recordid[0]);
+        alert(Recordid[0])
       }
-      const fetchedRecords = await Records.getRecordsByID(RecordId);
+      const fetchedRecords = await Records.getRecordsByID("");
       setRecord(fetchedRecords);
     };
     fetchRecords();
@@ -104,7 +104,8 @@ const transactionReasons = [
       alert("Please enter a reason");
       return;
     }
-    await Data.save(id, cash, type, date.toISOString(), reason);
+    alert(`Saving record with amount: ${cash}, type: ${type}, date: ${date.toISOString()}, reason: ${reason}, id: ${RecordId}`);
+    await Data.save(RecordId, cash, type, date.toISOString(), reason);
     setUpdateVisible(false);
     setCash(0);
     setDate(new Date());
@@ -122,6 +123,19 @@ const transactionReasons = [
       return;
     }
     await Data.updateData(RecordId, id, cash, type, date.toISOString(), reason);
+    setUpdateVisible(false);
+    setCash(0);
+    setDate(new Date());
+    setReason("Other");
+    setId("");
+    setFormType("Record");
+  };
+  const deleteRecord = async () => {
+    if (id.length === 0) {
+      alert("Please select a record to delete");
+      return;
+    }
+    await Data.deleteData(RecordId, id);
     setUpdateVisible(false);
     setCash(0);
     setDate(new Date());
@@ -168,7 +182,7 @@ const transactionReasons = [
           { record.map((item, index) => (
             item.type === 'In' ?
           <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
-          onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
+          onLongPress={() => {setId(item.id); setFormType('Delete');}}
           onPress={() => {
                   setId(item.id);
                   setCash(item.amount);
@@ -184,7 +198,7 @@ const transactionReasons = [
           </TouchableOpacity>
           :
           <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
-          onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
+          onLongPress={() => {setId(item.id); setFormType('Delete');}} 
           onPress={() => {
                   setId(item.id);
                   setCash(item.amount);
@@ -204,10 +218,11 @@ const transactionReasons = [
       <Modal
         animationType="slide"
         transparent={true}
-        visible={updateVisible}
+        visible={formType === ''? false : true}
         onRequestClose={() => {
-          setUpdateVisible(false);
+          setFormType('');
         }}>
+        {{ Record:
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
   
           <View style={styles.form}>
@@ -287,7 +302,22 @@ const transactionReasons = [
             </View>
             }
           </View>
-        </View>
+          <TouchableOpacity onPress={() => setFormType('')}>
+            <Text style={{ color: 'red' }}>close</Text>
+          </TouchableOpacity>
+        </View>,
+        Delete:
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Are you sure you want to delete this record?</Text>
+          <View style={{ flexDirection: 'row', marginTop: 20 }}>
+            <TouchableOpacity onPress={() => deleteRecord()} style={{ marginRight: 10 }}>
+              <Text style={{ color: 'red' }}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setFormType('')}>
+              <Text style={{ color: 'blue' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>}[formType] }
       </Modal>
     </ScrollView>
   );

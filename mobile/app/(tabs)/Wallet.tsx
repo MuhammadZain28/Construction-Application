@@ -407,7 +407,7 @@ export default function Wallet() {
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
               onPress={() => {
-                      router.push({pathname: '/Record', params: { id: item.id }});
+                      router.push({pathname: '/Record', params: { Recordid: item.id }});
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
                   <FontAwesome6 name='user-circle' size={30} color={'rgba(4, 159, 9, 1)'} />
