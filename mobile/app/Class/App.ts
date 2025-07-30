@@ -587,15 +587,10 @@ export class Records {
         const snapshot = await get(recordsRef);
         const records: Data[] = [];
         console.log(snapshot);
-        if (!snapshot.exists()) {
-            console.error('No records found for the given ID:', recordId);
-            return [];
-        }
         if (snapshot.exists()) {
-            snapshot.forEach((childSnapshot) => {
-                const data = childSnapshot.val();
-                for (const [key, value] of Object.entries(data)) {
-                        if (key === 'name' || key === 'wallet' || key === 'TotalAmount') continue;
+            const data = snapshot.val();
+            for (const [key, value] of Object.entries(data)) {
+                if (key === 'name' || key === 'wallet' || key === 'TotalAmount') continue;
 
                         records.push({
                             id: key,
@@ -607,7 +602,6 @@ export class Records {
                             })
                         });
                 }
-            });
         }
         return records;
     }

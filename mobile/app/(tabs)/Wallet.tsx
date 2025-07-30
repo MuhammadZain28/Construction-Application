@@ -214,7 +214,8 @@ export default function Wallet() {
         setDropDownType('');
       }
       else if (type === 'wallet') {
-        Wallets.deleteWallet(id);
+        Wallets.deleteWallet(Walletid);
+        setWalletid("main");
         setIsWalletUpdated(true);
         setDropDownType('');
       }
@@ -271,7 +272,7 @@ export default function Wallet() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 locations={[0, 0.5, 1]}
-                style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]}>
+                style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]} onTouchEnd={() => {setDropDownType('Delete'); setDeleteType("wallet")}}>
                   <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onPress={() => setDropDownType('Wallet')}>
                     <Ionicons name="wallet" size={28} color="#fff" />
                     <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
@@ -359,7 +360,7 @@ export default function Wallet() {
                 onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{fontSize: 16, color: 'rgba(211, 0, 0, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
-                    <Text style={{color: 'rgba(211, 0, 0, 1)', fontSize: 16, fontWeight: 700}}>Rs. {item.amount}</Text>
+                    <Text style={{color: 'rgba(211, 0, 0, 1)', fontSize: 16, fontWeight: 700}}>Rs. {-item.amount}</Text>
                     <Ionicons name='arrow-down' size={20} color={'rgba(211, 0, 0, 1)'} />
                   </View>
                 </TouchableOpacity>
@@ -404,10 +405,10 @@ export default function Wallet() {
             <View style={{ gap: 10, marginTop: 10 }}>
               { records.filter(r => r.wallet === Walletid).map((item, index) => (
                 item.amount >= 0 ?
-              <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
+              <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, marginInline: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
               onPress={() => {
-                      router.push({pathname: '/Record', params: { Recordid: item.id }});
+                      router.push({pathname: '/Record', params: { Recordid: item.id, name: item.name, Total: item.amount, wallet: wallet.find(w => w.id === item.wallet)?.name, house: wallet.find(w => w.id === item.wallet)?.house }});
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
                   <FontAwesome6 name='user-circle' size={30} color={'rgba(4, 159, 9, 1)'} />
@@ -416,10 +417,10 @@ export default function Wallet() {
                 <Text style={{color: 'rgba(4, 159, 9, 1)', fontSize: 16, fontWeight: 700}}>Rs. {item.amount}</Text>
               </TouchableOpacity>
               :
-              <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
+              <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, marginInline: 10, borderRadius: 10 }]} 
               onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
               onPress={() => {
-                      router.push({pathname: '/Record', params: { Recordid: item.id }});
+                      router.push({ pathname: '/Record', params: { Recordid: item.id, name: item.name, Total: item.amount, wallet: wallet.find(w => w.id === item.wallet)?.name, house: wallet.find(w => w.id === item.wallet)?.house }});
                     }}>
                 <View style={[styles.row, { gap: 10 }]}>
                   <FontAwesome6 name='user-circle' size={30} color={'rgba(211, 0, 0, 1)'} />
@@ -601,7 +602,7 @@ export default function Wallet() {
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Transaction</Text>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
                     <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
-                    <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash In</Text>
+                    <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
                     <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(e) => setCash(parseInt(e))}/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
                     <View style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10}]}>

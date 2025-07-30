@@ -18,7 +18,7 @@ export default function TabTwoScreen(Houses: House[]) {
   const [color, setcolor] = React.useState("Paint");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
-  const [home, setHome] = React.useState("");
+  const [home, setHome] = React.useState("All Houses");
   const [name, setName] = React.useState("");
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = React.useState(false);
@@ -543,6 +543,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212, 228, 248, 1)',
     borderRadius: 10,
     padding: 5,
+    marginInline: 10,
     gap: 10,
   },
   data: {

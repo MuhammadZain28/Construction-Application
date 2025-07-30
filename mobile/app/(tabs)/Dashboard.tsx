@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
       const usedPaints = paints.filter(p => p.used === false).length;
       setPaintProgress((usedPaints / totalPaints) * 100);
       let totalSpend = 0;
-      for (let i = 1; i < 12; i++) {
+      for (let i = 1; i <= 12; i++) {
         const month = `${i}`;
         totalSpend += materialSum[`2025-${month.padStart(2, '0')}`] + paintSum[`2025-${month.padStart(2, '0')}`];
       }
@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
               <MaterialCommunityIcons name='cash' style={{fontSize: 42, color: 'rgba(195, 53, 251, 1)'}}></MaterialCommunityIcons>
               </View>
             </View>
-            <Text style={styles.number}>{transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter((r) => r.type === 'In').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>Rs.  {transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter((r) => r.type === 'In').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{-transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + spend - record.filter((r) => r.type === 'Out').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>Rs.  { spend - transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) - record.filter((r) => r.type === 'Out').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
           </View>
         </View>
         <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
@@ -188,62 +188,62 @@ const Dashboard: React.FC = () => {
               <View style={{width: mobile ? '85%' : '95%'}}>
                 <View style={styles.chart}>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-01'] + materialSum['2025-01']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-01'] + materialSum['2025-01']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-01'] + materialSum['2025-01']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-02'] + materialSum['2025-02']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-02'] + materialSum['2025-02']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-02'] + materialSum['2025-02']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-03'] + materialSum['2025-03']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-03'] + materialSum['2025-03']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-03'] + materialSum['2025-03']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-04'] + materialSum['2025-04']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-04'] + materialSum['2025-04']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-04'] + materialSum['2025-04']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-05'] + materialSum['2025-05']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-05'] + materialSum['2025-05']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-05'] + materialSum['2025-05']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-06'] + materialSum['2025-06']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-06'] + materialSum['2025-06']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-06'] + materialSum['2025-06']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-07'] + materialSum['2025-07']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-07'] + materialSum['2025-07']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-07'] + materialSum['2025-07']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-08'] + materialSum['2025-08']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-08'] + materialSum['2025-08']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-08'] + materialSum['2025-08']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-09'] + materialSum['2025-09']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-09'] + materialSum['2025-09']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-09'] + materialSum['2025-09']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-10'] + materialSum['2025-10']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-10'] + materialSum['2025-10']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-10'] + materialSum['2025-10']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-11'] + materialSum['2025-11']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-11'] + materialSum['2025-11']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-11'] + materialSum['2025-11']}</Text>
                     </View>
                   </View>
                   <View style={styles.progressBar}>
-                    <View style={[styles.bar, {width: `${(paintSum['2025-12'] + materialSum['2025-12']) / 30000 * 100}%`}]}>
+                    <View style={[styles.bar, {width: `${(paintSum['2025-12'] + materialSum['2025-12']) / 50000 * 100}%`}]}>
                       <Text style={styles.graphText}>Rs. {paintSum['2025-12'] + materialSum['2025-12']}</Text>
                     </View>
                   </View>
@@ -255,23 +255,23 @@ const Dashboard: React.FC = () => {
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >6000</Text>
+                    <Text >10000</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
-                    <Text >12000</Text>
-                  </View>
-                  <View style={{width: 40, alignItems: 'center',}}>
-                    <Text style={{fontSize: 10}}>|</Text>
-                    <Text >18000</Text>
-                  </View>
-                  <View style={{width: 40, alignItems: 'center',}}>
-                    <Text style={{fontSize: 10}}>|</Text>
-                    <Text >24000</Text>
+                    <Text >20000</Text>
                   </View>
                   <View style={{width: 40, alignItems: 'center',}}>
                     <Text style={{fontSize: 10}}>|</Text>
                     <Text >30000</Text>
+                  </View>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
+                    <Text >40000</Text>
+                  </View>
+                  <View style={{width: 40, alignItems: 'center',}}>
+                    <Text style={{fontSize: 10}}>|</Text>
+                    <Text >50000</Text>
                   </View>
                 </View>
               </View>
@@ -293,8 +293,8 @@ const Dashboard: React.FC = () => {
                   <Text style={[styles.pieText, {bottom: 35}]}>Paints</Text>
                 </View>
                 <View style={{flexDirection: 'row', marginLeft: 160, marginTop: -50, gap: 5}}>
-                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{materialProgress}%</Text>
-                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{paintProgress}%</Text>
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{materialProgress.toPrecision(2)}%</Text>
+                  <Text style={{fontSize: 12, fontWeight: 'bold'}}>{paintProgress.toPrecision(2)}%</Text>
                 </View>
               </View>
               <View style={{display: 'flex', flex: 1, padding: 10, gap: 20}}>

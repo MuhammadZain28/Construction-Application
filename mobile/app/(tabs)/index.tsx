@@ -211,7 +211,7 @@ export default function HomeScreen() {
                     setDelete(true);
                     setCode(house.code);
                   }}>
-              <View style={{flexDirection: 'column', borderRadius: 20, gap: 10, backgroundColor: 'rgba(245, 212, 252, 1)', padding: 10, marginBottom: 10}}>
+              <View style={{flexDirection: 'column', borderRadius: 20, gap: 10, backgroundColor: 'rgba(245, 212, 252, 1)', padding: 10, marginInline: 10, marginBottom: 10}}>
                 <View style={styles.titleContainer}>
                   <Text style={{fontSize: 24, fontWeight: 'bold'}}> {house.code}</Text>
                   <Text style={{fontSize: 14}}>Date: {house.date}</Text>

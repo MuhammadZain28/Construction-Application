@@ -4,15 +4,16 @@ import { Ionicons, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-ico
 import { useLocalSearchParams } from "expo-router";
 import { Data, Records } from "./Class/App";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from "expo-linear-gradient";
 
 const Record: React.FC = () => {
-  const { Recordid } = useLocalSearchParams();
+  const { Recordid, name, Total, wallet, house } = useLocalSearchParams();
   const [searchData, setSearchData] = React.useState("");
   const [record, setRecord] = React.useState<Data[]>([]);
   const [cash, setCash] = React.useState(0);
   const [date, setDate] = React.useState(new Date());
   const [reason, setReason] = React.useState("Other");
-  const [formType, setFormType] = React.useState("Record");
+  const [formType, setFormType] = React.useState("");
   const [showReasons, setShowReasons] = React.useState(false);
   const [showDate, setShowDate] = React.useState(false);
   const [id, setId] = React.useState("");
@@ -67,12 +68,10 @@ const transactionReasons = [
     const fetchRecords = async () => {
       if (typeof Recordid === "string") {
         setRecordId(Recordid);
-        alert(Recordid)
       } else if (Array.isArray(Recordid)) {
         setRecordId(Recordid[0]);
-        alert(Recordid[0])
       }
-      const fetchedRecords = await Records.getRecordsByID("");
+      const fetchedRecords = await Records.getRecordsByID(RecordId);
       setRecord(fetchedRecords);
     };
     fetchRecords();
@@ -105,13 +104,14 @@ const transactionReasons = [
       return;
     }
     alert(`Saving record with amount: ${cash}, type: ${type}, date: ${date.toISOString()}, reason: ${reason}, id: ${RecordId}`);
-    await Data.save(RecordId, cash, type, date.toISOString(), reason);
+    const id = await Data.save(RecordId, cash, type, date.toISOString().substring(0, 10), reason);
+    setRecord(m => [...m, { id: id, amount: cash, type, date: date.toISOString().substring(0, 10), reason }]);
     setUpdateVisible(false);
     setCash(0);
     setDate(new Date());
     setReason("Other");
     setId("");
-    setFormType("Record");
+    setFormType("");
   };
   const updateRecord = async (type: 'In' | 'Out') => {
     if (cash <= 0) {
@@ -122,13 +122,14 @@ const transactionReasons = [
       alert("Please enter a reason");
       return;
     }
-    await Data.updateData(RecordId, id, cash, type, date.toISOString(), reason);
+    await Data.updateData(RecordId, id, cash, type, date.toISOString().substring(0, 10), reason);
+    setRecord(prev => prev.map(item => item.id === id ? new Data(item.id, cash, type, date.toISOString().substring(0, 10), reason) : item));
     setUpdateVisible(false);
     setCash(0);
     setDate(new Date());
     setReason("Other");
     setId("");
-    setFormType("Record");
+    setFormType("");
   };
   const deleteRecord = async () => {
     if (id.length === 0) {
@@ -136,15 +137,44 @@ const transactionReasons = [
       return;
     }
     await Data.deleteData(RecordId, id);
+    setRecord(prev => prev.filter(item => item.id !== id));
     setUpdateVisible(false);
     setCash(0);
     setDate(new Date());
     setReason("Other");
     setId("");
-    setFormType("Record");
+    setFormType("");
   };
   return (
     <ScrollView style={styles.container}>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
+        <LinearGradient
+          colors={['rgba(249, 196, 2, 1)', 'rgba(245, 213, 84, 1)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ minHeight: 200, minWidth: 450, borderRadius: 20, margin: 10, padding: 20, shadowColor: '#000', justifyContent: 'space-between', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)' }}> <FontAwesome6 name="user-circle" size={24} color={'rgba(255, 255, 255, 1)'}/>  {name}</Text>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)', marginTop: 10 }}>    Rs.  {Total}</Text>
+            </View>
+            <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 1)', width: 100, height: 100, borderRadius: 50, padding: 10 }}>
+              <FontAwesome6 name="user" size={64} color={'rgba(245, 213, 84, 1)'}/>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Ionicons name="wallet" size={20} color={'white'} />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)' }}>{wallet}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Ionicons name="home" size={20} color={'white'}/>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)' }}>{house}</Text>
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
       <View style={styles.body}>
         <View style={styles.row}>
           <Text style={styles.icon}>Records</Text>
@@ -161,7 +191,7 @@ const transactionReasons = [
           }
           { searchData.length > 0 &&
             <FlatList 
-              data= {record.filter(item => item.amount.toString().includes(searchData.toLowerCase()))}
+              data= {record.filter(item => item.date.includes(searchData.toLowerCase()))}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
@@ -171,10 +201,10 @@ const transactionReasons = [
                   setReason(item.reason || 'Other');
                   setFormType('Record');
                 }}>
-                  <Text style={{ padding: 10, fontSize: 16 }}>{item.amount}</Text>
+                  <Text style={{ padding: 10, fontSize: 16 }}>Rs. {item.amount}       ({item.date})</Text>
                 </TouchableOpacity>
               )}
-              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 100, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
             />
           }
         </View>
@@ -223,7 +253,7 @@ const transactionReasons = [
           setFormType('');
         }}>
         {{ Record:
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', gap: 30}}>
   
           <View style={styles.form}>
             <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Records</Text>
@@ -302,20 +332,27 @@ const transactionReasons = [
             </View>
             }
           </View>
-          <TouchableOpacity onPress={() => setFormType('')}>
-            <Text style={{ color: 'red' }}>close</Text>
+          <TouchableOpacity onPress={() => setFormType('')} style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', borderRadius: 50,}}>
+            <MaterialCommunityIcons name="close" size={30} color={'rgba(255, 255, 255, 1)'} style={{ padding: 20, }} />
           </TouchableOpacity>
         </View>,
         Delete:
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text>Are you sure you want to delete this record?</Text>
-          <View style={{ flexDirection: 'row', marginTop: 20 }}>
-            <TouchableOpacity onPress={() => deleteRecord()} style={{ marginRight: 10 }}>
-              <Text style={{ color: 'red' }}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setFormType('')}>
-              <Text style={{ color: 'blue' }}>Cancel</Text>
-            </TouchableOpacity>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', }}>
+          <View style={{width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', gap: 20, bottom: 0, position: 'absolute', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}>
+            <Text style={{fontSize: 24, fontWeight: 'bold'}}>DELETE RECORD</Text>
+            <View style={{ flexDirection: 'row', marginTop: 20, maxWidth: 500, alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 20 }}>
+              <TouchableOpacity onPress={() => setFormType('')} style={{ backgroundColor: 'rgba(0, 42, 255, 1)', gap: 5, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', minWidth: 100, paddingBlock: 10, paddingInline: 25, borderRadius: 50}}>
+                <MaterialCommunityIcons name="delete" size={24} color={'white'} />
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+
+              </TouchableOpacity>
+              
+              <TouchableOpacity onPress={() => deleteRecord()} style={{ backgroundColor: 'rgba(255, 0, 0, 1)', gap: 5, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', minWidth: 100, paddingBlock: 10, paddingInline: 25, borderRadius: 50 }}>
+                <MaterialCommunityIcons name="delete" size={24} color={'white'} />
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Delete</Text>
+
+              </TouchableOpacity>
+            </View>
           </View>
         </View>}[formType] }
       </Modal>
@@ -372,7 +409,8 @@ const styles = StyleSheet.create({
     outline: '0px solid transparent',
   },
   form: {
-    width: '90%',
+    width: '80%',
+    maxWidth: 400,
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,

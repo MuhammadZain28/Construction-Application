@@ -129,7 +129,7 @@ const Home: React.FC = () => {
           <View>
             <Text style={styles.cardText}> Spend </Text> 
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 5, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 15, borderRadius: 50}}>
-              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)', fontSize: 24}]}>Rs.  {material.reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)', fontSize: 24}]}>Rs.  {material.filter(m => m.house === home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
             </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -537,6 +537,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(229, 248, 212)',
     borderRadius: 10,
     padding: 5,
+    marginInline: 10,
     gap: 10,
   },
   data: {

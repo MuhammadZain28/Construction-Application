@@ -10,14 +10,12 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DataProvider } from './DataContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <DataProvider>
-      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -65,7 +63,6 @@ export default function TabLayout() {
         }}
       />
       </Tabs>
-      </SafeAreaView>
-    </DataProvider>
+    </SafeAreaView>
   );
 }
