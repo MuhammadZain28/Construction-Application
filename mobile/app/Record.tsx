@@ -18,7 +18,7 @@ const Record: React.FC = () => {
   const [showDate, setShowDate] = React.useState(false);
   const [id, setId] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
-  const [mobile, setMobile] = React.useState(false);
+  const [mobile, setMobile] = React.useState(true);
   const [RecordId, setRecordId] = React.useState<string>("");
 const transactionReasons = [
   "Other",
@@ -147,12 +147,12 @@ const transactionReasons = [
   };
   return (
     <ScrollView style={styles.container}>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 10, padding: 10 }}>
         <LinearGradient
           colors={['rgba(249, 196, 2, 1)', 'rgba(245, 213, 84, 1)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ minHeight: 200, minWidth: 450, borderRadius: 20, margin: 10, padding: 20, shadowColor: '#000', justifyContent: 'space-between', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
+          style={{ minHeight: 200, maxWidth: 450, width: '100%', borderRadius: 20, margin: 10, padding: 20, shadowColor: '#000', justifyContent: 'space-between', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>

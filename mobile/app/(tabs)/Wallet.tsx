@@ -580,19 +580,19 @@ export default function Wallet() {
                     { updateVisible ?
                     <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
                       <TouchableOpacity onPress={() => saveRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
-                        <Text style={styles.text}>Out</Text>
+                        <Text style={[styles.text, {marginInline: 0}]}>Out</Text>
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => saveRecord('In')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
-                        <Text style={styles.text}>In</Text>
+                        <Text style={[styles.text, {marginInline: 0}]}>In</Text>
                       </TouchableOpacity>
                     </View>
                     :
                     <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
-                      <TouchableOpacity onPress={() => updateRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
-                        <Text style={styles.text}>Out</Text>
+                      <TouchableOpacity onPress={() => updateRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingBlock: 5,}}>
+                        <Text style={[styles.text, {marginInline: 0}]}>Out</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => updateRecord('In')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
-                        <Text style={styles.text}>In</Text>
+                      <TouchableOpacity onPress={() => updateRecord('In')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(26, 173, 0, 1)', borderRadius: 20, paddingBlock: 5,}}>
+                        <Text style={[styles.text, {marginInline: 0}]}>In</Text>
                       </TouchableOpacity>
                     </View>
                     }
@@ -660,10 +660,10 @@ export default function Wallet() {
                       { updateVisible ?
                         <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
                           <TouchableOpacity onPress={() => saveTransaction("Out") } style={{width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, padding: 5}}>
-                            <Text style={styles.text}>Out</Text>
+                            <Text style={[styles.text, {marginInline: 0}]}>Out</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => saveTransaction("In")} style={{width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(54, 163, 0, 1)', borderRadius: 20, padding: 5}}>
-                            <Text style={styles.text}>In</Text>
+                            <Text style={[styles.text, {marginInline: 0}]}>In</Text>
                           </TouchableOpacity>
                         </View>
                         :

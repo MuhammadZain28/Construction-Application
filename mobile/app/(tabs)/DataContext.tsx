@@ -22,6 +22,8 @@ type DataContextType = {
   setIsRecordUpdated: React.Dispatch<React.SetStateAction<boolean>>;
   paintSum: { [key: string]: number };
   materialSum: { [key: string]: number };
+  isDataLoaded: boolean;
+  setIsDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const DataContext = React.createContext<DataContextType | undefined>(undefined);
@@ -36,10 +38,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isRecordUpdated, setIsRecordUpdated] = useState<boolean>(true);
   const [paints, setPaints] = useState<Paints[]>([]);
   const [wallet, setWallets] = useState<Wallets[]>([]);
-  const [transactions, setTransactions] = useState<Transactions[]>([]); 
+  const [transactions, setTransactions] = useState<Transactions[]>([]);
   const [record, setRecords] = useState<Records[]>([]);
   const [paintSum, setPaintSum] = useState<{ [key: string]: number }>({});
   const [materialSum, setMaterialSum] = useState<{ [key: string]: number }>({});
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
     const fetchHouses = async () => {
         const housesData = await House.getAllHouses();
@@ -77,30 +80,39 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
   useEffect(() => {
-    if (isHouseUpdated) {
-      fetchHouses();
+    try {
+      if (isHouseUpdated) {
+        fetchHouses();
+      }
+      if (isMaterialUpdated) {
+        fetchMaterials();
+      }
+      if (isPaintUpdated) {
+        fetchPaints();
+      }
+      if (isWalletUpdated) {
+        fetchWallets();
+      }
+      if (isTransactionUpdated) {
+        fetchTransactions();
+      }
+      if (isRecordUpdated) {
+        fetchRecords();
+      }
     }
-    if (isMaterialUpdated) {
-      fetchMaterials();
+    catch (error) {
+      console.error('Error fetching data:', error);
     }
-    if (isPaintUpdated) {
-      fetchPaints();
+    finally {
+      setIsDataLoaded(true);
     }
-    if (isWalletUpdated) {
-      fetchWallets();
-    }
-    if (isTransactionUpdated) {
-      fetchTransactions();
-    }
-    if (isRecordUpdated) {
-      fetchRecords();
-    }
+
   },
 
   [ isHouseUpdated, isMaterialUpdated, isPaintUpdated, isWalletUpdated, isTransactionUpdated, isRecordUpdated ]);
 
   return (
-    <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum}}>
+    <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum, isDataLoaded, setIsDataLoaded }}>
       {children}
     </DataContext.Provider>
   );
