@@ -14,13 +14,17 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 function LayoutContent() {
   const { isDataLoaded } = useDataContext();
   const colorScheme = useColorScheme();
+  
   const onLayoutRootView = useCallback(async () => {
     if (isDataLoaded) {
       await SplashScreen.hideAsync();
     }
   }, [isDataLoaded]);
+  const [loaded] = useFonts({
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+      });
 
-  if (!isDataLoaded) return null;
+  if (!isDataLoaded || !loaded) return null;
 
   return (
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>

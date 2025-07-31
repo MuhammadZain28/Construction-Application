@@ -620,28 +620,39 @@ export class Data {
         this.date = date;
         this.reason = reason;
     }
-    static async save(recordId: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<string> {
+    static async save(recordId: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string): Promise<string> {
         const db = await Database();
         const recordRef = ref(db, `records/${recordId}`);
+        await update(recordRef, {
+            TotalAmount: cash,
+        });
         const newDataRef = push(recordRef);
         await set(newDataRef, {
-            amount: type === 'In' ? amount : -amount,
+            amount: amount,
             type: type,
             date: date,
             reason: reason
         });
         return newDataRef.key; 
     }
-    static async deleteData(recordId: string, dataId: string): Promise<void> {
+    static async deleteData(recordId: string, dataId: string, cash: number): Promise<void> {
         const db = await Database();
+        const recordRef = ref(db, `records/${recordId}`);
+        await update(recordRef, {
+            TotalAmount: cash,
+        });
         const dataRef = ref(db, `records/${recordId}/${dataId}`);
         await remove(dataRef);
     }
-    static async updateData(recordId: string, dataId: string, amount: number, type: 'In' | 'Out', date: string, reason?: string): Promise<void> {
+    static async updateData(recordId: string, dataId: string, amount: number, type: 'In' | 'Out', date: string, cash: number, reason?: string): Promise<void> {
         const db = await Database();
+        const recordRef = ref(db, `records/${recordId}`);
+        await update(recordRef, {
+            TotalAmount: cash,
+        });
         const dataRef = ref(db, `records/${recordId}/${dataId}`);
         await update(dataRef, {
-            amount: type === 'In' ? amount : -amount,
+            amount: amount,
             type: type,
             date: date,
             reason: reason

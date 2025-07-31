@@ -4,9 +4,10 @@ import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
 import { House } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
+import Loading from '@/components/Loading';
 
 export default function HomeScreen() {
-  const { houses, materials, paints } = useDataContext();
+  const { houses, materials, paints, loading } = useDataContext();
   const [visible, setVisible] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
@@ -115,7 +116,10 @@ export default function HomeScreen() {
     setUpdateVisible(false);
     setVisible(false);
   };
-  
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <ScrollView style={{backgroundColor: '#dbdbdbff'}}>
       <View style={styles.main}>

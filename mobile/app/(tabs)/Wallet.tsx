@@ -6,9 +6,10 @@ import { useDataContext } from './DataContext';
 import { House, Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
+import Loading from '@/components/Loading';
 
 export default function Wallet() {
-  const { houses, wallet, transactions, record, materials, paints, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
+  const { houses, wallet, transactions, record, materials, paints, loading, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
   const [search, setSearch] = React.useState('');
   const [searchData, setSearchData] = React.useState('');
   const [house, setHouse] = React.useState<House[]>([]);
@@ -93,7 +94,9 @@ export default function Wallet() {
       sum = await Transactions.getMonthlySum(month, 'Out', Walletid);
       setOutSum(prev => prev + sum);
     }
+
     MonthlySum();
+
   }, [Walletid, transactions, records]);
 
   React.useEffect(() => {
@@ -263,6 +266,10 @@ export default function Wallet() {
     }
   }
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <ScrollView style={{ backgroundColor: '#dbdbdbff', padding: 10 }}>
         <View style={styles.main}>
@@ -272,7 +279,7 @@ export default function Wallet() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 locations={[0, 0.5, 1]}
-                style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]} onTouchEnd={() => {setDropDownType('Delete'); setDeleteType("wallet")}}>
+                style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]} >
                   <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onPress={() => setDropDownType('Wallet')}>
                     <Ionicons name="wallet" size={28} color="#fff" />
                     <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
@@ -346,7 +353,7 @@ export default function Wallet() {
             <View style={{ gap: 10, marginTop: 10 }}>
               { transaction.filter(t => t.wallet === Walletid).map((item, index) => (
                  item.type === 'In' ?
-                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
+                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10, marginInline: 10 }]} 
                 onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
                 onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{fontSize: 16, color: 'rgba(4, 159, 9, 1)', fontWeight: 700}}>{item.name}</Text>
@@ -356,7 +363,7 @@ export default function Wallet() {
                   </View>
                 </TouchableOpacity>
                 :
-                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
+                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10, marginInline: 10 }]} onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
                 onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
                   <Text style={{fontSize: 16, color: 'rgba(211, 0, 0, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
@@ -730,7 +737,7 @@ export default function Wallet() {
                   <TouchableOpacity onPress={() => {
                     setDropDownType('');
                   }} style={{ padding: 10, marginBottom: 20 }}>
-                    <Text style={{ fontWeight: "bold", fontSize: 24}}>Delete Transaction</Text>
+                    <Text style={{ fontWeight: "bold", fontSize: 14}}>Delete Transaction</Text>
                   </TouchableOpacity>
                   <View style={[styles.row, { justifyContent: 'space-between', gap: 80,  marginTop: 20 }]}>
                     <TouchableOpacity onPress={() => setDropDownType('')} style={{ backgroundColor: 'rgba(31, 50, 255, 0.96)', paddingInline: 20, paddingBlock: 5, borderRadius: 20, marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }}>

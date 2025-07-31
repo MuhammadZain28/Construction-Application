@@ -8,7 +8,7 @@ import Loading from "@/components/Loading";
 
 let house: House[] = [];
 const Home: React.FC = () => {
-  const {houses, materials, setIsMaterialUpdated} = useDataContext();
+  const {houses, materials, setIsMaterialUpdated, loading} = useDataContext();
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
@@ -19,12 +19,12 @@ const Home: React.FC = () => {
   const [product, setProduct] = React.useState("Material");
   const [no, setNo] = React.useState(0);
   const [price, setPrice] = React.useState(0.0);
-  const [home, setHome] = React.useState("");
+  const [home, setHome] = React.useState("All Houses");
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
   const [search, setSearch] = React.useState("");
-  const [loading, setLoading] = React.useState(true);
+  const [material, setMaterial] = React.useState<Material[]>([]);
 
   const onChange = (event: any, date?: Date) => {
     if (date) {
@@ -33,11 +33,6 @@ const Home: React.FC = () => {
       setShowDate(false);
     }
   };
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   React.useEffect(() => {
     
@@ -65,7 +60,6 @@ const Home: React.FC = () => {
     setProduct(material.find(m => m.id === id)?.product || "Material");
     toggleMaterialDropdown()
   }
-  const [material, setMaterial] = React.useState<Material[]>([]);
 
   const handleClick = (id: string, status: boolean) => {
     Material.UpdateUsed(id, status).catch(console.error);
@@ -444,7 +438,7 @@ const Home: React.FC = () => {
               </TouchableOpacity>
 
               <FlatList
-                data={material}
+                data={Array.from(new Map(material.map(item => [item.product, item])).values())}
                 keyExtractor={(item) => item.product}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>

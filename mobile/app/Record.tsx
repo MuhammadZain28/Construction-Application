@@ -20,6 +20,9 @@ const Record: React.FC = () => {
   const [updateVisible, setUpdateVisible] = React.useState(false);
   const [mobile, setMobile] = React.useState(true);
   const [RecordId, setRecordId] = React.useState<string>("");
+  const [prevCash, setPrevCash] = React.useState(0);
+  const [TotalAmount, setTotalAmount] = React.useState(0);
+  const [prevType, setPrevType] = React.useState<'In' | 'Out'>('In');
 const transactionReasons = [
   "Other",
   // Income-Related
@@ -86,6 +89,11 @@ const transactionReasons = [
 
     check();
   }, []);
+
+  React.useEffect(() => {
+    setTotalAmount(parseInt(Total.toString()));
+  }, [Total]);
+
   const onChange = (event: any, selectedDate: Date | undefined) => {
     setShowDate(false);
     if (selectedDate) {
@@ -103,8 +111,9 @@ const transactionReasons = [
       alert("Please enter a reason");
       return;
     }
-    alert(`Saving record with amount: ${cash}, type: ${type}, date: ${date.toISOString()}, reason: ${reason}, id: ${RecordId}`);
-    const id = await Data.save(RecordId, cash, type, date.toISOString().substring(0, 10), reason);
+    const amount = type === 'In' ? TotalAmount + cash : TotalAmount - cash;
+    setTotalAmount(amount);
+    const id = await Data.save(RecordId, cash, type, date.toISOString().substring(0, 10), amount, reason);
     setRecord(m => [...m, { id: id, amount: cash, type, date: date.toISOString().substring(0, 10), reason }]);
     setUpdateVisible(false);
     setCash(0);
@@ -122,7 +131,12 @@ const transactionReasons = [
       alert("Please enter a reason");
       return;
     }
-    await Data.updateData(RecordId, id, cash, type, date.toISOString().substring(0, 10), reason);
+    const RemainingAmount = TotalAmount - (prevType === 'In' ? prevCash : -prevCash);
+    alert(`Remaining Amount: ${RemainingAmount}, Previous Amount: ${prevCash}, Cash: ${cash}`);
+    const amount = type === 'In' ? RemainingAmount + cash : RemainingAmount - cash;
+    setTotalAmount(amount);
+    alert(`Remaining Amount: ${amount}, Previous Amount: ${prevCash}, Cash: ${cash}`);
+    await Data.updateData(RecordId, id, cash, type, date.toISOString().substring(0, 10), amount, reason);
     setRecord(prev => prev.map(item => item.id === id ? new Data(item.id, cash, type, date.toISOString().substring(0, 10), reason) : item));
     setUpdateVisible(false);
     setCash(0);
@@ -136,7 +150,10 @@ const transactionReasons = [
       alert("Please select a record to delete");
       return;
     }
-    await Data.deleteData(RecordId, id);
+    const amount = TotalAmount - (prevType === 'In' ? prevCash : -prevCash);
+    alert(`Remaining Amount: ${amount}, Previous Amount: ${prevCash}, Cash: ${cash}`);
+    setTotalAmount(amount);
+    await Data.deleteData(RecordId, id, amount);
     setRecord(prev => prev.filter(item => item.id !== id));
     setUpdateVisible(false);
     setCash(0);
@@ -157,7 +174,7 @@ const transactionReasons = [
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
               <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)' }}> <FontAwesome6 name="user-circle" size={24} color={'rgba(255, 255, 255, 1)'}/>  {name}</Text>
-              <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)', marginTop: 10 }}>    Rs.  {Total}</Text>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 1)', marginTop: 10 }}>    Rs.  {TotalAmount}</Text>
             </View>
             <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 1)', width: 100, height: 100, borderRadius: 50, padding: 10 }}>
               <FontAwesome6 name="user" size={64} color={'rgba(245, 213, 84, 1)'}/>
@@ -212,10 +229,12 @@ const transactionReasons = [
           { record.map((item, index) => (
             item.type === 'In' ?
           <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10 }]} 
-          onLongPress={() => {setId(item.id); setFormType('Delete');}}
+          onLongPress={() => {setId(item.id); setFormType('Delete'); setPrevCash(item.amount); }}
           onPress={() => {
                   setId(item.id);
                   setCash(item.amount);
+                  setPrevCash(item.amount);
+                  setPrevType(item.type);
                   setDate(new Date(item.date));
                   setReason(item.reason || 'Other');
                   setFormType('Record');
@@ -228,10 +247,12 @@ const transactionReasons = [
           </TouchableOpacity>
           :
           <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10 }]} 
-          onLongPress={() => {setId(item.id); setFormType('Delete');}} 
+          onLongPress={() => {setId(item.id); setFormType('Delete'); setPrevCash(item.amount); setPrevType(item.type); }} 
           onPress={() => {
                   setId(item.id);
                   setCash(item.amount);
+                  setPrevCash(item.amount);
+                  setPrevType(item.type);
                   setDate(new Date(item.date));
                   setReason(item.reason || 'Other');
                   setFormType('Record');
@@ -337,9 +358,9 @@ const transactionReasons = [
           </TouchableOpacity>
         </View>,
         Delete:
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
           <View style={{width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', gap: 20, bottom: 0, position: 'absolute', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}>
-            <Text style={{fontSize: 24, fontWeight: 'bold'}}>DELETE RECORD</Text>
+            <Text style={{fontSize: 14, fontWeight: 'bold'}}>DELETE RECORD</Text>
             <View style={{ flexDirection: 'row', marginTop: 20, maxWidth: 500, alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 20 }}>
               <TouchableOpacity onPress={() => setFormType('')} style={{ backgroundColor: 'rgba(0, 42, 255, 1)', gap: 5, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', minWidth: 100, paddingBlock: 10, paddingInline: 25, borderRadius: 50}}>
                 <MaterialCommunityIcons name="delete" size={24} color={'white'} />

@@ -24,6 +24,7 @@ type DataContextType = {
   materialSum: { [key: string]: number };
   isDataLoaded: boolean;
   setIsDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  loading : boolean;
 };
 
 const DataContext = React.createContext<DataContextType | undefined>(undefined);
@@ -43,40 +44,59 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [paintSum, setPaintSum] = useState<{ [key: string]: number }>({});
   const [materialSum, setMaterialSum] = useState<{ [key: string]: number }>({});
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
     const fetchHouses = async () => {
+        setLoading(true);
         const housesData = await House.getAllHouses();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setHouses(housesData);
         setIsHouseUpdated(false);
+        setLoading(false);
     }
     const fetchMaterials = async () => {
+        setLoading(true);
         const materialsData = await Material.getAllMaterials();
         const materialSumData = await Material.getMonthlySum();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setMaterials(materialsData);
         setMaterialSum(materialSumData);
         setIsMaterialUpdated(false);
+        setLoading(false);
     }
     const fetchPaints = async () => {
+        setLoading(true);
         const paintsData = await Paints.getAllPaints();
         const paintSumData = await Paints.getMonthlySum();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setPaints(paintsData);
         setPaintSum(paintSumData);
         setIsPaintUpdated(false);
+        setLoading(false);
     }
     const fetchWallets = async () => {
+        setLoading(true);
         const walletsData = await Wallets.getAllWallets();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setWallets(walletsData);
         setIsWalletUpdated(false);
+        setLoading(false);
     }
     const fetchTransactions = async () => {
+        setLoading(true);
         const transactionsData = await Transactions.getAllTransactions();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setTransactions(transactionsData);
         setIsTransactionUpdated(false);
+        setLoading(false);
     }
     const fetchRecords = async () => {
+        setLoading(true);
         const recordsData = await Records.getAllRecords();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setRecords(recordsData);
         setIsRecordUpdated(false);
+        setLoading(false);
     }
 
   useEffect(() => {
@@ -112,7 +132,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   [ isHouseUpdated, isMaterialUpdated, isPaintUpdated, isWalletUpdated, isTransactionUpdated, isRecordUpdated ]);
 
   return (
-    <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum, isDataLoaded, setIsDataLoaded }}>
+    <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum, isDataLoaded, setIsDataLoaded, loading }}>
       {children}
     </DataContext.Provider>
   );

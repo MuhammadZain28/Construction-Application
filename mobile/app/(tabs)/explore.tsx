@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, FlatList, Platform } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { House, Paints } from '../Class/App'; // Adjust the import path as necessary
+import { House, Paints } from '../Class/App'; 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useDataContext } from './DataContext'; // Adjust the import path as necessary
+import { useDataContext } from './DataContext'; 
+import Loading from '@/components/Loading'; 
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
 export default function TabTwoScreen(Houses: House[]) {
-  const { houses, paints, setIsPaintUpdated } = useDataContext();
+  const { houses, paints, setIsPaintUpdated, loading } = useDataContext();
   const [isDropdownVisible, setDropdownVisible] = React.useState(false);
   const [updateVisible, setUpdateVisible] = React.useState(false); 
   const [visible, setVisible] = React.useState(false);
@@ -83,6 +84,11 @@ export default function TabTwoScreen(Houses: House[]) {
     setcolorId("");
     setHome("All Houses");
   };
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
 
     <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
@@ -451,7 +457,7 @@ export default function TabTwoScreen(Houses: House[]) {
               </TouchableOpacity>
 
               <FlatList
-                data={paint}
+                data={Array.from(new Map(paint.map(item => [item.color, item])).values())}
                 keyExtractor={(item) => item.color}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>

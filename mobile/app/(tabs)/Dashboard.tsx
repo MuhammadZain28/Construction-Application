@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
               <MaterialCommunityIcons name='cash' style={{fontSize: 42, color: 'rgba(195, 53, 251, 1)'}}></MaterialCommunityIcons>
               </View>
             </View>
-            <Text style={styles.number}>Rs.  {transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter((r) => r.type === 'In').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>Rs.  {transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter(r => r.amount > 0).reduce((acc, curr) => acc + curr.amount, 0)}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>Rs.  { spend - transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) - record.filter((r) => r.type === 'Out').map((r) => r.amount).reduce((acc, curr) => acc + curr, 0)}</Text>
+            <Text style={styles.number}>Rs.  { spend - transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) - record.filter((r) => r.amount <= 0).reduce((acc, curr) => acc + curr.amount, 0)}</Text>
           </View>
         </View>
         <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
