@@ -18,7 +18,7 @@ export default function Wallet() {
   const [showDate, setShowDate] = React.useState(false);
   const [date, setDate] = React.useState<Date>(new Date());
   const [mobile, setMobile] = React.useState<boolean>(true);
-  const [wallets, setWallets] = React.useState<Wallets[]>([]);
+  const [wallets, setWallets] = React.useState<Wallets[]>([]);  
   const [cash, setCash] = React.useState<number>(0);
   const [name, setName] = React.useState<string>('');
   const [id, setId] = React.useState<string>('');

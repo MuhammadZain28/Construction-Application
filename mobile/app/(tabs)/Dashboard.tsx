@@ -1,7 +1,7 @@
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView, Platform} from 'react-native';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import Svg, {Circle} from 'react-native-svg';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { useDataContext } from './DataContext';
   
 const Dashboard: React.FC = () => {
@@ -10,13 +10,50 @@ const Dashboard: React.FC = () => {
   const [materialProgress, setMaterialProgress] = React.useState(0);
   const [paintProgress, setPaintProgress] = React.useState(0);
   const [spend, setSpend] = React.useState(0);
-  return (
+
+  const totalOut = React.useMemo(() => {
+  return transactions
+    .filter((transaction) => transaction.type === 'Out')
+    .reduce((acc, curr) => acc + curr.amount, 0);
+  }, [transactions]);
+
+  const totalNegativeRecord = React.useMemo(() => {
+    return record
+      .filter((r) => r.amount <= 0)
+      .reduce((acc, curr) => acc + curr.amount, 0);
+  }, [record]);
+
+  
+  const totalIn = React.useMemo(() => {
+  return transactions
+    .filter((transaction) => transaction.type === 'In')
+    .reduce((acc, curr) => acc + curr.amount, 0);
+  }, [transactions]);
+
+  const totalRecord = React.useMemo(() => {
+    return record
+      .filter((r) => r.amount > 0)
+      .reduce((acc, curr) => acc + curr.amount, 0);
+  }, [record]);
+
+  const remaining = React.useMemo(() => {
+    return spend - totalOut - totalNegativeRecord;
+  }, [spend, totalOut, totalNegativeRecord]);
+
+  const ConmpletedHouses = React.useMemo(() => {
+    return houses.filter((house) => house.completed === true).length;
+  }, [houses]);
+
+  const PendingHouses = React.useMemo(() => {
+    return houses.filter((house) => house.completed === false).length - 1;
+  }, [houses]);
+
     React.useEffect(() => {
       if (Platform.OS === 'android') {
         setMobile(true);
       }
 
-    }, []),
+    }, []);
 
     React.useEffect(() => {
       const totalMaterials = materials.length;
@@ -33,8 +70,9 @@ const Dashboard: React.FC = () => {
       }
       setSpend(totalSpend);
 
-    }, [materials, paints, materialSum, paintSum]),
+    }, [materials, paints, materialSum, paintSum]);
 
+  return (
     <ScrollView>
       <View style={styles.main}>
         <View style={styles.top}>
@@ -58,7 +96,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='pending-actions' style={{fontSize: 42, color: 'rgba(245, 195, 58, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{houses.filter((house) => house.completed === false).length - 1}</Text>
+            <Text style={styles.number}>{PendingHouses}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(15, 151, 37, 1)'}]}>
@@ -81,7 +119,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='done-all' style={{fontSize: 42, color: 'rgba(17, 151, 37, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>{houses.filter((house) => house.completed === true).length}</Text>
+            <Text style={styles.number}>{ConmpletedHouses}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(197, 50, 255, 1)'}]}>
@@ -103,7 +141,7 @@ const Dashboard: React.FC = () => {
               <MaterialCommunityIcons name='cash' style={{fontSize: 42, color: 'rgba(195, 53, 251, 1)'}}></MaterialCommunityIcons>
               </View>
             </View>
-            <Text style={styles.number}>Rs.  {transactions.filter((transaction) => transaction.type === 'In').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) + record.filter(r => r.amount > 0).reduce((acc, curr) => acc + curr.amount, 0)}</Text>
+            <Text style={styles.number}>Rs.  {totalIn + totalRecord}</Text>
           </View>
           <View
             style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
@@ -125,7 +163,7 @@ const Dashboard: React.FC = () => {
               <MaterialIcons name='receipt-long' style={{fontSize: 42, color: 'rgba(54, 91, 254, 1)'}}></MaterialIcons>
               </View>
             </View>
-            <Text style={styles.number}>Rs.  { spend - transactions.filter((transaction) => transaction.type === 'Out').map((transaction) => transaction.amount).reduce((acc, curr) => acc + curr, 0) - record.filter((r) => r.amount <= 0).reduce((acc, curr) => acc + curr.amount, 0)}</Text>
+            <Text style={styles.number}>Rs.  { remaining }</Text>
           </View>
         </View>
         <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>

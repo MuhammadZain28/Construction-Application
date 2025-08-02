@@ -1,10 +1,10 @@
-import { TextInput, Text, View, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal, Platform } from "react-native";
-import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Material, House } from "../Class/App";
-import React from "react";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { useDataContext } from "./DataContext";
 import Loading from "@/components/Loading";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React from "react";
+import { FlatList, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { House, Material } from "../Class/App";
+import { useDataContext } from "./DataContext";
 
 let house: House[] = [];
 const Home: React.FC = () => {
@@ -18,9 +18,9 @@ const Home: React.FC = () => {
   });
   const [dropDownType, setDropDownType] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
-  const [productId, setProductId] = React.useState("");
   const [showDate, setShowDate] = React.useState(false);
   const [mobile, setMobile] = React.useState(false);
+  const [productId, setProductId] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [material, setMaterial] = React.useState<Material[]>([]);
 
