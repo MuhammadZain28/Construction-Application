@@ -10,16 +10,15 @@ export default function HomeScreen() {
   const { houses, materials, paints, loading } = useDataContext();
   const [visible, setVisible] = React.useState(false);
   const [code, setCode] = React.useState("");
-  const [updateVisible, setUpdateVisible] = React.useState(false);
   const [name, setName] = React.useState("");
-  const [ deleteVisible, setDelete] = React.useState(false);
   const [description, setDescription] = React.useState("");
+  const [updateVisible, setUpdateVisible] = React.useState(false);
+  const [ deleteVisible, setDelete] = React.useState(false);
   const [date, setDate] = React.useState(new Date());
   const [showDate, setShowDate] = useState(false);
   const [mobile, setMobile] = useState(false);
-  const [home, setHome] = useState<House[]>([]);
-  const [search, setSearch] = useState("");
   const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [search, setSearch] = useState("");
 
   React.useEffect(() => {
     if (Platform.OS === 'web') {
@@ -29,14 +28,6 @@ export default function HomeScreen() {
       setMobile(true);
     }
   }, []);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      setHome(houses);
-    };
-    fetchData();
-  }, [houses]);
-  
   const onChange = (event: any, date?: Date) => {
     if (date) {
       const strippedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -51,19 +42,11 @@ export default function HomeScreen() {
   };
  
   const handleClick = (code: string, status: boolean) => {
-    setHome(prev =>
-      prev.map(h =>
-        h.code === code
-          ? new House(h.name, h.code, h.description, status, h.date) // status = true
-          : h
-        )
-      );
     House.updateCompleted(code, status).catch(console.error);
   };
 
   const addData = () => {
     const house = new House(name, code, description, false, date.toISOString().substring(0, 10));
-    setHome(prev =>[ ...prev, house]);
     House.save(house).then(() => {
       setVisible(false);
       setName("");
@@ -76,7 +59,6 @@ export default function HomeScreen() {
   };
 
   const remove = (code: string) => {
-    setHome(prevHomes => prevHomes.filter(h => h.code !== code));
     try {
     House.deleteHouse(code);
         setDelete(false);
@@ -98,10 +80,6 @@ export default function HomeScreen() {
   };
 
   const update = () => {
-    setHome(prevHomes => prevHomes.map(h =>
-      h.code === code
-        ? new House(name, code, description, h.completed, date.toISOString().substring(0, 10)) : h
-    ));
     House.updateHouse(code, new House(name, code, description, false, date.toISOString().substring(0, 10)))
       .then(() => {
         setVisible(false);
@@ -182,7 +160,7 @@ export default function HomeScreen() {
             }
             { search.length > 0 &&
               <FlatList 
-                data={home.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.code.toLowerCase().includes(search.toLowerCase()))}
+                data={houses.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.code.toLowerCase().includes(search.toLowerCase()))}
                 keyExtractor={(item) => item.code}
                 scrollEnabled={false}
                 renderItem={({ item }) => (
@@ -203,7 +181,7 @@ export default function HomeScreen() {
            
           <View>
             {
-            home.filter(h => h.code !== "All Houses").map((house, index) => (
+            houses.filter(h => h.code !== "All Houses").map((house, index) => (
             <TouchableOpacity key={index} onPress={() => {
                     setName(house.name);
                     setCode(house.code);
@@ -408,7 +386,7 @@ export default function HomeScreen() {
   
   
                 <FlatList
-                      data={home}
+                      data={houses}
                       keyExtractor={(item) => item.name}
                       renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>

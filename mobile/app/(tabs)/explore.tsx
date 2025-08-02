@@ -3,55 +3,54 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput,
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { House, Paints } from '../Class/App'; 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useDataContext } from './DataContext'; 
-import Loading from '@/components/Loading'; 
+import { useDataContext } from './DataContext';
+import Loading from '@/components/Loading';
+import { set } from 'firebase/database';
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
 export default function TabTwoScreen(Houses: House[]) {
   const { houses, paints, setIsPaintUpdated, loading } = useDataContext();
-  const [isDropdownVisible, setDropdownVisible] = React.useState(false);
-  const [updateVisible, setUpdateVisible] = React.useState(false); 
-  const [visible, setVisible] = React.useState(false);
-  const [deleteVisible, setDelete] = React.useState(false);
-  const [colorId, setcolorId] = React.useState("");
-  const [mDropDown, setMDropDown] = React.useState(false);
+  const [Form, setForm] = React.useState({
+    id: "",
+    color: "Paint",
+    no: 0,
+    price: 0.0,
+    home: "All Houses",
+    name: "",
+    date: new Date(),
+  });
+  const [ModalType, setModalType] = React.useState("")
   const [id, setId] = React.useState("");
-  const [color, setcolor] = React.useState("Paint");
-  const [no, setNo] = React.useState(0);
-  const [price, setPrice] = React.useState(0.0);
-  const [home, setHome] = React.useState("All Houses");
-  const [name, setName] = React.useState("");
-  const [date, setDate] = React.useState(new Date());
-  const [showDate, setShowDate] = React.useState(false);
-  const [mobile, setMobile] = React.useState(false);
-  const [paint, setPaint] = React.useState<Paints[]>([]);
+  const [state, setState] = React.useState({
+    update: false,
+    dropdown: false,
+    mobile: false,
+    showDate: false,
+  });
   const [search, setSearch] = React.useState("");
   React.useEffect(() => {
     
     if (Platform.OS === 'android') {
-      setMobile(true);
-    } 
+      setState(prev => ({ ...prev, mobile: true }));
+    }
   }, []);
 
   React.useEffect(() => {
     const fetchData = async () => {
       house = houses;
-      setPaint(paints);
     }
 
     fetchData();
   }, [houses, paints]);
 
-  const toggleDropdown = () => setDropdownVisible(prev => !prev);
-  const toggleMaterialDropdown = () => setMDropDown(prev => !prev);
-
   const handleHouseSelect = (code: string) => {
-    setHome(code);
-    toggleDropdown();
+    setForm(prev => ({ ...prev, home: code }));
+    setModalType("");
+    setState(prev => ({ ...prev, dropdown: false }));
   }
   const handleMaterialSelect = (id: string) => {
-    setcolor(paint.find(p => p.id === id)?.color || "Paint");
-    toggleMaterialDropdown()
+    setForm(prev => ({ ...prev, color: paints.find(p => p.id === id)?.color || "Paint" }));
+    setModalType("");
   }
 
   const handleClick = (id: string, status: boolean) => {
@@ -60,13 +59,17 @@ export default function TabTwoScreen(Houses: House[]) {
   };
   
   const addData = async() => {
-    await Paints.save(name, color, home, no, price, date.toISOString().substring(0, 10), false);
+    await Paints.save(Form.name, Form.color, Form.home, Form.no, Form.price, Form.date.toISOString().substring(0, 10), false);
     setIsPaintUpdated(true);
-    setPrice(0);
-    setNo(0);
-    setcolor("Paint");
-    setcolorId("");
-    setHome("All Houses");
+    setForm(prev => ({
+      ...prev,
+      price: 0,
+      no: 0,
+      color: "Paint",
+      colorId: "",
+      id: "",
+      home: "All Houses",
+    }));
   }
   const handleDelete = (id: string) => {
     setIsPaintUpdated(true)
@@ -74,16 +77,20 @@ export default function TabTwoScreen(Houses: House[]) {
   };
   const handleUpdate = () => {
     setIsPaintUpdated(true);
-    Paints.UpdatePaint(colorId, name, color, home, no, price, date.toISOString().substring(0, 10));
+    Paints.UpdatePaint(Form.id, Form.name, Form.color, Form.home, Form.no, Form.price, Form.date.toISOString().substring(0, 10));
 
-    setUpdateVisible(false);
-    setVisible(false);
-    setPrice(0);
-    setNo(0);
-    setcolor("Paint");
-    setcolorId("");
-    setHome("All Houses");
-  };
+    setState(prev => ({ ...prev, update: false }));
+    setModalType("")
+    setForm(prev => ({
+      ...prev,
+      price: 0,
+      no: 0,
+      color: "Paint",
+      colorId: "",
+      id: "",
+      home: "All Houses",
+    }));
+  }
 
   if (loading) {
     return <Loading />;
@@ -95,12 +102,12 @@ export default function TabTwoScreen(Houses: House[]) {
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgba(12, 41, 145, 1)'}]}>
           <View>
-            <TouchableOpacity onPress={() => toggleMaterialDropdown()} style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={styles.cardText}>{ color }</Text>
+            <TouchableOpacity onPress={() => setModalType("Paint")} style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={styles.cardText}>{ Form.color }</Text>
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>    
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 120, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
-              <Text style={[styles.cardText, {color: 'rgba(12, 41, 145, 1)',}]}>{ color === "Paint" ? paint.length : paint.filter(p => p.color === color).length}</Text>
+              <Text style={[styles.cardText, {color: 'rgba(12, 41, 145, 1)',}]}>{ Form.color === "Paint" ? paints.length : paints.filter(p => p.color === Form.color).length}</Text>
             </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -108,7 +115,7 @@ export default function TabTwoScreen(Houses: House[]) {
               <MaterialIcons name='format-paint' style={[styles.icon, {color: 'rgba(12, 41, 145, 1)'}]}/>
             </View>
             <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', width: 170, borderRadius: 20, paddingInline: 15, paddingBlock: 5, alignItems: "center", justifyContent: "center", flexDirection: "row"}}
-            onPress={() => setVisible(true)}>
+            onPress={() => setModalType("Form")}>
               <MaterialCommunityIcons name="plus-circle" style={{color: 'rgb(12, 41, 145)', fontSize: 28}}/>
               <Text style={{color: 'rgb(12, 41, 145)', fontSize: 18, fontWeight: "bold"}}> Paint</Text>
             </TouchableOpacity>
@@ -116,9 +123,9 @@ export default function TabTwoScreen(Houses: House[]) {
         </View>
         <View style={[styles.card, {backgroundColor: 'rgba(255, 183, 0, 1)'}]}>
           <View>
-            <Text style={styles.cardText}> Spend </Text>        
+            <Text style={styles.cardText}> Spend </Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 5, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 15, borderRadius: 50}}>
-              <Text style={[styles.cardText, { color: 'rgba(255, 183, 0, 1)', fontSize: 24 }]}>Rs. {paint.filter(p => p.house === home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+              <Text style={[styles.cardText, { color: 'rgba(255, 183, 0, 1)', fontSize: 24 }]}>Rs. {paints.filter(p => p.house === Form.home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
             </View>    
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -126,10 +133,10 @@ export default function TabTwoScreen(Houses: House[]) {
               <MaterialCommunityIcons name='cash-100' style={[styles.icon, {color: 'rgb(255, 183, 0)'}]}/>
             </View>
             <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', width: 170, borderRadius: 20, paddingInline: 15, paddingBlock: 5, alignItems: "center", justifyContent: "center", flexDirection: "row"}} 
-                              onPress={toggleDropdown}>
+                              onPress={() => setState(prev => ({ ...prev, dropdown: true }))}>
               <MaterialCommunityIcons name="home" style={{color: 'rgb(255, 183, 0)', fontSize: 28, paddingInline: 5,}}/>
               <Text style={{color: 'rgb(255, 183, 0)', fontSize: 18, fontWeight: "bold"}}>
-                { house.find(h => home === h.code)?.name || 'All Houses'}
+                { house.find(h => Form.home === h.code)?.name || 'All Houses'}
               </Text>
             </TouchableOpacity>
 
@@ -148,19 +155,22 @@ export default function TabTwoScreen(Houses: House[]) {
           }
           { search.length > 0 &&
             <FlatList 
-              data={paint.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.color.toLowerCase().includes(search.toLowerCase()))}
+              data={paints.filter(h => h.name.toLowerCase().includes(search.toLowerCase()) || h.color.toLowerCase().includes(search.toLowerCase()))}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => {
-                  setName(item.name);
-                  setcolor(item.color);
-                  setPrice(item.price);
-                  setNo(item.no);
-                  setHome(item.house);
-                  setcolorId(item.id);
-                  setVisible(true);
-                  setUpdateVisible(true);
+                  setForm(prev => ({
+                    ...prev,
+                    id: item.id,
+                    name: item.name,
+                    color: item.color,
+                    no: item.no,
+                    price: item.price,
+                    home: item.house,
+                  }));
+                  setModalType("Form");
+                  setState(prev => ({ ...prev, update: true }));
                 }}>
                   <Text style={{ padding: 10, fontSize: 16 }}>{item.color} ({item.name})</Text>
                 </TouchableOpacity>
@@ -170,9 +180,9 @@ export default function TabTwoScreen(Houses: House[]) {
           }
         </View>
         <View style={{gap: 15}}>
-          {paint.map((paints, index) => ( 
+          {paints.map((paints, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDelete(true); setId(paints.id);}} onPress={() => {setcolorId(paints.id); setcolor(paints.color); setName(paints.name); setNo(paints.no); setPrice(paints.price); setHome(paints.house); setVisible(true); setUpdateVisible(true);}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setModalType("Delete"); setId(paints.id);}} onPress={() => {setForm(prev => ({ ...prev, id: paints.id, color: paints.color, name: paints.name, no: paints.no, price: paints.price, home: paints.house })); setModalType("Form"); setState(prev => ({ ...prev, update: true }));}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
               <Text style={[styles.data, {fontSize: 22}]}> {paints.house}  </Text>
               {paints.used ?
@@ -214,186 +224,174 @@ export default function TabTwoScreen(Houses: House[]) {
   
       </View>
       <Modal
-        visible={visible}
+        visible={ModalType !== "" ? true : false}
         transparent={true}
         animationType="fade"
         onRequestClose={() => {
-          setVisible(false);
+          setModalType("");
         }}>
-        <View style={{ flex: 1, justifyContent: 'center', gap: 10, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-          <View style={{ width: '80%', maxWidth: 430, backgroundColor: '#fff', padding: 20, borderRadius: 20 }}>
-              <Text style={{display: 'flex', textAlign: 'center',justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: 24, marginBlockEnd: 15}}>
-                <MaterialIcons name='construction' style={{fontSize: 32}}/> Materials
-              </Text>
-            <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='creative-commons' style={{fontSize: 32}}></MaterialCommunityIcons>  Name</Text>
-            <TextInput
-              placeholder="Type here..."
-            value={name}
-            onChangeText={setName}
-              style={{
-                height: 40,
-                borderColor: 'gray',
-                borderBottomWidth: 1,
-                marginBottom: 20,
-                paddingHorizontal: 10,
-                outline: 'none',
-              }}
-            />
-            <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-              <MaterialCommunityIcons name='format-paint' style={{fontSize: 32}}></MaterialCommunityIcons>  Color</Text>
-            <TextInput
-              placeholder="Type here..."
-            value={color}
-            onChangeText={setcolor}
-              style={{
-                height: 40,
-                borderColor: 'gray',
-                borderBottomWidth: 1,
-                marginBottom: 20,
-                paddingHorizontal: 10,
-                outline: 'none',
-              }}
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <View>
-                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-                  <MaterialCommunityIcons name='counter' style={{fontSize: 32}}/>  No of Items</Text>
-                <TextInput
-                  placeholder="Type here..."
-                  value={no.toString()}
-                  onChangeText={(text) => setNo(parseInt(text) || 0)}
-                  keyboardType="numeric"
-                  style={{
-                    height: 40,
-                    borderColor: 'gray',
-                    borderBottomWidth: 1,
-                    marginBottom: 20,
-                    paddingHorizontal: 10,
-                    outline: 'none',
-                  }}
-                />
-              </View>
-              <View>
-                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-                  <MaterialIcons name='receipt' style={{fontSize: 32}}></MaterialIcons>  Price</Text>
-                <TextInput
-                  placeholder="Type here..."
-                  value={price.toString()}
-                  onChangeText={(text) => setPrice(parseFloat(text) || 0)}
-                  style={{
-                    height: 40,
-                    borderColor: 'gray',
-                    borderBottomWidth: 1,
-                    marginBottom: 20,
-                    paddingHorizontal: 10,
-                    outline: 'none',
-                  }}
-                />
-              </View>
-            </View>
-            <View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <View style={{flex: 1, marginRight: 25}}>
-                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-                  <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
-                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                                  onPress={toggleDropdown}>
-                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    { home !== "" ? home : 'All Houses'}
+          {{
+            Form:
+            <View style={{ flex: 1, justifyContent: 'center', gap: 10, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={{ width: '80%', maxWidth: 430, backgroundColor: '#fff', padding: 20, borderRadius: 20 }}>
+                  <Text style={{display: 'flex', textAlign: 'center',justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: 24, marginBlockEnd: 15}}>
+                    <MaterialIcons name='construction' style={{fontSize: 32}}/> Materials
                   </Text>
-                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
-                </TouchableOpacity>
-              </View>
-              <View style={{flex: 1}}>
-                <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
-                  <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
-                  { !mobile ?
-
-                  <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
-                  :
+                <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialCommunityIcons name='creative-commons' style={{fontSize: 32}}></MaterialCommunityIcons>  Name</Text>
+                <TextInput
+                  placeholder="Type here..."
+                  value={Form.name}
+                  onChangeText={name => setForm(prev => ({ ...prev, name }))}
+                  style={{
+                    height: 40,
+                    borderColor: 'gray',
+                    borderBottomWidth: 1,
+                    marginBottom: 20,
+                    paddingHorizontal: 10,
+                    outline: 'none',
+                  }}
+                />
+                <Text style={{ fontSize: 18,display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                  <MaterialCommunityIcons name='format-paint' style={{fontSize: 32}}></MaterialCommunityIcons>  Color</Text>
+                <TextInput
+                  placeholder="Type here..."
+                  value={Form.color}
+                  onChangeText={color => setForm(prev => ({ ...prev, color }))}
+                  style={{
+                    height: 40,
+                    borderColor: 'gray',
+                    borderBottomWidth: 1,
+                    marginBottom: 20,
+                    paddingHorizontal: 10,
+                    outline: 'none',
+                  }}
+                />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <View>
-                  <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                  onPress={() => setShowDate(true)}>
-                  <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                    {date.toLocaleDateString()}
-                  </Text>
-                  <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
-                </TouchableOpacity>
-                  {showDate && (
-                    
-                    <DateTimePicker
-                    value={new Date()}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowDate(false);
-                      if (selectedDate) {
-                        setDate(selectedDate);
-                      }
-                    }}
+                    <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                      <MaterialCommunityIcons name='counter' style={{fontSize: 32}}/>  No of Items</Text>
+                    <TextInput
+                      placeholder="Type here..."
+                      value={Form.no.toString()}
+                      onChangeText={(text) => setForm(prev => ({ ...prev, no: parseInt(text) || 0 }))}
+                      keyboardType="numeric"
+                      style={{
+                        height: 40,
+                        borderColor: 'gray',
+                        borderBottomWidth: 1,
+                        marginBottom: 20,
+                        paddingHorizontal: 10,
+                        outline: 'none',
+                      }}
                     />
-                  )}
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                      <MaterialIcons name='receipt' style={{fontSize: 32}}></MaterialIcons>  Price</Text>
+                    <TextInput
+                      placeholder="Type here..."
+                      value={Form.price.toString()}
+                      onChangeText={(text) => setForm(prev => ({ ...prev, price: parseFloat(text) || 0 }))}
+                      style={{
+                        height: 40,
+                        borderColor: 'gray',
+                        borderBottomWidth: 1,
+                        marginBottom: 20,
+                        paddingHorizontal: 10,
+                        outline: 'none',
+                      }}
+                    />
+                  </View>
+                </View>
+                <View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                  <View style={{flex: 1, marginRight: 25}}>
+                    <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                      <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
+                      <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                                      onPress={() => setState(prev => ({ ...prev, dropdown: true }))}>
+                      <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                        { Form.home !== "" ? Form.home : 'All Houses'}
+                      </Text>
+                      <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{flex: 1}}>
+                    <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
+                      <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
+                      { !state.mobile ?
+
+                      <input type="date" value={Form.date instanceof Date && !isNaN(Form.date.getTime()) ? Form.date.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
+                      :
+                      <View>
+                      <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
+                      onPress={() => setState(prev => ({ ...prev, showDate: true }))}>
+                      <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
+                        {Form.date.toLocaleDateString()}
+                      </Text>
+                      <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
+                    </TouchableOpacity>
+                      {state.showDate && (
+
+                        <DateTimePicker
+                        value={new Date()}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => {
+                          setState(prev => ({ ...prev, showDate: false }));
+                          if (selectedDate) {
+                            setForm(prev => ({ ...prev, date: selectedDate }));
+                          }
+                        }}
+                        />
+                      )}
+                    </View>
+                    }
+                  </View>
+                </View>
+                </View>
+                { !state.update ?
+                <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+                  onPress={() => addData()}>
+                    <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+                :
+                <View>
+                  <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
+                  onPress={() => handleUpdate()}>
+                    <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
+                  </TouchableOpacity>
                 </View>
                 }
               </View>
-            </View>
-            </View>
-            { !updateVisible ? 
-            <View>
-              <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
-              onPress={() => addData()}>
-                <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Save</Text>
+              
+              <TouchableOpacity 
+              onPress={() =>{ setModalType(""); 
+                              setState(prev => ({ ...prev, update: false }));      
+                              setForm(prev => ({ ...prev, price: 0, no: 0, color: "Paint", colorId: "", home: "All Houses" }));
+              }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
+                <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
               </TouchableOpacity>
-            </View>
-            :
-            <View>
-              <TouchableOpacity style={{backgroundColor: 'rgba(9, 20, 121, 1)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
-              onPress={() => handleUpdate()}>
-                <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: 900}}>Update</Text>
-              </TouchableOpacity>
-            </View>
-            }
-          </View>
-          
-          <TouchableOpacity 
-          onPress={() =>{ setVisible(false); 
-                          setUpdateVisible(false);      
-                          setPrice(0);
-                          setNo(0);
-                          setcolor("Paint");
-                          setcolorId("");
-                          setHome("All Houses");
-          }} style={{borderRadius: 50, backgroundColor: 'rgba(48, 47, 47, 0.51)', justifyContent:'center', alignItems: 'center'}}>
-            <MaterialCommunityIcons name='close-thick' style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 32, padding: 10 }}></MaterialCommunityIcons>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-      <Modal
-        visible={deleteVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose ={() => {
-          setDelete(false)
-        }}>
-          <View style={{ flex: 1, gap: 10, backgroundColor: 'rgba(97, 97, 97, 0.5)' }}>
+            </View>,
+            Delete:
+            <View style={{ flex: 1, gap: 10, backgroundColor: 'rgba(97, 97, 97, 0.5)' }}>
             <View style={{ width: '100%', backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, bottom: 0, gap: 20, position: "absolute",  justifyContent: "center", alignItems: "center" }}>
               <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, paddingBottom: 10, flex: 1 }}>
                 <Text style={{ fontSize: 18, fontWeight: "bold"}}>Delete Items</Text>
               </View>
-              <TouchableOpacity style={{position: "absolute", top: 5, right: 5}} onPress={() => setDelete(false)}>
+              <TouchableOpacity style={{position: "absolute", top: 5, right: 5}} onPress={() => setModalType("")}>
                 <MaterialIcons name='cancel' style={{ color: 'rgba(54, 57, 55, 1)', fontSize: 24 }} />
               </TouchableOpacity>
               <View style={{ width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgba(60, 94, 245, 1)"}} 
-                                    onPress={() => { setDelete(false);
-                                                      setcolorId("");
-                                                      setHome("All Houses");
-                                                      setcolor("Paint");
-                                                      setNo(0);
-                                                      setPrice(0);}}>
+                                    onPress={() => { setModalType("");
+                                                      setForm(prev => ({ ...prev, colorId: "", home: "All Houses", color: "Paint", no: 0, price: 0 }));
+                                                      }}>
                     <MaterialIcons name='cancel' style={{ color: 'white', fontSize: 24 }} />
                     <Text style={{color: 'white', fontWeight: "bold"}}>Cancel</Text>
                   </TouchableOpacity>
@@ -402,7 +400,7 @@ export default function TabTwoScreen(Houses: House[]) {
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgb(255, 50, 10)"}}
                     onPress={() => {
                       handleDelete(id);
-                      setDelete(false);
+                      setModalType("");
                     }}>
                     <MaterialIcons name='delete' style={{ color: 'white', fontSize: 24 }} />
                     <Text style={{color: 'white', fontWeight: "bold"}}>Delete</Text>
@@ -410,14 +408,38 @@ export default function TabTwoScreen(Houses: House[]) {
                 </View>
               </View>
             </View>
+          </View>,
+          Paint:
+          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={styles.dropDown}>
+              <TouchableOpacity onPress={() => handleMaterialSelect("")}>
+                <Text style={{ fontWeight: "bold", fontSize: 24}}>Paint</Text>
+              </TouchableOpacity>
+
+              <FlatList
+                data={Array.from(new Map(paints.map(item => [item.color, item])).values())}
+                keyExtractor={(item) => item.color}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
+                    { item.color === Form.color ?
+                      <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                        :
+                      <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
+                    }
+                    <Text style={{fontSize: 18}}>{item.color}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              </View>
           </View>
+          }[ModalType]}
       </Modal>
       <Modal
-        visible={isDropdownVisible}
+        visible={state.dropdown}
         animationType='slide'
         transparent={true}
         onRequestClose={() => 
-          setDropdownVisible(false)
+          setState(prev => ({ ...prev, dropdown: false }))
         }>
           <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
             
@@ -431,7 +453,7 @@ export default function TabTwoScreen(Houses: House[]) {
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => (
                       <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                        { item.code === home ?
+                        { item.code === Form.home ?
                         <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
                         :
                         <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
@@ -440,36 +462,6 @@ export default function TabTwoScreen(Houses: House[]) {
                       </TouchableOpacity>
                     )}
                   />
-              </View>
-          </View>
-      </Modal>
-      <Modal
-        visible={mDropDown}
-        animationType='slide'
-        transparent={true}
-        onRequestClose={() => 
-          setDropdownVisible(false)
-        }>
-          <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-              <View style={styles.dropDown}>
-              <TouchableOpacity onPress={() => handleMaterialSelect("")}>
-                <Text style={{ fontWeight: "bold", fontSize: 24}}>Paint</Text>
-              </TouchableOpacity>
-
-              <FlatList
-                data={Array.from(new Map(paint.map(item => [item.color, item])).values())}
-                keyExtractor={(item) => item.color}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                    { item.color === color ?
-                      <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
-                        :
-                      <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgba(5, 12, 121, 1)', paddingRight: 10}}/>
-                    }
-                    <Text style={{fontSize: 18}}>{item.color}</Text>
-                  </TouchableOpacity>
-                )}
-              />
               </View>
           </View>
       </Modal>

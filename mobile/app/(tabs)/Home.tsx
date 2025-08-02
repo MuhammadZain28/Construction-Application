@@ -16,33 +16,33 @@ const Home: React.FC = () => {
     home: "All Houses",
     date: new Date(),
   });
+  const [state, setState] = React.useState({
+    update: false,
+    date: false,
+    mobile: false,
+  });
   const [dropDownType, setDropDownType] = React.useState("");
-  const [updateVisible, setUpdateVisible] = React.useState(false);
-  const [showDate, setShowDate] = React.useState(false);
-  const [mobile, setMobile] = React.useState(false);
   const [productId, setProductId] = React.useState("");
   const [search, setSearch] = React.useState("");
-  const [material, setMaterial] = React.useState<Material[]>([]);
 
 
   const onChange = (event: any, date?: Date) => {
     if (date) {
       const strippedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       setForm(prev => ({ ...prev, date: strippedDate }));
-      setShowDate(false);
+      setState(prev => ({ ...prev, date: false }));
     }
   };
 
   React.useEffect(() => {
     if (Platform.OS === 'android') {
-      setMobile(true);
+      setState(prev => ({ ...prev, mobile: true }));
     }
   }, []);
 
   React.useEffect(() => {
     const fetchData = async () => {
       house = houses;
-      setMaterial(materials);
     };
     fetchData();
   }, [houses, materials]);
@@ -53,7 +53,7 @@ const Home: React.FC = () => {
   }
 
   const handleMaterialSelect = (id: string) => {
-    setForm(prev => ({ ...prev, product: material.find(m => m.id === id)?.product || "Material" }));
+    setForm(prev => ({ ...prev, product: materials.find(m => m.id === id)?.product || "Material" }));
     setDropDownType("");
   }
 
@@ -82,7 +82,7 @@ const Home: React.FC = () => {
   const handleUpdate = () => {
     Material.UpdateMaterial(productId, form.home, form.product, form.no, form.price, form.date.toISOString().substring(0, 10));
     setIsMaterialUpdated(true);
-    setUpdateVisible(false);
+    setState(prev => ({ ...prev, update: false }));
     setDropDownType("");
     setForm({
       product: "Material",
@@ -106,7 +106,7 @@ const Home: React.FC = () => {
               <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20, color: 'rgb(255, 255, 255)'}}/>
             </TouchableOpacity>
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 120, marginInline: 15, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 25, borderRadius: 50}}>
-              <Text style={[styles.cardText, {color: 'rgba(7, 180, 48, 1)'}]}>{ form.product === "Material" ? material.length : material.filter(m => m.product === form.product).length}</Text>
+              <Text style={[styles.cardText, {color: 'rgba(7, 180, 48, 1)'}]}>{ form.product === "Material" ? materials.length : materials.filter(m => m.product === form.product).length}</Text>
             </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -124,7 +124,7 @@ const Home: React.FC = () => {
           <View>
             <Text style={styles.cardText}> Spend </Text> 
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginInline: 5, marginBlock: 20, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 15, borderRadius: 50}}>
-              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)', fontSize: 24}]}>Rs.  {material.filter(m => m.house === form.home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
+              <Text style={[styles.cardText, {color: 'rgba(255, 183, 0, 1)', fontSize: 24}]}>Rs.  {materials.filter(m => m.house === form.home).reduce((sum, item) => sum + item.price*item.no, 0)}</Text>
             </View>
           </View>
           <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>
@@ -154,14 +154,14 @@ const Home: React.FC = () => {
           }
           { search.length > 0 &&
             <FlatList 
-              data={material.filter(h => h.product.toLowerCase().includes(search.toLowerCase()))}
+              data={materials.filter(h => h.product.toLowerCase().includes(search.toLowerCase()))}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => {
                   setForm(prev => ({ ...prev, name: item.product, no: item.no, price: item.price, home: item.house, date: new Date(item.date) }));
                   setDropDownType("Form");
-                  setUpdateVisible(true);
+                  setState(prev => ({ ...prev, update: true }));
                 }}>
                   <Text style={{ padding: 10, fontSize: 16 }}>{item.product}</Text>
                 </TouchableOpacity>
@@ -172,9 +172,9 @@ const Home: React.FC = () => {
         </View>
         
         <View style={{gap: 15}}>
-          {material.map((materials, index) => ( 
+          {materials.map((materials, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDropDownType("Delete"); setProductId(materials.id);}} onPress={() => {setProductId(materials.id); setForm({ product: materials.product, no: materials.no, price: materials.price, home: materials.house, date: new Date(materials.date) }); setDropDownType("Form"); setUpdateVisible(true);}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setDropDownType("Delete"); setProductId(materials.id);}} onPress={() => {setProductId(materials.id); setForm({ product: materials.product, no: materials.no, price: materials.price, home: materials.house, date: new Date(materials.date) }); setDropDownType("Form"); setState(prev => ({ ...prev, update: true }));}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
               <Text style={[styles.data, {fontSize: 22}]}> {house.find(h=>h.code === materials.house)?.name || 'All Houses'}  </Text>
               {materials.used ?
@@ -279,7 +279,7 @@ const Home: React.FC = () => {
                   <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                     <MaterialIcons name='home' style={{fontSize: 32}}></MaterialIcons>  House</Text>
                     <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                                    onPress={() => setDropDownType("home")}>
+                                    onPress={() => setDropDownType("House")}>
                     <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
                       { house.find(h=> h.code === form.home)?.name || 'All Houses'}
                     </Text>
@@ -291,20 +291,20 @@ const Home: React.FC = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 18, display: 'flex', alignItems: 'center', fontWeight: 'bold', marginBottom: 5 }}>
                     <MaterialIcons name='calendar-month' style={{fontSize: 32}}></MaterialIcons>  Date</Text>
-                    { !mobile ?
+                    { !state.mobile ?
 
                     <input type="date" value={form.date instanceof Date && !isNaN(form.date.getTime()) ? form.date.toISOString().split('T')[0] : ''}
                     onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 30, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, fontFamily: 'Arial'}}/>
                     :
                     <View>
                     <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                    onPress={() => setShowDate(true)}>
+                    onPress={() => setState(prev => ({ ...prev, date: true }))}>
                     <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
                       {form.date.toLocaleDateString()}
                     </Text>
                     <MaterialIcons name="keyboard-arrow-down" style={{fontSize: 20}}/>
                   </TouchableOpacity>
-                    {showDate && (
+                    {state.date && (
 
                       <DateTimePicker
                       value={new Date(form.date)}
@@ -318,7 +318,7 @@ const Home: React.FC = () => {
               </View>
 
               
-              { !updateVisible ? 
+              { !state.update ? 
               <View>
                 <TouchableOpacity style={{backgroundColor: 'rgb(26, 153, 12)', borderRadius: 15, paddingInline: 10, paddingBlock: 5}}
                 onPress={() => addData()}>
@@ -337,7 +337,7 @@ const Home: React.FC = () => {
             
             <TouchableOpacity
             onPress={() =>{ setDropDownType("");
-                            setUpdateVisible(false);
+                            setState(prev => ({ ...prev, update: false }));
                             setForm({
                               product: "Material",
                               no: 0,
@@ -419,7 +419,7 @@ const Home: React.FC = () => {
               </TouchableOpacity>
 
               <FlatList
-                data={Array.from(new Map(material.map(item => [item.product, item])).values())}
+                data={Array.from(new Map(materials.map(item => [item.product, item])).values())}
                 keyExtractor={(item) => item.product}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleMaterialSelect(item.id)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
