@@ -5,10 +5,9 @@ import { House, Paints } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
 import Loading from '@/components/Loading';
-import { set } from 'firebase/database';
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
-export default function TabTwoScreen(Houses: House[]) {
+export default function TabTwoScreen() {
   const { houses, paints, setIsPaintUpdated, loading } = useDataContext();
   const [Form, setForm] = React.useState({
     id: "",
@@ -20,7 +19,6 @@ export default function TabTwoScreen(Houses: House[]) {
     date: new Date(),
   });
   const [ModalType, setModalType] = React.useState("")
-  const [id, setId] = React.useState("");
   const [state, setState] = React.useState({
     update: false,
     dropdown: false,
@@ -172,17 +170,20 @@ export default function TabTwoScreen(Houses: House[]) {
                   setModalType("Form");
                   setState(prev => ({ ...prev, update: true }));
                 }}>
-                  <Text style={{ padding: 10, fontSize: 16 }}>{item.color} ({item.name})</Text>
+                  <View style={{ padding: 10, borderBottomColor: '#ccc', borderBottomWidth: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 16 }}>{item.color}</Text>
+                    <Text style={{ fontSize: 16 }}>({item.name})</Text>
+                  </View>
                 </TouchableOpacity>
               )}
-              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(248, 248, 248, 1)', borderRadius: 10, marginTop: 90, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
             />
           }
         </View>
         <View style={{gap: 15}}>
           {paints.map((paints, index) => ( 
 
-          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setModalType("Delete"); setId(paints.id);}} onPress={() => {setForm(prev => ({ ...prev, id: paints.id, color: paints.color, name: paints.name, no: paints.no, price: paints.price, home: paints.house })); setModalType("Form"); setState(prev => ({ ...prev, update: true }));}}>
+          <TouchableOpacity key={index} style={styles.row} onLongPress={() => {setModalType("Delete"); setForm(prev => ({ ...prev, id: paints.id }));}} onPress={() => {setForm(prev => ({ ...prev, id: paints.id, color: paints.color, name: paints.name, no: paints.no, price: paints.price, home: paints.house })); setModalType("Form"); setState(prev => ({ ...prev, update: true }));}}>
             <View style={{flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 15}}>
               <Text style={[styles.data, {fontSize: 22}]}> {paints.house}  </Text>
               {paints.used ?
@@ -399,7 +400,7 @@ export default function TabTwoScreen(Houses: House[]) {
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                   <TouchableOpacity style={{ flexDirection: "row", gap: 5, justifyContent: "center", alignItems: "center", paddingBlock: 5, paddingInline: 15, borderRadius: 15, backgroundColor: "rgb(255, 50, 10)"}}
                     onPress={() => {
-                      handleDelete(id);
+                      handleDelete(Form.id);
                       setModalType("");
                     }}>
                     <MaterialIcons name='delete' style={{ color: 'white', fontSize: 24 }} />

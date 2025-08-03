@@ -11,12 +11,12 @@ const Record: React.FC = () => {
   const [searchData, setSearchData] = React.useState("");
   const [record, setRecord] = React.useState<Data[]>([]);
   const [cash, setCash] = React.useState(0);
+  const [id, setId] = React.useState("");
   const [date, setDate] = React.useState(new Date());
   const [reason, setReason] = React.useState("Other");
   const [formType, setFormType] = React.useState("");
   const [showReasons, setShowReasons] = React.useState(false);
   const [showDate, setShowDate] = React.useState(false);
-  const [id, setId] = React.useState("");
   const [updateVisible, setUpdateVisible] = React.useState(false);
   const [mobile, setMobile] = React.useState(true);
   const [RecordId, setRecordId] = React.useState<string>("");
@@ -169,7 +169,7 @@ const transactionReasons = [
           colors={['rgba(249, 196, 2, 1)', 'rgba(245, 213, 84, 1)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ minHeight: 200, maxWidth: 450, width: '100%', borderRadius: 20, margin: 10, padding: 20, shadowColor: '#000', justifyContent: 'space-between', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
+          style={{ minHeight: 200, maxWidth: 450, width: '100%', borderRadius: 10, margin: 10, padding: 20, shadowColor: '#000', justifyContent: 'space-between', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
@@ -221,7 +221,7 @@ const transactionReasons = [
                   <Text style={{ padding: 10, fontSize: 16 }}>Rs. {item.amount}       ({item.date})</Text>
                 </TouchableOpacity>
               )}
-              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 100, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
             />
           }
         </View>

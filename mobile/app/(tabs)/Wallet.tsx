@@ -3,38 +3,44 @@ import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Modal, TextInput,
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome6, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useDataContext } from './DataContext';
-import { House, Wallets, Transactions, Records } from '../Class/App';
+import { Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import Loading from '@/components/Loading';
 
 export default function Wallet() {
   const { houses, wallet, transactions, record, materials, paints, loading, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
-  const [search, setSearch] = React.useState('');
-  const [searchData, setSearchData] = React.useState('');
-  const [house, setHouse] = React.useState<House[]>([]);
-  const [home, setHome] = React.useState<string>('');
+  const [search, setSearch] = React.useState({
+    transactions: '',
+    record: ''
+  });
+  const [Form, setForm] = React.useState({
+    id: '',
+    name: '',
+    cash: 0,
+    date: new Date(),
+    house: '',
+    reason: '',
+    walletid: 'main',
+  });
   const [formType, setFormType] = React.useState('');
-  const [showDate, setShowDate] = React.useState(false);
-  const [date, setDate] = React.useState<Date>(new Date());
-  const [mobile, setMobile] = React.useState<boolean>(true);
-  const [wallets, setWallets] = React.useState<Wallets[]>([]);
-  const [cash, setCash] = React.useState<number>(0);
-  const [name, setName] = React.useState<string>('');
-  const [id, setId] = React.useState<string>('');
-  const [Walletid, setWalletid] = React.useState<string>('main');
-  const [reason, setReason] = React.useState<string>('Other');
+  const [state, setState] = React.useState({
+    date: false,
+    mobile: true,
+    reasons: false,
+    update: false
+  });
   const [index, setIndex] = React.useState<number>(0);
-  const [showReasons, setShowReasons] = React.useState<boolean>(false);
-  const [transaction, setTransaction] = React.useState<Transactions[]>([]);
   const [deleteType, setDeleteType] = React.useState<string>('');
-  const [records, setRecords] = React.useState<Records[]>([]);
-  const [updateVisible, setUpdateVisible] = React.useState<boolean>(false);
   const [dropDownType, setDropDownType] = React.useState<string>('');
-  const [sum, setSum] = React.useState<number>(0);
-  const [outSum, setOutSum] = React.useState<number>(0);
-  const [lastInTransaction, setLastInTransaction] = React.useState<number>(0);
-  const [lastOutTransaction, setLastOutTransaction] = React.useState<number>(0);
+  const [transactionData, setTransactionData] = React.useState(
+    {
+      in: 0,
+      out: 0,
+      lastIn: 0,
+      lastOut: 0
+    }
+  );
   const router = useRouter();
   const transactionReasons = [
   "Other",
@@ -81,60 +87,43 @@ export default function Wallet() {
   "Tax Payment"
 ];
 
- React.useEffect(() => {
-    const MonthlySum = async () => {
+  React.useEffect(() => {
+    const monthlySum = async () => {
       const month = new Date().toISOString().slice(0, 7);
-      let sum = 0;
-      setSum(0);
-      setOutSum(0);
-      sum = await Wallets.getMonthlySum(month, Walletid);
-      setSum(prev => prev + sum);
-      sum = await Transactions.getMonthlySum(month, 'In', Walletid);
-      setSum(prev => prev + sum);
-      sum = await Transactions.getMonthlySum(month, 'Out', Walletid);
-      setOutSum(prev => prev + sum);
-    }
+      const sum = await Wallets.getMonthlySum(month, Form.walletid) + await Transactions.getMonthlySum(month, 'In', Form.walletid);
+      setTransactionData(prev => ({ ...prev, in: sum }));
+      const outSum = await Transactions.getMonthlySum(month, 'Out', Form.walletid);
+      setTransactionData(prev => ({ ...prev, out: outSum }));
+    };
+    monthlySum();
+  }, [Form.walletid]);
 
-    MonthlySum();
-
-  }, [Walletid, transactions, records]);
-
+  
   React.useEffect(() => {
     const lastTransaction = async () => {
-      const amount = transactions.filter(item => item.wallet === Walletid && item.type === 'In').sort((a, b) => a.date.localeCompare(b.date));
-      setLastInTransaction(amount[amount.length - 1]?.amount || 0);
-      const outAmount = transactions.filter(item => item.wallet === Walletid && item.type === 'Out').sort((a, b) => a.date.localeCompare(b.date));
-      setLastOutTransaction(outAmount[outAmount.length - 1]?.amount || 0);
+      const amount = transactions.filter(item => item.wallet === Form.walletid && item.type === 'In').sort((a, b) => a.date.localeCompare(b.date));
+      setTransactionData(prev => ({ ...prev, lastIn: amount[amount.length - 1]?.amount || 0 }));
+      const outAmount = transactions.filter(item => item.wallet === Form.walletid && item.type === 'Out').sort((a, b) => a.date.localeCompare(b.date));
+      setTransactionData(prev => ({ ...prev, lastOut: outAmount[outAmount.length - 1]?.amount || 0 }));
     }
     lastTransaction();
-  }, [Walletid, transactions]);
+  }, [Form.walletid, transactions]);
 
   React.useEffect(() => {
-    const fetch = () => {
-      setHouse(houses);
-      setWallets(wallet);
-      setTransaction(transactions);
-      setRecords(record);
-    }
-
-    fetch();
-  }, [houses, wallet, transactions, record]);
-
-  React.useEffect(() => {
-    setIndex(wallets.findIndex(item => item.id === Walletid));
-  }, [wallets, Walletid]);
+    setIndex(wallet.findIndex(item => item.id === Form.walletid));
+  }, [wallet, Form.walletid]);
 
   const onChange = (event: any, selectedDate: Date | undefined) => {
-    setShowDate(false);
+    setState(prev => ({ ...prev, date: false }));
     if (selectedDate) {
-      setDate(selectedDate);
+      setForm(prev => ({ ...prev, date: selectedDate }));
     }
   };
 
   React.useEffect(() => {
     const check = () => {
       if (Platform.OS === 'web') {
-        setMobile(false);
+        setState(prev => ({ ...prev, mobile: false }));
       }
     }
 
@@ -142,17 +131,17 @@ export default function Wallet() {
   }, []);
 
   const handleHouseSelect = (code: string) => {
-    setHome(code);
+    setForm(prev => ({ ...prev, home: code }));
     setDropDownType('');
   };
 
   const add = async () => {
-    if (home === '') {
+    if (Form.house === '') {
       Alert.alert('Please select a house');
       return;
     }
     try {
-      Wallets.save(name, home, cash, date.toISOString().substring(0, 10));
+      Wallets.save(Form.name, Form.house, Form.cash, Form.date.toISOString().substring(0, 10));
       setIsWalletUpdated(true);
       setFormType('');
     } 
@@ -162,13 +151,13 @@ export default function Wallet() {
   }
   const updateCash = async () => {
     try {
-      const walletItem = wallets.find(item => item.id === Walletid);
+      const walletItem = wallet.find(item => item.id === Form.walletid);
       if (!walletItem) {
         Alert.alert('Wallet not found');
         return;
       }
-      const amount = walletItem.amount + cash;
-      Wallets.UpdateAmount(Walletid, amount, date.toISOString().substring(0, 10), cash);
+      const amount = walletItem.amount + Form.cash;
+      Wallets.UpdateAmount(Form.walletid, amount, Form.date.toISOString().substring(0, 10), Form.cash);
       setIsWalletUpdated(true);
       setFormType('');
     }
@@ -178,15 +167,15 @@ export default function Wallet() {
   }
 
   const saveTransaction = async (type: 'In' | 'Out') => {
-    if (name === '' || cash <= 0) {
+    if (Form.name === '' || Form.cash <= 0) {
       Alert.alert('Please fill all fields');
       return;
     }
     try {
-      await Transactions.save(Walletid, cash, type, date.toISOString().substring(0, 10), reason, name);
+      await Transactions.save(Form.walletid, Form.cash, type, Form.date.toISOString().substring(0, 10), Form.reason, Form.name);
       setIsTransactionUpdated(true);
       setFormType('');
-      setUpdateVisible(false);
+      setState(prev => ({ ...prev, update: false }));
     } 
     catch (error) {
       console.error('Error saving transaction:', error);
@@ -194,15 +183,15 @@ export default function Wallet() {
   }
 
   const saveRecord = async (type: 'In' | 'Out') => {
-    if (name === '' || cash <= 0) {
+    if (Form.name === '' || Form.cash <= 0) {
       Alert.alert('Please fill all fields');
       return;
     }
     try {
-      await Records.save(name, Walletid, cash, type, date.toISOString().substring(0, 10), reason);
+      await Records.save(Form.name, Form.walletid, Form.cash, type, Form.date.toISOString().substring(0, 10), Form.reason);
       setIsRecordUpdated(true);
       setFormType('');
-      setUpdateVisible(false);
+      setState(prev => ({ ...prev, update: false }));
     } 
     catch (error) {
       console.error('Error saving record:', error);
@@ -212,18 +201,18 @@ export default function Wallet() {
   const remove = async (type: string) => {
     try {
       if (type === 'transaction') {
-        Transactions.deleteTransaction(id);
+        Transactions.deleteTransaction(Form.id);
         setIsTransactionUpdated(true);
         setDropDownType('');
       }
       else if (type === 'wallet') {
-        Wallets.deleteWallet(Walletid);
-        setWalletid("main");
+        Wallets.deleteWallet(Form.walletid);
+        setForm(prev => ({ ...prev, walletid: 'main' }));
         setIsWalletUpdated(true);
         setDropDownType('');
       }
       else if (type === 'record') {
-        Records.deleteRecord(id);
+        Records.deleteRecord(Form.id);
         setIsRecordUpdated(true);
         setDropDownType('');
       }
@@ -237,12 +226,12 @@ export default function Wallet() {
     }
   }
   const updateTransaction = async (type: 'In' | 'Out') => {
-    if (name === '' || cash <= 0) {
+    if (Form.name === '' || Form.cash <= 0) {
       Alert.alert('Please fill all fields');
       return;
     }
     try {
-      Transactions.update(id, Walletid, cash, type, date.toISOString().substring(0, 10), reason, name);
+      Transactions.update(Form.id, Form.walletid, Form.cash, type, Form.date.toISOString().substring(0, 10), Form.reason, Form.name);
       setIsTransactionUpdated(true);
       setFormType('');
     }
@@ -251,13 +240,13 @@ export default function Wallet() {
     }
   }
   const updateRecord = async (type: 'In' | 'Out') => {
-    if (name === '' || cash <= 0) {
+    if (Form.name === '' || Form.cash <= 0) {
       Alert.alert('Please fill all fields');
       return;
     }
     try {
 
-      Records.UpdateRecord(id, name, Walletid, cash, type, date.toISOString().substring(0, 10), reason);
+      Records.UpdateRecord(Form.id, Form.name, Form.walletid, Form.cash, type, Form.date.toISOString().substring(0, 10), Form.reason);
       setIsRecordUpdated(true);
       setFormType('');
     }
@@ -282,10 +271,10 @@ export default function Wallet() {
                 style ={[{ padding: 20, borderRadius: 10, margin: 0,}, styles.card]} >
                   <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} onPress={() => setDropDownType('Wallet')}>
                     <Ionicons name="wallet" size={28} color="#fff" />
-                    <Text style={styles.head}>{ wallets[index]?.name || 'Wallet'}</Text>
+                    <Text style={styles.head}>{ wallet[index]?.name || 'Wallet'}</Text>
                   </TouchableOpacity>
                   <View>
-                    <Text style={styles.text}>Rs. {wallets[index]?.amount - materials.filter(item => item.house === wallets[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) - paints.filter(item => item.house === wallets[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) + transaction.filter(item => item.wallet === wallets[index]?.id).reduce((sum, item) => sum + item.amount, 0) + records.filter(item => item.wallet === wallets[index]?.id).reduce((sum, item) => sum + item.amount, 0)}</Text>
+                    <Text style={styles.text}>Rs. {wallet[index]?.amount - materials.filter(item => item.house === wallet[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) - paints.filter(item => item.house === wallet[index]?.house).reduce((sum, item) => sum + item.price*item.no, 0) + transactions.filter(item => item.wallet === wallet[index]?.id).reduce((sum, item) => sum + item.amount, 0) + record.filter(item => item.wallet === wallet[index]?.id).reduce((sum, item) => sum + item.amount, 0)}</Text>
                   </View>
                   <View style={styles.container}>
                     <View style={[styles.circle1]} />
@@ -299,20 +288,20 @@ export default function Wallet() {
                     <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
                       <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly In</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {sum}</Text>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {transactionData.in}</Text>
                         <View style={{ backgroundColor: 'rgba(10, 255, 10, 0.52)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
                           <Ionicons name='arrow-up' size={12} color={'rgb(255, 255,255)'}/>
-                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {lastInTransaction}</Text>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {transactionData.lastIn}</Text>
                         </View>
                       </View>
                     </View>
                     <View style={{ flex: 1, alignItems: 'center', gap: 20 }}>
                       <Text style={{textAlign: 'center', color: 'rgb(255, 255, 255)', fontWeight: '700'}}>Monthly Out</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {outSum}</Text>
+                        <Text style={{color: 'rgb(255, 255, 255)'}}>Rs. {transactionData.out}</Text>
                         <View style={{ backgroundColor: 'rgba(255, 0, 0, 0.6)', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingInline: 5, borderRadius: 10 }}>
                           <Ionicons name='arrow-down' size={12} color={'rgb(255, 255,255)'}/>
-                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {lastOutTransaction}</Text>
+                          <Text style={{color: 'rgb(255,255,255)', fontSize: 12}}> {transactionData.lastOut}</Text>
                         </View>
                       </View>
                     </View>
@@ -325,37 +314,37 @@ export default function Wallet() {
           <View style={styles.body}>
             <View style={styles.row}>
               <Text style={styles.icon}>Transactions</Text>
-              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => {setFormType('Transaction'); setUpdateVisible(true);}}>
+              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => {setFormType('Transaction'); setState(prev => ({ ...prev, update: true }));}}>
                 <Ionicons name='receipt' color={'rgb(255,255,255)'} size={20}></Ionicons>
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Transaction</Text>
               </TouchableOpacity>
             </View>
             
         <View style={styles.searchBar}>
-          <TextInput placeholder='Search....' style={styles.searchInput} value={search} onChangeText={setSearch}/>
-          { search.length > 0 &&
-            <TouchableOpacity onPress={() => setSearch("")} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
+          <TextInput placeholder='Search....' style={styles.searchInput} value={search.transactions} onChangeText={text => setSearch(prev => ({ ...prev, transactions: text }))}/>
+          { search.transactions.length > 0 &&
+            <TouchableOpacity onPress={() => setSearch(prev => ({ ...prev, transactions: '' }))} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
           }
-          { search.length > 0 &&
+          { search.transactions.length > 0 &&
             <FlatList 
-              data={transaction.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))} 
+              data={transactions.filter(item => item.name.toLowerCase().includes(search.transactions.toLowerCase()))} 
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
+                <TouchableOpacity onPress={() => {setForm(prev => ({ ...prev, name: item.name, walletid: item.wallet, cash: item.amount, date: new Date(item.date), reason: item.reason || 'Other', type: 'Transaction', id: item.id })); setFormType('Transaction');}}>
                   <Text style={{ padding: 10, fontSize: 16 }}>{item.name}</Text>
                 </TouchableOpacity>
               )}
-              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 50, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
             />
           }
         </View>
             <View style={{ gap: 10, marginTop: 10 }}>
-              { transaction.filter(t => t.wallet === Walletid).map((item, index) => (
+              { transactions.filter(t => t.wallet === Form.walletid).map((item, index) => (
                  item.type === 'In' ?
                 <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, borderRadius: 10, marginInline: 10 }]} 
-                onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
-                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
+                onLongPress={() => {setDropDownType('Delete'); setForm(prev => ({ ...prev, id: item.id })); setDeleteType('transaction');}}
+                onPress={() => {setForm(prev => ({ ...prev, name: item.name, walletid: item.wallet, cash: item.amount, date: new Date(item.date), reason: item.reason || 'Other', type: 'Transaction', id: item.id })); setFormType('Transaction');}}>
                   <Text style={{fontSize: 16, color: 'rgba(4, 159, 9, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
                     <Text style={{color: 'rgba(4, 159, 9, 1)', fontSize: 16, fontWeight: 700}}>Rs. {item.amount}</Text>
@@ -363,8 +352,8 @@ export default function Wallet() {
                   </View>
                 </TouchableOpacity>
                 :
-                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10, marginInline: 10 }]} onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('transaction');}}
-                onPress={() => {setName(item.name); setWalletid(item.wallet); setCash(item.amount); setDate(new Date(item.date)); setReason(item.reason || 'Other'); setFormType('Transaction'); setId(item.id);}}>
+                <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, borderRadius: 10, marginInline: 10 }]} onLongPress={() => {setDropDownType('Delete'); setForm(prev => ({ ...prev, id: item.id })); setDeleteType('transaction');}}
+                onPress={() => {setForm(prev => ({ ...prev, name: item.name, walletid: item.wallet, cash: item.amount, date: new Date(item.date), reason: item.reason || 'Other', type: 'Transaction', id: item.id })); setFormType('Transaction');}}>
                   <Text style={{fontSize: 16, color: 'rgba(211, 0, 0, 1)', fontWeight: 700}}>{item.name}</Text>
                   <View style={[styles.row, { gap: 10 }]}>
                     <Text style={{color: 'rgba(211, 0, 0, 1)', fontSize: 16, fontWeight: 700}}>Rs. {-item.amount}</Text>
@@ -378,42 +367,39 @@ export default function Wallet() {
           <View style={styles.body}>
             <View style={styles.row}>
               <Text style={styles.icon}>Records</Text>
-              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { setFormType('Record'); setUpdateVisible(true);}}>
+              <TouchableOpacity style={[styles.row, { gap: 10, paddingBlock: 10, backgroundColor: 'rgba(0, 35, 123, 1)', borderRadius: 50 }]} onPress={() => { setFormType('Record'); setState(prev => ({ ...prev, update: true }));}}>
                 <Ionicons name='book' color={'rgb(255,255,255)'} size={20}></Ionicons>
                 <Text style={{fontSize: 18, fontWeight: '900', color: 'rgb(255,255,255)'}}>Record</Text>
               </TouchableOpacity>
             </View>
                 
             <View style={styles.searchBar}>
-              <TextInput placeholder='Search....' style={styles.searchInput} value={searchData} onChangeText={setSearchData}/>
-              { searchData.length > 0 &&
-                <TouchableOpacity onPress={() => setSearchData("")} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
+              <TextInput placeholder='Search....' style={styles.searchInput} value={search.record} onChangeText={text => setSearch(prev => ({ ...prev, record: text }))}/>
+              { search.record.length > 0 &&
+                <TouchableOpacity onPress={() => setSearch(prev => ({ ...prev, record: '' }))} style={{ position: 'absolute', right: 10}}><Ionicons name='close' size={18} color={'rgba(255, 174, 0, 1)'}/></TouchableOpacity>
               }
-              { searchData.length > 0 &&
+              { search.record.length > 0 &&
                 <FlatList 
-                  data= {records.filter(item => item.name.toLowerCase().includes(searchData.toLowerCase()))}
+                  data= {record.filter(item => item.name.toLowerCase().includes(search.record.toLowerCase()))}
                   keyExtractor={(item) => item.id}
                   scrollEnabled={false}
                   renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => {
-                      setName(item.name);
-                      setCash(item.amount);
-                      setDate(new Date(item.date));
-                      setReason(item.reason || 'Other');
+                      setForm(prev => ({ ...prev, name: item.name, walletid: item.wallet, cash: item.amount, date: new Date(item.date), reason: item.reason || 'Other', type: 'Record', id: item.id }));
                       setFormType('Record');
                     }}>
                       <Text style={{ padding: 10, fontSize: 16 }}>{item.name}</Text>
                     </TouchableOpacity>
                   )}
-                  style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, marginTop: 170, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+                  style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
                 />
               }
             </View>
             <View style={{ gap: 10, marginTop: 10 }}>
-              { records.filter(r => r.wallet === Walletid).map((item, index) => (
+              { record.filter(r => r.wallet === Form.walletid).map((item, index) => (
                 item.amount >= 0 ?
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(4, 159, 9, 0.1)', padding: 10, marginInline: 10, borderRadius: 10 }]} 
-              onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}}
+              onLongPress={() => {setDropDownType('Delete'); setForm(prev => ({ ...prev, id: item.id })); setDeleteType('record');}}
               onPress={() => {
                       router.push({pathname: '/Record', params: { Recordid: item.id, name: item.name, Total: item.amount, wallet: wallet.find(w => w.id === item.wallet)?.name, house: wallet.find(w => w.id === item.wallet)?.house }});
                     }}>
@@ -425,7 +411,7 @@ export default function Wallet() {
               </TouchableOpacity>
               :
               <TouchableOpacity key={index} style={[styles.row, { backgroundColor: 'rgba(159, 4, 4, 0.1)', padding: 10, marginInline: 10, borderRadius: 10 }]} 
-              onLongPress={() => {setDropDownType('Delete'); setId(item.id); setDeleteType('record');}} 
+              onLongPress={() => {setDropDownType('Delete'); setForm(prev => ({ ...prev, id: item.id })); setDeleteType('record');}} 
               onPress={() => {
                       router.push({ pathname: '/Record', params: { Recordid: item.id, name: item.name, Total: item.amount, wallet: wallet.find(w => w.id === item.wallet)?.name, house: wallet.find(w => w.id === item.wallet)?.house }});
                     }}>
@@ -453,25 +439,25 @@ export default function Wallet() {
                   <View style={styles.form}>
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 40, }}>CASH IN</Text>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
-                      <TextInput style={[styles.input, {outline: 'none'}]} onChangeText={(text) => setCash(parseFloat(text))} value={cash.toString()} keyboardType='numeric'/>
+                      <TextInput style={[styles.input, {outline: 'none'}]} onChangeText={(text) => setForm(prev => ({ ...prev, cash: parseFloat(text) }))} value={Form.cash.toString()} keyboardType='numeric'/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
-                    { !mobile ?
+                    { !state.mobile ?
 
-                      <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                      onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20,  fontFamily: 'Arial'}}/>
+                      <input type="date" value={Form.date instanceof Date && !isNaN(Form.date.getTime()) ? Form.date.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20,  fontFamily: 'Arial'}}/>
                       :
                       <View>
                       <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                      onPress={() => setShowDate(true)}>
+                      onPress={() => setState(prev => ({ ...prev, date: true }))}>
                       <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                        {date.toLocaleDateString()}
+                        {Form.date.toLocaleDateString()}
                       </Text>
                       <Ionicons name="chevron-down" style={{fontSize: 20}}/>
                     </TouchableOpacity>
-                      {showDate && (
+                      {state.date && (
 
                         <DateTimePicker
-                        value={new Date(date)}
+                        value={new Date(Form.date)}
                         mode="date"
                         display="default"
                         onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
@@ -486,27 +472,27 @@ export default function Wallet() {
                   <View style={styles.form}>
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>WALLET</Text>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.name} onChangeText={name => setForm(prev => ({ ...prev, name }))}/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash In</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(text) => setCash(parseInt(text))} keyboardType='numeric'/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.cash.toString()} onChangeText={cash => setForm(prev => ({ ...prev, cash: parseInt(cash) }))} keyboardType='numeric'/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
-                    { !mobile ?
+                    { !state.mobile ?
 
-                      <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                      onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                      <input type="date" value={Form.date instanceof Date && !isNaN(Form.date.getTime()) ? Form.date.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
                       :
                       <View>
                       <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                      onPress={() => setShowDate(true)}>
+                      onPress={() => setState(prev => ({ ...prev, date: true }))}>
                       <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                        {date.toLocaleDateString()}
+                        {Form.date.toLocaleDateString()}
                       </Text>
                       <Ionicons name="chevron-down" style={{fontSize: 20}}/>
                     </TouchableOpacity>
-                      {showDate && (
+                      {state.date && (
 
                         <DateTimePicker
-                        value={new Date(date)}
+                        value={new Date(Form.date)}
                         mode="date"
                         display="default"
                         onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
@@ -516,7 +502,7 @@ export default function Wallet() {
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>House</Text>
                     <TouchableOpacity style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]} onPress={() => setDropDownType('House')}>
                       <Text style={{color: 'rgb(0,0,0)'}}>
-                        { house.find(h => h.code === home)?.name || 'All Houses'}
+                        { houses.find(h => h.code === Form.house)?.name || 'All Houses'}
                       </Text>
                       <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
                     </TouchableOpacity>
@@ -528,28 +514,28 @@ export default function Wallet() {
                   <View style={styles.form}>
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Records</Text>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.name} onChangeText={name => setForm(prev => ({ ...prev, name }))}/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(e) => {setCash(parseInt(e))}} keyboardType='numeric'/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.cash.toString()} onChangeText={cash => setForm(prev => ({ ...prev, cash: parseInt(cash) }))} keyboardType='numeric'/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
                     <View style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10}]}>
-                      <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={reason} onChangeText={(e) => {setReason(e); setShowReasons(true)}}/>
+                      <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={Form.reason} onChangeText={(e) => {setForm(prev => ({ ...prev, reason: e })); setState(prev => ({ ...prev, reasons: true }))}}/>
                       <TouchableOpacity>
                         <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
                       </TouchableOpacity>
-                      { (reason.length > 0 && showReasons) &&
+                      { (Form.reason.length > 0 && state.reasons) &&
                         <FlatList
-                              data={transactionReasons.filter(t => t.toLowerCase().includes(reason.toLowerCase()))}
+                              data={transactionReasons.filter(t => t.toLowerCase().includes(Form.reason.toLowerCase()))}
                               keyExtractor={(item) => item}
                               style={{ position: 'absolute', width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, left: 0, zIndex: 100, shadowColor: '#000', height: 250,shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
                               scrollEnabled={true}
                               renderScrollComponent={(props) => <ScrollView {...props} />}
                               renderItem={({ item }) => (
                                 <TouchableOpacity onPress={() => {
-                                  setReason(item);
-                                  setShowReasons(false);
+                                  setForm(prev => ({ ...prev, reason: item }));
+                                  setState(prev => ({ ...prev, reasons: false }));
                                 }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
-                                  { item === reason ?
+                                  { item === Form.reason ?
                                   <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
                                   :
                                   <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
@@ -561,30 +547,30 @@ export default function Wallet() {
                       }
                     </View>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
-                    { !mobile ?
+                    { !state.mobile ?
 
-                      <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                      onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                      <input type="date" value={Form.date instanceof Date && !isNaN(Form.date.getTime()) ? Form.date.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
                       :
                       <View>
                       <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                      onPress={() => setShowDate(true)}>
+                      onPress={() => setState(prev => ({ ...prev, date: true }))}>
                       <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                        {date.toLocaleDateString()}
+                        {Form.date.toLocaleDateString()}
                       </Text>
                       <Ionicons name="chevron-down" style={{fontSize: 20}}/>
                     </TouchableOpacity>
-                      {showDate && (
+                      {state.date && (
 
                         <DateTimePicker
-                        value={new Date(date)}
+                        value={new Date(Form.date)}
                         mode="date"
                         display="default"
                         onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
                       )}
                     </View>
                     }
-                    { updateVisible ?
+                    { state.update ?
                     <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
                       <TouchableOpacity onPress={() => saveRecord('Out')} style={{ width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, paddingInline: 10, paddingBlock: 5,}}>
                         <Text style={[styles.text, {marginInline: 0}]}>Out</Text>
@@ -608,28 +594,28 @@ export default function Wallet() {
                   <View style={styles.form}>
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 30, }}>Transaction</Text>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Name</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={name} onChangeText={setName}/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.name} onChangeText={text => setForm(prev => ({...prev, name: text}))}/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Cash</Text>
-                    <TextInput style={[styles.input, {outline: 'none'}]} value={cash.toString()} onChangeText={(e) => setCash(parseInt(e))}/>
+                    <TextInput style={[styles.input, {outline: 'none'}]} value={Form.cash.toString()} onChangeText={(e) => setForm(prev => ({ ...prev, cash: parseFloat(e) || 0}))}/>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Reason</Text>
                     <View style={[styles.input, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10}]}>
-                      <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={reason} onChangeText={(e) => {setReason(e); setShowReasons(true)}}/>
+                      <TextInput style={[{color: 'rgb(0,0,0)', width: '100%', outline: 'none'}]} value={Form.reason} onChangeText={(e) => {setForm(prev => ({...prev, reason: e})); setState(prev => ({ ...prev, reasons: true }))}}/>
                       <TouchableOpacity>
                         <Ionicons name='chevron-down' size={20} color={'rgb(0,0,0)'}/>
                       </TouchableOpacity>
-                      { (reason.length > 0 && showReasons) &&
+                      { (Form.reason.length > 0 && state.reasons) &&
                         <FlatList
-                              data={transactionReasons.filter(t => t.toLowerCase().includes(reason.toLowerCase()))}
+                              data={transactionReasons.filter(t => t.toLowerCase().includes(Form.reason.toLowerCase()))}
                               keyExtractor={(item) => item}
                               style={{ position: 'absolute', width: '100%', backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, left: 0, zIndex: 100, shadowColor: '#000', height: 250,shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
                               scrollEnabled={true}
                               renderScrollComponent={(props) => <ScrollView {...props} />}
                               renderItem={({ item }) => (
                                 <TouchableOpacity onPress={() => {
-                                  setReason(item);
-                                  setShowReasons(false);
+                                  setForm(prev => ({...prev, reason: item}));
+                                  setState(prev => ({ ...prev, reasons: false }));
                                 }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
-                                  { item === reason ?
+                                  { item === Form.reason ?
                                   <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
                                   :
                                   <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
@@ -641,30 +627,30 @@ export default function Wallet() {
                       }
                     </View>
                     <Text style={[{color: 'rgb(0,0,0)', fontSize: 18, fontWeight: '700'}]}>Date</Text>
-                    { !mobile ?
+                    { !state.mobile ?
 
-                      <input type="date" value={date instanceof Date && !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''}
-                      onChange={(e) => setDate(new Date(e.target.value))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
+                      <input type="date" value={Form.date instanceof Date && !isNaN(Form.date.getTime()) ? Form.date.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, date: new Date(e.target.value) }))} style={{ borderBottomColor: '#000', height: 40, borderBottomWidth: 1, borderInlineWidth: 0, borderTopWidth: 0, marginBottom: 20, fontFamily: 'Arial'}}/>
                       :
                       <View>
                       <TouchableOpacity style={{backgroundColor: 'rgb(255, 255, 255)', borderBottomWidth: 1, borderColor: '#000', paddingInline: 15, paddingBlock: 5, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} 
-                      onPress={() => setShowDate(true)}>
+                      onPress={() => setState(prev => ({ ...prev, date: true }))}>
                       <Text style={{color: 'rgba(0, 0, 0, 1)'}}>
-                        {date.toLocaleDateString()}
+                        {Form.date.toLocaleDateString()}
                       </Text>
                       <Ionicons name="chevron-down" style={{fontSize: 20}}/>
                     </TouchableOpacity>
-                      {showDate && (
+                      {state.date && (
 
                         <DateTimePicker
-                        value={new Date(date)}
+                        value={new Date(Form.date)}
                         mode="date"
                         display="default"
                         onChange={(event, selectedDate) => onChange(event, selectedDate)}/>
                       )}
                     </View>
                     }
-                      { updateVisible ?
+                      { state.update ?
                         <View style={[styles.row, { justifyContent: 'space-around', marginTop: 20 }]}>
                           <TouchableOpacity onPress={() => saveTransaction("Out") } style={{width: '40%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 0, 0, 1)', borderRadius: 20, padding: 5}}>
                             <Text style={[styles.text, {marginInline: 0}]}>Out</Text>
@@ -695,32 +681,32 @@ export default function Wallet() {
         </Modal>    
 
       <Modal
-        visible={dropDownType !== ''}
+        visible={dropDownType !== ""}
         animationType='slide'
         transparent={true}
         onRequestClose={() =>
-          setDropDownType('')
+          setDropDownType("")
         }>
           {{
             Wallet:
               <View style={{justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                 <View style={styles.dropDown}>
                   <TouchableOpacity onPress={() => {
-                            setId('main');
-                            setIndex(wallets.findIndex(w => w.id === id));
+                            setForm(prev => ({ ...prev, walletid: 'main' }));
+                            setIndex(wallet.findIndex(w => w.id === Form.id));
                             setDropDownType('')}} style={{ padding: 10, borderBottomColor: '#ddd', borderBottomWidth: 1 }}>
                     <Text style={{ fontWeight: "bold", fontSize: 24}}>Wallets</Text>
                   </TouchableOpacity>
                   <FlatList
-                        data={wallets}
+                        data={wallet}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                           <TouchableOpacity onPress={() => {
-                            setWalletid(item.id);
-                            setIndex(wallets.findIndex(w => w.id === item.id));
-                            setDropDownType('');
+                            setForm(prev => ({ ...prev, walletid: item.id }));
+                            setIndex(wallet.findIndex(w => w.id === item.id));
+                            setDropDownType("");
                           }} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
-                            { item.id === Walletid ?
+                            { item.id === Form.walletid ?
                             <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
                             :
                             <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
@@ -762,11 +748,11 @@ export default function Wallet() {
                 </TouchableOpacity>
 
                 <FlatList
-                      data={house}
+                      data={houses}
                       keyExtractor={(item) => item.name}
                       renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => handleHouseSelect(item.code)} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15,  borderBottomColor: '#ddd', borderBottomWidth: 1,}}>
-                          { item.code === home ?
+                          { item.code === Form.house ?
                           <MaterialCommunityIcons name="circle-slice-8" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>
                           :
                           <MaterialCommunityIcons name="circle-outline" style={{fontSize: 20, color: 'rgb(7, 180, 48)', paddingRight: 10}}/>

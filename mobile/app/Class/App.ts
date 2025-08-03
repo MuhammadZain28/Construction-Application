@@ -479,6 +479,9 @@ export class Transactions {
         const transactionsRef = ref(db, 'transactions');
         const snapshot = await get(transactionsRef);
         let sum = 0;
+        if (!snapshot.exists()) {
+            return 0;
+        }
         snapshot.forEach((childSnapshot) => {
             const data = childSnapshot.val();
             const transactionMonth = data.date.split('-')[1];
@@ -499,7 +502,7 @@ export class Transactions {
             const lastTransactionKey = Object.keys(data)[0];
             return data[lastTransactionKey].amount;
         } else {
-            return 0; // No transactions found
+            return 0;
         }
     }
 }
@@ -533,7 +536,7 @@ export class Records {
         const innerRef = ref(db, `records/${newRecordRef.key}`);
         const newInnerRef = push(innerRef)
         await set(newInnerRef, {
-            amount: type === 'In' ? amount : -amount,
+            amount: amount,
             type: type,
             date: date,
             reason: reason

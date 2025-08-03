@@ -163,10 +163,13 @@ const Home: React.FC = () => {
                   setDropDownType("Form");
                   setState(prev => ({ ...prev, update: true }));
                 }}>
-                  <Text style={{ padding: 10, fontSize: 16 }}>{item.product}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+                    <Text style={{ padding: 10, fontSize: 16 }}>{item.product}</Text>   
+                    <Text style={{ padding: 10, fontSize: 16 }}>{item.date}</Text>
+                  </View>
                 </TouchableOpacity>
               )}
-              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(248, 248, 248, 1)', borderRadius: 10, marginTop: 90, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              style={{ position: 'absolute', width: 350, backgroundColor: 'rgba(255, 255, 255, 1)', borderRadius: 10, top: 50, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
             />
           }
         </View>
