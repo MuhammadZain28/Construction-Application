@@ -5,6 +5,7 @@ import { House, Paints } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
 import Loading from '@/components/Loading';
+import Header from '@/components/ui/Header';
 
 let house = [ new House("All Houses", "All Houses", "", false) ];
 export default function TabTwoScreen() {
@@ -96,7 +97,8 @@ export default function TabTwoScreen() {
 
   return (
 
-    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
+    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff'}}>
+      <Header icon="format-paint" name="Paints"/>
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgba(12, 41, 145, 1)'}]}>
           <View>
@@ -479,10 +481,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     paddingBlock: 20,
+    paddingHorizontal: 10,
   },
   card: {
     flex: 1,
     minWidth: 300,
+    minHeight: 170,
     padding: 10,
     borderRadius: 15,
     flexDirection: 'row',
@@ -526,6 +530,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
+    marginHorizontal: 10,
   },
   headerRow: {
     flexDirection: 'row',

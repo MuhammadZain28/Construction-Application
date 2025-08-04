@@ -26,7 +26,6 @@ export default function TabLayout() {
             height: Platform.OS === 'android' ? 70 : 60,
           },
         }}>
-          
         <Tabs.Screen
           name="Dashboard"
           options={{

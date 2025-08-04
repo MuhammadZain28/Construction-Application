@@ -7,6 +7,7 @@ import { Wallets, Transactions, Records } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import Loading from '@/components/Loading';
+import Header from '@/components/ui/Header';
 
 export default function Wallet() {
   const { houses, wallet, transactions, record, materials, paints, loading, setIsRecordUpdated, setIsTransactionUpdated, setIsWalletUpdated } = useDataContext();
@@ -260,7 +261,8 @@ export default function Wallet() {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: '#dbdbdbff', padding: 10 }}>
+    <ScrollView style={{ backgroundColor: '#dbdbdbff'}}>
+      <Header icon="wallet" name="Wallets" />
         <View style={styles.main}>
           <View style={[styles.row, { justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10, width: '100%' }]}>
               <LinearGradient
@@ -772,6 +774,7 @@ const styles = StyleSheet.create({
   main: {
     display: 'flex',
     flexDirection: 'column',
+    padding: 10
   },
   card: {
     backgroundColor: 'transparent',

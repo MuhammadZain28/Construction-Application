@@ -5,6 +5,7 @@ import React from "react";
 import { FlatList, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { House, Material } from "../Class/App";
 import { useDataContext } from "./DataContext";
+import Header from "@/components/ui/Header";
 
 let house: House[] = [];
 const Home: React.FC = () => {
@@ -97,7 +98,8 @@ const Home: React.FC = () => {
   }
 
   return (
-    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff', padding: 10}}>
+    <ScrollView style={{flex: 1, backgroundColor: '#dbdbdbff'}}>
+      <Header icon="construction" name="Materials"/>
       <View style={styles.header}>
         <View style={[styles.card, {backgroundColor: 'rgb(7, 180, 48)'}]}>
           <View>
@@ -453,10 +455,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     paddingBlock: 20,
+    padding: 10
   },
   card: {
     flex: 1,
     minWidth: 300,
+    minHeight: 170,
     padding: 10,
     borderRadius: 15,
     flexDirection: 'row',
@@ -500,6 +504,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
+    marginInline: 10,
   },
   headerRow: {
     flexDirection: 'row',

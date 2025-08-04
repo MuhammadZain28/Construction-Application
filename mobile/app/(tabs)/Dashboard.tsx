@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useDataContext } from './DataContext';
-  
+import Header from '@/components/ui/Header';
 const Dashboard: React.FC = () => {
   const {houses, transactions, materials, paints, record, paintSum, materialSum} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
@@ -74,6 +74,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <ScrollView>
+      <Header icon="dashboard" name="Dashboard" />
       <View style={styles.main}>
         <View style={styles.top}>
           <View

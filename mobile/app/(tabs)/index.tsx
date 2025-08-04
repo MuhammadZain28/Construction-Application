@@ -5,6 +5,7 @@ import { House } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
 import Loading from '@/components/Loading';
+import Header from '@/components/ui/Header';
 
 export default function HomeScreen() {
   const { houses, materials, paints, loading } = useDataContext();
@@ -87,6 +88,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={{backgroundColor: '#dbdbdbff'}}>
+      <Header icon="home" name="Houses"/>
       <View style={styles.main}>
         <View style={styles.header}>
           <View style={[styles.card, {backgroundColor: 'rgba(206, 58, 255, 1)'}]}>
@@ -361,8 +363,6 @@ export default function HomeScreen() {
                 <TouchableOpacity onPress={() => handleHouseSelect("")}>
                   <Text style={{ fontWeight: "bold", fontSize: 24}}>Home</Text>
                 </TouchableOpacity>
-  
-  
                 <FlatList
                       data={houses}
                       keyExtractor={(item) => item.name}
