@@ -1,14 +1,14 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput} from 'react-native';
 
-export default function Loading() {
+export default function Loading({ wallet }: { wallet: boolean }) {
     const height = window.innerHeight;
 
   return (
     <View style={{backgroundColor: '#dbdbdbff', height: height, flex: 1}}>
-
         <View style={[styles.head, { backgroundColor: 'rgb(185, 185, 185)' }]}>
         </View>
+      { !wallet ?
       <View style={styles.main}>
         <View style={styles.header}>
           <View style={[styles.card, {backgroundColor: 'rgba(185, 185, 185, 1)'}]}>
@@ -27,6 +27,27 @@ export default function Loading() {
           </View>
         </View>
       </View>
+      :
+      <View style={styles.main}>
+        <View style={{ justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10, width: '100%', paddingBlock: 10 }}>
+          <View style={{backgroundColor: 'rgba(185, 185, 185, 1)', width: 450, height: 220, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 2}}>
+          </View>
+          <View style={[{ width: '100%', justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={{backgroundColor: 'rgba(185, 185, 185, 1)', height: 76, width: 76, borderRadius: 50, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2}}/>
+          </View>
+        </View>
+        <View style={styles.container}>
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',  padding: 20}}>
+            <Text style={{fontSize: 24, fontWeight: 'bold', }}> </Text>
+          </View>
+          <View style={styles.searchBar}>
+            <TextInput style={styles.searchInput} />
+          </View>
+          <View>
+          </View>
+        </View>
+      </View>
+      }
     </View>
   );
 }
@@ -40,12 +61,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'stretch',
+    width: '100%',
     gap: 20,
     paddingBlock: 20,
   },
   card: {
-    flex: 1,
     minWidth: 300,
     minHeight: 170,
     padding: 10,

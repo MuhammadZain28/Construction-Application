@@ -14,9 +14,9 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 function LayoutContent() {
   const { isDataLoaded } = useDataContext();
   const colorScheme = useColorScheme();
-  
   const onLayoutRootView = useCallback(async () => {
     if (isDataLoaded) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await SplashScreen.hideAsync();
     }
   }, [isDataLoaded]);

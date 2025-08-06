@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { House, Material, Paints, Transactions, Wallets, Records } from '../Class/App'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth"
+import { FirebaseAuth } from '@/app/Firebase/firebaseAuth';
 
 type DataContextType = {
   houses: House[];
@@ -99,8 +101,45 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
     }
 
+    const logIn = async () => {
+      try {
+          const auth = await FirebaseAuth();
+
+          // Try to create the user
+          const credentials = await createUserWithEmailAndPassword(
+            auth,
+            'zaina.azhar2005@gmail.com',
+            'admin123'
+          );
+
+          if (credentials.user) {
+            console.log('User created:', credentials.user.email);
+          }
+        } catch (error: any) {
+          // If user already exists, sign in instead
+          if (error.code === 'auth/email-already-in-use') {
+            try {
+              const auth = await FirebaseAuth();
+              const credentials = await signInWithEmailAndPassword(
+                auth,
+                'zaina.azhar2005@gmail.com',
+                'admin123'
+              );
+              console.log('Signed in existing user:', credentials.user.email);
+            } catch (signInError) {
+              console.error("Sign-in failed:", signInError);
+              alert("Failed to sign in.");
+            }
+          } else {
+            console.error("Error creating user:", error);
+            alert(error.message);
+          }
+        }
+      };
+
   useEffect(() => {
     try {
+      logIn()
       if (isHouseUpdated) {
         fetchHouses();
       }

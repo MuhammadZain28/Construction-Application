@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, FlatList, Platform } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { House, Paints } from '../Class/App'; 
+import { House, Paints } from '../Class/App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDataContext } from './DataContext';
 import Loading from '@/components/Loading';
@@ -28,7 +28,6 @@ export default function TabTwoScreen() {
   });
   const [search, setSearch] = React.useState("");
   React.useEffect(() => {
-    
     if (Platform.OS === 'android') {
       setState(prev => ({ ...prev, mobile: true }));
     }
@@ -92,7 +91,7 @@ export default function TabTwoScreen() {
   }
 
   if (loading) {
-    return <Loading />;
+    return <Loading wallet={false} />;
   }
 
   return (

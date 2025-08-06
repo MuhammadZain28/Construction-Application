@@ -39,6 +39,18 @@ export default function HomeScreen() {
     House.updateCompleted(code, status).catch(console.error);
   };
 
+  const totalMaterial = React.useMemo(() => {
+    return materials.filter(m => m.house === Form.code).length;
+  }, [materials, Form.code]);
+
+  const totalPaint = React.useMemo(() => {
+    return paints.filter(p => p.house === Form.code).length;
+  }, [paints, Form.code]);
+
+  const spend = React.useMemo(() => {
+    return materials.filter(m => m.house === Form.code).reduce((acc, curr) => acc + curr.price*curr.no, 0) + paints.filter(p => p.house === Form.code).reduce((acc, curr) => acc + curr.price*curr.no, 0);
+  }, [materials, paints, Form.code]);
+
   const addData = () => {
     const house = new House(Form.name, Form.code, Form.description, false, Form.date.toISOString().substring(0, 10));
     House.save(house).then(() => {
@@ -83,7 +95,7 @@ export default function HomeScreen() {
       setState(prevState => ({ ...prevState, updateVisible: false }));
   };
   if (loading) {
-    return <Loading />;
+    return <Loading wallet={false} />;
   }
 
   return (
@@ -100,14 +112,14 @@ export default function HomeScreen() {
               </TouchableOpacity>    
               <View style={{flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10,}}>
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)',  width: 75}}>Material</Text>                
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{materials.filter(m => m.house === Form.code).length}</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)',  width: 75}}>Material</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{totalMaterial}</Text>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginInline: 10, paddingInline: 15, backgroundColor: 'rgba(255, 255, 255, 1)', paddingBlock: 5, borderRadius: 20}}>
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', width: 75}}>Paint</Text>  
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>                
-                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{paints.filter(p => p.house === Form.code).length}</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>:</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: 'rgba(205, 58, 255, 1)', }}>{totalPaint}</Text>
                 </View>
               </View>
             </View>
@@ -122,7 +134,7 @@ export default function HomeScreen() {
               <Text style={styles.cardText}> Spend </Text>
               <View style={{flexDirection: 'row', alignItems: 'center', marginInline: 20, justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(255, 255, 255, 1)', paddingInline: 10, paddingBlock: 5, borderRadius: 20}}>
                 <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>Rs.</Text>  
-                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>{materials.filter(m => m.house === Form.code).reduce((acc, curr) => acc + curr.price*curr.no, 0) + paints.filter(p => p.house === Form.code).reduce((acc, curr) => acc + curr.price*curr.no, 0)}</Text>
+                <Text style={{fontSize: 24, fontWeight: 'bold', color: 'rgba(255, 183, 0, 1)', paddingInline: 15,}}>{spend}</Text>
               </View>
             </View>
             <View style={{justifyContent: 'center', alignItems: 'center', gap: 10}}>

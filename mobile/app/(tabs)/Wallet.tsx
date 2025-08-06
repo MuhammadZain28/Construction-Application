@@ -257,7 +257,7 @@ export default function Wallet() {
   }
 
   if (loading) {
-    return <Loading />;
+    return <Loading wallet={true} />;
   }
 
   return (
