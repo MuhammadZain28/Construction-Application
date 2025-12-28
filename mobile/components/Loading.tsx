@@ -30,7 +30,7 @@ export default function Loading({ wallet }: { wallet: boolean }) {
       :
       <View style={styles.main}>
         <View style={{ justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 10, width: '100%', paddingBlock: 10 }}>
-          <View style={{backgroundColor: 'rgba(185, 185, 185, 1)', width: 450, height: 220, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 2}}>
+          <View style={{backgroundColor: 'rgba(185, 185, 185, 1)', maxWidth: 450, width: '110%', height: 220, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 2}}>
           </View>
           <View style={[{ width: '100%', justifyContent: 'center', alignItems: 'center' }]}>
             <View style={{backgroundColor: 'rgba(185, 185, 185, 1)', height: 76, width: 76, borderRadius: 50, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2}}/>
@@ -52,10 +52,10 @@ export default function Loading({ wallet }: { wallet: boolean }) {
   );
 }
 const styles = StyleSheet.create({
-    head: {
-    height: 60,
-    width: '100%',
-    },
+  head: {
+  height: 60,
+  width: '100%',
+  },
   header: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     paddingBlock: 20,
   },
   card: {
+    flex: 1,
     minWidth: 300,
     minHeight: 170,
     padding: 10,
@@ -92,8 +93,9 @@ const styles = StyleSheet.create({
     height: 700,
     flexDirection: 'column',
     padding: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    marginTop: 20,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
     backgroundColor: 'rgba(185, 185, 185, 1)',
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     padding: 10,
     borderRadius: 20,
-    outline: '0px solid transparent',
+    outline: 'none',
   },
   dropdown: {
     backgroundColor: '#fff',

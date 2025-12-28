@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { House, Material, Paints, Transactions, Wallets, Records } from '../Class/App'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth"
-import { FirebaseAuth } from '@/app/Firebase/firebaseAuth';
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { FirebaseAuth } from '../Firebase/firebaseAuth';
 
 type DataContextType = {
   houses: House[];
@@ -102,22 +102,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const logIn = async () => {
-      try {
-          const auth = await FirebaseAuth();
-
-          // Try to create the user
-          const credentials = await createUserWithEmailAndPassword(
-            auth,
-            'zaina.azhar2005@gmail.com',
-            'admin123'
-          );
-
-          if (credentials.user) {
-            console.log('User created:', credentials.user.email);
-          }
-        } catch (error: any) {
-          // If user already exists, sign in instead
-          if (error.code === 'auth/email-already-in-use') {
             try {
               const auth = await FirebaseAuth();
               const credentials = await signInWithEmailAndPassword(
@@ -126,20 +110,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 'admin123'
               );
               console.log('Signed in existing user:', credentials.user.email);
+              return true;
             } catch (signInError) {
               console.error("Sign-in failed:", signInError);
               alert("Failed to sign in.");
+              return false;
             }
-          } else {
-            console.error("Error creating user:", error);
-            alert(error.message);
           }
-        }
-      };
 
   useEffect(() => {
     try {
-      logIn()
+      if (!isDataLoaded) {
+        logIn().catch(error => {
+          console.error("Login failed:", error);
+          alert("Failed to log in.");
+          return;
+        });
+      }
       if (isHouseUpdated) {
         fetchHouses();
       }
@@ -168,7 +155,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   },
 
-  [ isHouseUpdated, isMaterialUpdated, isPaintUpdated, isWalletUpdated, isTransactionUpdated, isRecordUpdated ]);
+  [ isHouseUpdated, isMaterialUpdated, isPaintUpdated, isWalletUpdated, isTransactionUpdated, isRecordUpdated, isDataLoaded ]);
 
   return (
     <DataContext.Provider value={{ houses, isHouseUpdated, setIsHouseUpdated, materials, isMaterialUpdated, setIsMaterialUpdated, paints, isPaintUpdated, setIsPaintUpdated, wallet, isWalletUpdated, setIsWalletUpdated, transactions, isTransactionUpdated, setIsTransactionUpdated, record, isRecordUpdated, setIsRecordUpdated, paintSum, materialSum, isDataLoaded, setIsDataLoaded, loading }}>

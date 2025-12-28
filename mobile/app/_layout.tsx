@@ -4,7 +4,6 @@ import { useFonts } from 'expo-font';
 import React, { useCallback } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
 import { DataProvider, useDataContext } from './(tabs)/DataContext';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from '@/hooks/useColorScheme';

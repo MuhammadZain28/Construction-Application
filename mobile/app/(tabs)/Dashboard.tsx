@@ -4,6 +4,7 @@ import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useDataContext } from './DataContext';
 import Header from '@/components/ui/Header';
+import { LinearGradient } from 'expo-linear-gradient';
 const Dashboard: React.FC = () => {
   const {houses, transactions, materials, paints, record, paintSum, materialSum} = useDataContext();
   const [mobile, setMobile] = React.useState(false);
@@ -23,7 +24,6 @@ const Dashboard: React.FC = () => {
       .reduce((acc, curr) => acc + curr.amount, 0);
   }, [record]);
 
-  
   const totalIn = React.useMemo(() => {
   return transactions
     .filter((transaction) => transaction.type === 'In')
@@ -77,8 +77,11 @@ const Dashboard: React.FC = () => {
       <Header icon="dashboard" name="Dashboard" />
       <View style={styles.main}>
         <View style={styles.top}>
-          <View
-            style={[styles.container, {backgroundColor: 'rgba(245, 174, 22, 1)'}]}>
+          <LinearGradient
+            colors={['rgba(232, 148, 3, 1)', 'rgba(255, 202, 88, 1)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.container]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -98,9 +101,11 @@ const Dashboard: React.FC = () => {
               </View>
             </View>
             <Text style={styles.number}>{PendingHouses}</Text>
-          </View>
-          <View
-            style={[styles.container, {backgroundColor: 'rgba(15, 151, 37, 1)'}]}>
+          </LinearGradient>
+          <LinearGradient colors={['rgba(15, 151, 37, 1)', 'rgba(69, 194, 88, 1)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.container]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -116,14 +121,15 @@ const Dashboard: React.FC = () => {
                   marginVertical: 5,
                   padding: 15,
                 }}>
-                  
               <MaterialIcons name='done-all' style={{fontSize: 42, color: 'rgba(17, 151, 37, 1)'}}></MaterialIcons>
               </View>
             </View>
             <Text style={styles.number}>{ConmpletedHouses}</Text>
-          </View>
-          <View
-            style={[styles.container, {backgroundColor: 'rgba(197, 50, 255, 1)'}]}>
+          </LinearGradient>
+          <LinearGradient colors={['rgba(118, 0, 164, 1)', 'rgba(213, 107, 255, 1)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.container]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -143,9 +149,11 @@ const Dashboard: React.FC = () => {
               </View>
             </View>
             <Text style={styles.number}>Rs.  {totalIn + totalRecord}</Text>
-          </View>
-          <View
-            style={[styles.container, {backgroundColor: 'rgba(54, 91, 254, 1)'}]}>
+          </LinearGradient>
+          <LinearGradient colors={['rgba(0, 24, 132, 1)', 'rgba(91, 114, 220, 1)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.container]}>
             <View
               style={{
                 flexDirection: 'row',
@@ -165,9 +173,9 @@ const Dashboard: React.FC = () => {
               </View>
             </View>
             <Text style={styles.number}>Rs.  { remaining }</Text>
-          </View>
+          </LinearGradient>
         </View>
-        <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between'}}>
+        <View style={{flexDirection: mobile ? 'column' : 'row', gap: 10, margin: 10, alignItems: 'stretch', justifyContent: 'space-between', }}>
           <View style={styles.table}>
             <View style={{flexDirection: 'row', alignItems: 'center', padding: 5, margin: 5, backgroundColor: '#ffffffff', borderBottomLeftRadius: 20, borderBottomWidth: 2, borderColor: '#000000ff'}}>
               <MaterialIcons name='bar-chart' size={36} color={'rgba(0, 0, 0, 1)'}/>
@@ -337,7 +345,7 @@ const Dashboard: React.FC = () => {
                 </View>
               </View>
               <View style={{display: 'flex', flex: 1, padding: 10, gap: 20}}>
-                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 10, padding: 10}}>
+                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 18, padding: 10}}>
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Materials</Text>
                   <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
@@ -346,7 +354,7 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
                 <View>
-                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 10, padding: 10}}>
+                <View style={{gap: 5, borderWidth: 2, borderColor: '#000000ff', backgroundColor: '#000000ff', borderRadius: 18, padding: 10}}>
                   <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>Paints</Text>
                   <Text style={{fontSize: 16, fontWeight: 'bold', paddingHorizontal: 10, color: '#ffffff'}}>Types : </Text>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 5}}>
@@ -376,7 +384,7 @@ const CircularProgress = ({ radius = 60, stroke = 10, progress = 70 }) => {
     <Svg
       height={radius * 2}
       width={radius * 2}
-      style={{ transform: [{ rotateY: '180deg' }] }} 
+      style={{ transform: [{ rotateY: '180deg' }] }}
     >
       <Circle
         stroke="#e6e6e6"
@@ -450,7 +458,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgb(254, 240, 161)',
     minWidth: 250,
-    borderRadius: 15,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -480,7 +488,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     backgroundColor: '#ffffff',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 0,
     shadowColor: '#000',
     shadowOffset: {
@@ -497,7 +505,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#ffffff',
     padding: 0,
-    borderRadius: 10,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -543,7 +551,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000ff',
-    borderRadius: 10,
+    borderRadius: 20,
     height: 25,
   },
   x: {

@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     padding: 10,
     borderRadius: 20,
-    outline: '0px solid transparent',
+    outline: 'none',
   },
   form: {
     width: '80%',
